@@ -20,9 +20,19 @@ import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
 import { RunStartDialog } from "@/components/run-start-dialog";
 import { encodeDeck, MAX_SHARE_URL_LENGTH } from "@/lib/share";
-import type { Card, Complexity, Deck, DeckImportCard, RunMode, SessionGoal } from "@/types";
+import { Markdown } from "@/components/markdown";
+import type { Card, ChoiceOption, Complexity, Deck, DeckImportCard, RunMode, SessionGoal } from "@/types";
 import type { CardPerf } from "@/App";
 import { cn } from "@/lib/utils";
+
+function formatDue(dueAt: number, now: number): string {
+  const diffMs = dueAt - now;
+  const diffDays = Math.round(diffMs / 86_400_000);
+  if (diffDays < -1) return `${Math.abs(diffDays)}d overdue`;
+  if (diffDays <= 0) return "today";
+  if (diffDays === 1) return "tomorrow";
+  return `in ${diffDays}d`;
+}
 
 const COMPLEXITIES: Complexity[] = ["easy", "medium", "hard"];
 const COMPLEXITY_LABELS: Record<Complexity, string> = {
@@ -72,6 +82,16 @@ export function DeckDetail({
 }: DeckDetailProps) {
   const [now] = useState(() => Date.now());
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+
+  function toggleExpand(cardId: string) {
+    setExpandedCards((prev) => {
+      const next = new Set(prev);
+      if (next.has(cardId)) next.delete(cardId);
+      else next.add(cardId);
+      return next;
+    });
+  }
 
   // Study run dialog state (desktop: pre-selected mode; mobile: mode picker shown)
   const [runDialog, setRunDialog] = useState<{ open: boolean; mode: RunMode; label: string }>({
@@ -427,10 +447,17 @@ export function DeckDetail({
             const perf = cardPerf.get(card.id);
             const isDue = perf?.srs ? perf.srs.dueAt <= now : false;
             const isNew = !perf || perf.attempts === 0;
+            const isExpanded = expandedCards.has(card.id);
             return (
-            <UiCard key={card.id} size="sm">
+            <UiCard key={card.id} size="sm" className="cursor-pointer" onClick={() => toggleExpand(card.id)}>
               <CardHeader>
                 <div className="flex items-center gap-2 min-w-0">
+                  <span className={cn(
+                    "shrink-0 text-[10px] text-muted-foreground transition-transform duration-150",
+                    isExpanded ? "rotate-90" : ""
+                  )}>
+                    ▶
+                  </span>
                   <CardTitle className="text-sm truncate">{card.title}</CardTitle>
                   <div className="flex shrink-0 flex-wrap items-center gap-1.5">
                     <ComplexityBadge complexity={card.complexity} />
@@ -458,7 +485,7 @@ export function DeckDetail({
                     ) : null}
                   </div>
                 </div>
-                <CardAction>
+                <CardAction onClick={(e) => e.stopPropagation()}>
                   {/* Desktop: Edit + Delete */}
                   <div className="hidden sm:flex gap-1">
                     <CardForm
@@ -497,6 +524,101 @@ export function DeckDetail({
                   </div>
                 </CardAction>
               </CardHeader>
+
+              {/* Expanded card preview */}
+              {isExpanded && (
+                <div className="border-t px-4 pb-4 pt-3 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
+                  {/* Answer / Options */}
+                  {card.type === "standard" ? (
+                    <div>
+                      <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">Answer</p>
+                      <div className="rounded-lg bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                        <Markdown>{card.response}</Markdown>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">Options</p>
+                      <div className="flex flex-col gap-1">
+                        {card.options.map((opt: ChoiceOption) => (
+                          <div key={opt.id} className={cn(
+                            "flex items-start gap-2 rounded-md px-2 py-1.5 text-sm",
+                            opt.correct
+                              ? "bg-green-50 text-green-800 dark:bg-green-950/50 dark:text-green-300"
+                              : "text-muted-foreground"
+                          )}>
+                            <span className="shrink-0 mt-0.5 font-mono text-xs">
+                              {opt.correct ? "✓" : "·"}
+                            </span>
+                            <Markdown inline>{opt.text}</Markdown>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hint */}
+                  {card.hint && (
+                    <div>
+                      <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">Hint</p>
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                        <Markdown>{card.hint}</Markdown>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SRS & accuracy stats */}
+                  {perf && (
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      {perf.attempts === 0 ? (
+                        <span>Never studied</span>
+                      ) : (
+                        <>
+                          <span>
+                            Accuracy:{" "}
+                            <span className={cn(
+                              "font-medium",
+                              perf.accuracy >= 0.8 ? "text-green-600 dark:text-green-400" :
+                              perf.accuracy >= 0.5 ? "text-yellow-600 dark:text-yellow-400" :
+                              "text-red-600 dark:text-red-400"
+                            )}>
+                              {Math.round(perf.accuracy * 100)}%
+                            </span>
+                            {" "}({perf.attempts} session{perf.attempts === 1 ? "" : "s"})
+                          </span>
+                          {perf.srs && (
+                            <>
+                              <span>
+                                Interval:{" "}
+                                <span className="font-medium text-foreground">
+                                  {perf.srs.intervalDays === 0
+                                    ? "review"
+                                    : `${perf.srs.intervalDays}d`}
+                                </span>
+                              </span>
+                              <span>
+                                Due:{" "}
+                                <span className={cn(
+                                  "font-medium",
+                                  isDue ? "text-amber-600 dark:text-amber-400" : "text-foreground"
+                                )}>
+                                  {formatDue(perf.srs.dueAt, now)}
+                                </span>
+                              </span>
+                              <span>
+                                Ease:{" "}
+                                <span className="font-medium text-foreground">
+                                  {perf.srs.easeFactor.toFixed(1)}
+                                </span>
+                              </span>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </UiCard>
           );
           })}
