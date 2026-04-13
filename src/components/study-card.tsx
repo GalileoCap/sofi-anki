@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ComplexityBadge } from "@/components/complexity-badge";
 import type { AnswerResult, Card as CardType } from "@/types";
@@ -40,26 +41,27 @@ export function StudyCard({
       <CardContent className="flex flex-col items-center gap-6 text-center">
         <p className="text-lg font-medium text-foreground">{card.title}</p>
 
-        {complexityRevealed && (
+        {complexityRevealed ? (
           <ComplexityBadge complexity={card.complexity} />
+        ) : (
+          <Badge
+            variant="outline"
+            className="cursor-pointer bg-muted/50 text-muted-foreground hover:bg-muted"
+            onClick={onRevealComplexity}
+          >
+            Show Complexity
+          </Badge>
         )}
 
         {!revealed ? (
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex flex-wrap justify-center gap-2">
-              <Button onClick={onReveal}>Reveal Answer</Button>
-              <Button variant="outline" onClick={onSkip}>
-                Skip
-              </Button>
-              <Button variant="secondary" onClick={onSaveForLater}>
-                Save For Later
-              </Button>
-            </div>
-            {!complexityRevealed && (
-              <Button variant="ghost" size="sm" onClick={onRevealComplexity}>
-                Reveal Complexity
-              </Button>
-            )}
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button onClick={onReveal}>Reveal Answer</Button>
+            <Button variant="outline" onClick={onSkip}>
+              Skip
+            </Button>
+            <Button variant="secondary" onClick={onSaveForLater}>
+              Save For Later
+            </Button>
           </div>
         ) : (
           <>

@@ -40,18 +40,31 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
   // Per-card timing
   const cardStartRef = useRef(0);
 
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
     const now = Date.now();
     sessionStartRef.current = now;
     cardStartRef.current = now;
-    const id = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setElapsed(Date.now() - sessionStartRef.current);
     }, 1000);
-    return () => clearInterval(id);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, []);
 
   const currentCard = remaining[currentIndex];
   const isFinished = currentIndex >= remaining.length;
+
+  // Stop timer when run completes
+  useEffect(() => {
+    if (isFinished && timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+      setElapsed(Date.now() - sessionStartRef.current);
+    }
+  }, [isFinished]);
 
   const recordAttempt = useCallback(
     (card: Card, attempt: CardAttempt) => {
