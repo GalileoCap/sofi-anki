@@ -206,7 +206,7 @@ function ChoiceAttemptDetail({ card, attempt }: { card: CardRunResult["card"]; a
 
   return (
     <div className="ml-2 flex flex-col gap-0.5 text-xs">
-      {card.options.map((opt) => {
+      {(card.options ?? []).map((opt) => {
         const wasSelected = selectedSet.has(opt.id);
         return (
           <div key={opt.id} className="flex items-center gap-1.5 px-2 py-0.5">

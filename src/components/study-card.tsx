@@ -47,7 +47,7 @@ export function StudyCard({
   const isChoice = card.type === "choice";
   function computeChoiceGrade(selected: Set<string>): AnswerResult {
     if (!isChoice) return "wrong";
-    const correctIds = new Set(card.options.filter((o) => o.correct).map((o) => o.id));
+    const correctIds = new Set((card.options ?? []).filter((o) => o.correct).map((o) => o.id));
     const allCorrectSelected = [...correctIds].every((id) => selected.has(id));
     const noWrongSelected = [...selected].every((id) => correctIds.has(id));
     if (allCorrectSelected && noWrongSelected) return "correct";
@@ -136,7 +136,7 @@ export function StudyCard({
           {card.multiSelect ? "Check all correct answers" : "Pick one answer"}
         </span>
       </div>
-      {card.options.map((opt) => {
+      {(card.options ?? []).map((opt) => {
         const isSelected = selectedOptions.has(opt.id);
         let optStyle = "border-border hover:bg-muted/50";
         if (choiceSubmitted) {

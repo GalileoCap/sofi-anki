@@ -540,7 +540,7 @@ export function DeckDetail({
                     <div>
                       <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">Options</p>
                       <div className="flex flex-col gap-1">
-                        {card.options.map((opt: ChoiceOption) => (
+                        {(card.options ?? []).map((opt: ChoiceOption) => (
                           <div key={opt.id} className={cn(
                             "flex items-start gap-2 rounded-md px-2 py-1.5 text-sm",
                             opt.correct
