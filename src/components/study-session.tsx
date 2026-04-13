@@ -31,6 +31,8 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
   const [revealed, setRevealed] = useState(false);
   const [complexityRevealed, setComplexityRevealed] = useState(false);
   const [results, setResults] = useState<Map<string, CardRunResult>>(() => new Map());
+  const [confirmExit, setConfirmExit] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   // Timer — initialize in effect to avoid impure render (React Compiler)
   const sessionStartRef = useRef(0);
@@ -39,15 +41,22 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
 
   // Per-card timing
   const cardStartRef = useRef(0);
+  // Track accumulated pause time for the current card
+  const pauseStartRef = useRef(0);
+  const cardPausedMsRef = useRef(0);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Track total paused time for the session timer
+  const sessionPausedMsRef = useRef(0);
 
   useEffect(() => {
     const now = Date.now();
     sessionStartRef.current = now;
     cardStartRef.current = now;
     timerRef.current = setInterval(() => {
-      setElapsed(Date.now() - sessionStartRef.current);
+      if (!pauseStartRef.current) {
+        setElapsed(Date.now() - sessionStartRef.current - sessionPausedMsRef.current);
+      }
     }, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -62,9 +71,41 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
     if (isFinished && timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
-      setElapsed(Date.now() - sessionStartRef.current);
+      setElapsed(Date.now() - sessionStartRef.current - sessionPausedMsRef.current);
     }
   }, [isFinished]);
+
+  // Pause/resume keyboard shortcut
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "p" && !isFinished) {
+        setPaused((v) => !v);
+      }
+      if (e.key === "Escape") {
+        if (confirmExit) {
+          setConfirmExit(false);
+        } else if (!isFinished) {
+          setConfirmExit(true);
+        }
+      }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isFinished, confirmExit]);
+
+  // Track pause durations
+  useEffect(() => {
+    if (paused) {
+      pauseStartRef.current = Date.now();
+    } else if (pauseStartRef.current) {
+      const pauseDuration = Date.now() - pauseStartRef.current;
+      sessionPausedMsRef.current += pauseDuration;
+      cardPausedMsRef.current += pauseDuration;
+      pauseStartRef.current = 0;
+    }
+  }, [paused]);
 
   const recordAttempt = useCallback(
     (card: Card, attempt: CardAttempt) => {
@@ -85,10 +126,15 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
     []
   );
 
+  function getCardDuration() {
+    return Date.now() - cardStartRef.current - cardPausedMsRef.current;
+  }
+
   function resetCardState() {
     setRevealed(false);
     setComplexityRevealed(false);
     cardStartRef.current = Date.now();
+    cardPausedMsRef.current = 0;
   }
 
   function handleReveal() {
@@ -101,14 +147,14 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
   }
 
   function handleSkip() {
-    const durationMs = Date.now() - cardStartRef.current;
+    const durationMs = getCardDuration();
     recordAttempt(currentCard, { result: "skip", durationMs });
     setCurrentIndex((i) => i + 1);
     resetCardState();
   }
 
   function handleSaveForLater() {
-    const durationMs = Date.now() - cardStartRef.current;
+    const durationMs = getCardDuration();
     recordAttempt(currentCard, { result: "save_for_later", durationMs });
     setRemaining((prev) => {
       const next = [...prev];
@@ -125,7 +171,7 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
   }
 
   function handleGraded(result: AnswerResult, redoLater: boolean) {
-    const durationMs = Date.now() - cardStartRef.current;
+    const durationMs = getCardDuration();
     recordAttempt(currentCard, { result, durationMs });
 
     if (redoLater) {
@@ -152,7 +198,17 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
     setResults(new Map());
     resetCardState();
     sessionStartRef.current = Date.now();
+    sessionPausedMsRef.current = 0;
     setElapsed(0);
+    setPaused(false);
+    setConfirmExit(false);
+    // Restart the timer interval
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      if (!pauseStartRef.current) {
+        setElapsed(Date.now() - sessionStartRef.current - sessionPausedMsRef.current);
+      }
+    }, 1000);
   }
 
   if (isFinished) {
@@ -169,11 +225,38 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
 
   return (
     <div className="flex flex-col items-center gap-6">
+      {/* Header bar */}
       <div className="flex w-full max-w-lg items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={onExit}>
-          Exit
-        </Button>
+        <div className="flex items-center gap-1">
+          {!confirmExit ? (
+            <Button variant="ghost" size="sm" onClick={() => setConfirmExit(true)}>
+              Exit
+              <kbd className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
+                Esc
+              </kbd>
+            </Button>
+          ) : (
+            <div className="flex items-center gap-1">
+              <Button variant="destructive" size="sm" onClick={onExit}>
+                Confirm Exit
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setConfirmExit(false)}>
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-3">
+          <Button
+            variant={paused ? "secondary" : "ghost"}
+            size="xs"
+            onClick={() => setPaused((v) => !v)}
+          >
+            {paused ? "Resume" : "Pause"}
+            <kbd className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
+              P
+            </kbd>
+          </Button>
           {showTimer && (
             <span className="font-mono text-sm text-muted-foreground">
               {formatTime(elapsed)}
@@ -184,7 +267,7 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
             size="xs"
             onClick={() => setShowTimer((v) => !v)}
           >
-            {showTimer ? "Hide" : "Show"} Timer
+            {showTimer ? "Hide" : "Show"}
           </Button>
           <p className="text-sm text-muted-foreground">
             {currentIndex + 1} / {remaining.length}
@@ -192,17 +275,31 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
         </div>
       </div>
 
-      <StudyCard
-        key={`${currentCard.id}-${currentIndex}`}
-        card={currentCard}
-        revealed={revealed}
-        complexityRevealed={complexityRevealed}
-        onReveal={handleReveal}
-        onRevealComplexity={handleRevealComplexity}
-        onSkip={handleSkip}
-        onSaveForLater={handleSaveForLater}
-        onGraded={handleGraded}
-      />
+      {/* Paused overlay */}
+      {paused ? (
+        <div className="flex flex-col items-center gap-4 py-16">
+          <p className="text-xl font-medium text-muted-foreground">Paused</p>
+          <Button onClick={() => setPaused(false)}>
+            Resume
+            <kbd className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
+              P
+            </kbd>
+          </Button>
+        </div>
+      ) : (
+        <StudyCard
+          key={`${currentCard.id}-${currentIndex}`}
+          card={currentCard}
+          revealed={revealed}
+          complexityRevealed={complexityRevealed}
+          paused={paused}
+          onReveal={handleReveal}
+          onRevealComplexity={handleRevealComplexity}
+          onSkip={handleSkip}
+          onSaveForLater={handleSaveForLater}
+          onGraded={handleGraded}
+        />
+      )}
     </div>
   );
 }

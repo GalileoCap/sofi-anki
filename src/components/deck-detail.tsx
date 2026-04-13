@@ -4,7 +4,6 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardAction,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -105,9 +104,6 @@ export function DeckDetail({
                   <CardTitle className="text-sm">{card.title}</CardTitle>
                   <ComplexityBadge complexity={card.complexity} />
                 </div>
-                <CardDescription className="line-clamp-2 text-xs">
-                  {card.response}
-                </CardDescription>
                 <CardAction>
                   <div className="flex gap-1">
                     <CardForm

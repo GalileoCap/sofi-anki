@@ -3,6 +3,7 @@ import { useDecks } from "@/hooks/use-decks";
 import { DeckList } from "@/components/deck-list";
 import { DeckDetail } from "@/components/deck-detail";
 import { StudySession } from "@/components/study-session";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type View =
   | { kind: "home" }
@@ -38,9 +39,13 @@ function App() {
     );
   }
 
-  if (view.kind === "deck" && currentDeck) {
-    return (
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
+  return (
+    <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
+      <div className="flex justify-end mb-4">
+        <ThemeToggle />
+      </div>
+
+      {view.kind === "deck" && currentDeck ? (
         <DeckDetail
           deck={currentDeck}
           onBack={() => setView({ kind: "home" })}
@@ -60,18 +65,14 @@ function App() {
           }}
           onImportCards={(cards) => importCards(currentDeck.id, cards)}
         />
-      </div>
-    );
-  }
-
-  return (
-    <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
-      <DeckList
-        decks={decks}
-        onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
-        onAddDeck={(title) => addDeck(title)}
-        onImportDeck={(data) => importDeck(data)}
-      />
+      ) : (
+        <DeckList
+          decks={decks}
+          onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
+          onAddDeck={(title) => addDeck(title)}
+          onImportDeck={(data) => importDeck(data)}
+        />
+      )}
     </div>
   );
 }
