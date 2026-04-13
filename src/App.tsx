@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useDecks } from "@/hooks/use-decks";
 import { DeckList } from "@/components/deck-list";
 import { DeckDetail } from "@/components/deck-detail";
 import { StudySession } from "@/components/study-session";
 import { ThemeToggle } from "@/components/theme-toggle";
+import type { Complexity, Deck } from "@/types";
 
 type View =
   | { kind: "home" }
   | { kind: "deck"; deckId: string }
-  | { kind: "study"; deckId: string };
+  | { kind: "study"; deckId: string; complexityFilter: Complexity[] | null };
 
 function App() {
   const [view, setView] = useState<View>({ kind: "home" });
@@ -28,12 +29,23 @@ function App() {
       ? decks.find((d) => d.id === view.deckId)
       : undefined;
 
-  if (view.kind === "study" && currentDeck) {
+  // Build a filtered deck for study sessions
+  const studyDeck = useMemo((): Deck | undefined => {
+    if (view.kind !== "study" || !currentDeck) return undefined;
+    if (!view.complexityFilter) return currentDeck;
+    const filterSet = new Set(view.complexityFilter);
+    return {
+      ...currentDeck,
+      cards: currentDeck.cards.filter((c) => filterSet.has(c.complexity)),
+    };
+  }, [view, currentDeck]);
+
+  if (view.kind === "study" && studyDeck && studyDeck.cards.length > 0) {
     return (
       <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
         <StudySession
-          deck={currentDeck}
-          onExit={() => setView({ kind: "deck", deckId: currentDeck.id })}
+          deck={studyDeck}
+          onExit={() => setView({ kind: "deck", deckId: studyDeck.id })}
         />
       </div>
     );
@@ -49,8 +61,8 @@ function App() {
         <DeckDetail
           deck={currentDeck}
           onBack={() => setView({ kind: "home" })}
-          onStartStudy={() =>
-            setView({ kind: "study", deckId: currentDeck.id })
+          onStartStudy={(complexityFilter) =>
+            setView({ kind: "study", deckId: currentDeck.id, complexityFilter })
           }
           onAddCard={(title, response, complexity) =>
             addCard(currentDeck.id, title, response, complexity)

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,17 +7,26 @@ import {
   CardAction,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { CardForm } from "@/components/card-form";
 import { ComplexityBadge } from "@/components/complexity-badge";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
 import type { Complexity, Deck } from "@/types";
+import { cn } from "@/lib/utils";
+
+const COMPLEXITIES: Complexity[] = ["easy", "medium", "hard"];
+const COMPLEXITY_LABELS: Record<Complexity, string> = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+};
 
 interface DeckDetailProps {
   deck: Deck;
   onBack: () => void;
-  onStartStudy: () => void;
+  onStartStudy: (complexityFilter: Complexity[] | null) => void;
   onAddCard: (title: string, response: string, complexity: Complexity) => void;
   onEditCard: (cardId: string, title: string, response: string, complexity: Complexity) => void;
   onDeleteCard: (cardId: string) => void;
@@ -36,6 +45,39 @@ export function DeckDetail({
   onImportCards,
 }: DeckDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [search, setSearch] = useState("");
+  const [complexityFilter, setComplexityFilter] = useState<Set<Complexity>>(new Set());
+
+  const complexityCounts = useMemo(() => {
+    const counts: Record<Complexity, number> = { easy: 0, medium: 0, hard: 0 };
+    for (const card of deck.cards) {
+      counts[card.complexity]++;
+    }
+    return counts;
+  }, [deck.cards]);
+
+  const filteredCards = useMemo(() => {
+    let cards = deck.cards;
+    if (complexityFilter.size > 0) {
+      cards = cards.filter((c) => complexityFilter.has(c.complexity));
+    }
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      cards = cards.filter((c) => c.title.toLowerCase().includes(q));
+    }
+    return cards;
+  }, [deck.cards, complexityFilter, search]);
+
+  function toggleComplexity(c: Complexity) {
+    setComplexityFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(c)) next.delete(c);
+      else next.add(c);
+      return next;
+    });
+  }
+
+  const activeFilter = complexityFilter.size > 0 ? Array.from(complexityFilter) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -55,8 +97,11 @@ export function DeckDetail({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button onClick={onStartStudy} disabled={deck.cards.length === 0}>
-          Start Run
+        <Button
+          onClick={() => onStartStudy(activeFilter)}
+          disabled={filteredCards.length === 0}
+        >
+          Start Run{activeFilter ? ` (${filteredCards.length})` : ""}
         </Button>
         <CardForm
           trigger={<Button variant="outline">Add Card</Button>}
@@ -88,6 +133,46 @@ export function DeckDetail({
 
       <Separator />
 
+      {/* Filters */}
+      {deck.cards.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <Input
+            placeholder="Search cards..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="max-w-xs"
+          />
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Filter:</span>
+            {COMPLEXITIES.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => toggleComplexity(c)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-all",
+                  complexityFilter.has(c)
+                    ? "border-foreground/20 bg-foreground/5 text-foreground"
+                    : "border-transparent text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {COMPLEXITY_LABELS[c]}
+                <span className="font-mono text-muted-foreground">{complexityCounts[c]}</span>
+              </button>
+            ))}
+            {complexityFilter.size > 0 && (
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => setComplexityFilter(new Set())}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {deck.cards.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <p className="text-muted-foreground">No cards yet.</p>
@@ -95,9 +180,13 @@ export function DeckDetail({
             Add cards manually or import them from JSON.
           </p>
         </div>
+      ) : filteredCards.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <p className="text-sm text-muted-foreground">No cards match your filters.</p>
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {deck.cards.map((card) => (
+          {filteredCards.map((card) => (
             <Card key={card.id} size="sm">
               <CardHeader>
                 <div className="flex items-center gap-2">

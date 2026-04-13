@@ -1,4 +1,6 @@
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardHeader,
@@ -23,6 +25,18 @@ export function DeckList({
   onAddDeck,
   onImportDeck,
 }: DeckListProps) {
+  const [search, setSearch] = useState("");
+
+  const filteredDecks = useMemo(() => {
+    if (!search.trim()) return decks;
+    const q = search.trim().toLowerCase();
+    return decks.filter(
+      (d) =>
+        d.title.toLowerCase().includes(q) ||
+        d.cards.some((c) => c.title.toLowerCase().includes(q))
+    );
+  }, [decks, search]);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -39,6 +53,15 @@ export function DeckList({
         </div>
       </div>
 
+      {decks.length > 0 && (
+        <Input
+          placeholder="Search decks and cards..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-xs"
+        />
+      )}
+
       {decks.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <p className="text-muted-foreground">No decks yet.</p>
@@ -46,9 +69,13 @@ export function DeckList({
             Create a new deck or import one from JSON.
           </p>
         </div>
+      ) : filteredDecks.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <p className="text-sm text-muted-foreground">No decks match your search.</p>
+        </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {decks.map((deck) => (
+          {filteredDecks.map((deck) => (
             <button
               key={deck.id}
               onClick={() => onSelectDeck(deck.id)}
