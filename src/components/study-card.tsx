@@ -21,7 +21,7 @@ interface StudyCardProps {
   onRevealComplexity: () => void;
   onSkip: () => void;
   onSaveForLater: () => void;
-  onGraded: (result: AnswerResult, redoLater: boolean) => void;
+  onGraded: (result: AnswerResult, redoLater: boolean, selectedOptionIds?: string[]) => void;
 }
 
 export function StudyCard({
@@ -114,7 +114,7 @@ export function StudyCard({
         else if (e.key === "r") setRedoLater((v) => !v);
         else if ((e.key === "Enter" || e.key === " ") && grade !== null) {
           e.preventDefault();
-          onGraded(grade, redoLater);
+          onGraded(grade, redoLater, isChoice ? Array.from(selectedOptions) : undefined);
         }
       }
     }
@@ -143,9 +143,14 @@ export function StudyCard({
         {/* Choice options — always shown for choice cards */}
         {isChoice && (
           <div className="flex flex-col gap-2 w-full">
-            <p className="text-xs text-muted-foreground">
-              {card.multiSelect ? "Select all that apply" : "Select one"}
-            </p>
+            <div className="flex items-center justify-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                {card.multiSelect ? "Multi-select" : "Single-select"}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {card.multiSelect ? "Check all correct answers" : "Pick one answer"}
+              </span>
+            </div>
             {card.options.map((opt) => {
               const isSelected = selectedOptions.has(opt.id);
               let optStyle = "border-border hover:bg-muted/50";
@@ -165,11 +170,22 @@ export function StudyCard({
                   onClick={() => toggleOption(opt.id)}
                   disabled={choiceSubmitted}
                   className={cn(
-                    "w-full rounded-lg border px-4 py-2.5 text-left text-sm transition-all",
+                    "flex w-full items-center gap-3 rounded-lg border px-4 py-2.5 text-left text-sm transition-all",
                     optStyle,
                     choiceSubmitted && "cursor-default"
                   )}
                 >
+                  <span className={cn(
+                    "flex h-4 w-4 shrink-0 items-center justify-center border",
+                    card.multiSelect ? "rounded" : "rounded-full",
+                    isSelected ? "border-foreground bg-foreground text-background" : "border-muted-foreground/40"
+                  )}>
+                    {isSelected && (
+                      card.multiSelect
+                        ? <span className="text-[10px] leading-none">{"\u2713"}</span>
+                        : <span className="block h-2 w-2 rounded-full bg-background" />
+                    )}
+                  </span>
                   {opt.text}
                 </button>
               );
@@ -249,7 +265,7 @@ export function StudyCard({
               </label>
 
               <Button
-                onClick={() => onGraded(grade!, redoLater)}
+                onClick={() => onGraded(grade!, redoLater, isChoice ? Array.from(selectedOptions) : undefined)}
                 disabled={grade === null}
                 className="w-full max-w-xs"
               >

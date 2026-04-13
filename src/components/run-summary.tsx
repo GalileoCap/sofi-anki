@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ComplexityBadge } from "@/components/complexity-badge";
-import type { CardDisposition, CardRunResult } from "@/types";
+import type { CardAttempt, CardDisposition, CardRunResult } from "@/types";
 import { cn } from "@/lib/utils";
 
 function formatTime(ms: number): string {
@@ -128,19 +128,25 @@ export function RunSummary({ results, totalTimeMs, onRestart, onExit }: RunSumma
 function CardResultRow({ result }: { result: CardRunResult }) {
   const [expanded, setExpanded] = useState(false);
   const hasRetries = result.attempts.length > 1;
+  const isChoice = result.card.type === "choice";
 
   return (
     <div className="flex flex-col gap-1">
       <button
         type="button"
-        onClick={() => hasRetries && setExpanded((v) => !v)}
+        onClick={() => (hasRetries || isChoice) && setExpanded((v) => !v)}
         className={cn(
           "flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm",
-          hasRetries && "cursor-pointer hover:bg-muted/50"
+          (hasRetries || isChoice) && "cursor-pointer hover:bg-muted/50"
         )}
       >
         <span className="flex-1 truncate text-foreground">{result.card.title}</span>
         <ComplexityBadge complexity={result.card.complexity} />
+        {result.card.type === "choice" && (
+          <Badge variant="outline" className="shrink-0 text-xs">
+            {result.card.multiSelect ? "Multi" : "Single"}
+          </Badge>
+        )}
         <span className="shrink-0 font-mono text-xs text-muted-foreground">
           {formatDuration(result.attempts[0].durationMs)}
         </span>
@@ -151,21 +157,71 @@ function CardResultRow({ result }: { result: CardRunResult }) {
         )}
       </button>
 
-      {expanded && hasRetries && (
-        <div className="ml-4 flex flex-col gap-0.5 pb-1">
-          {result.attempts.map((attempt, i) => (
-            <div key={i} className="flex items-center gap-2 px-2 py-1 text-xs">
-              <span className="text-muted-foreground">#{i + 1}</span>
-              <Badge variant="outline" className={cn("text-xs", RESULT_BADGE_STYLES[attempt.result])}>
-                {RESULT_LABELS[attempt.result]}
-              </Badge>
-              <span className="font-mono text-muted-foreground">
-                {formatDuration(attempt.durationMs)}
-              </span>
+      {expanded && (
+        <div className="ml-4 flex flex-col gap-1.5 pb-1">
+          {/* Show choice details for choice cards */}
+          {isChoice && (
+            <ChoiceAttemptDetail card={result.card} attempt={result.attempts[0]} />
+          )}
+
+          {/* Show retry history */}
+          {hasRetries && (
+            <div className="flex flex-col gap-0.5">
+              {result.attempts.map((attempt, i) => (
+                <div key={i} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 px-2 py-1 text-xs">
+                    <span className="text-muted-foreground">#{i + 1}</span>
+                    <Badge variant="outline" className={cn("text-xs", RESULT_BADGE_STYLES[attempt.result])}>
+                      {RESULT_LABELS[attempt.result]}
+                    </Badge>
+                    <span className="font-mono text-muted-foreground">
+                      {formatDuration(attempt.durationMs)}
+                    </span>
+                  </div>
+                  {isChoice && i > 0 && attempt.selectedOptionIds && (
+                    <ChoiceAttemptDetail card={result.card} attempt={attempt} />
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+function ChoiceAttemptDetail({ card, attempt }: { card: CardRunResult["card"]; attempt: CardAttempt }) {
+  if (card.type !== "choice" || !attempt.selectedOptionIds) return null;
+  const selectedSet = new Set(attempt.selectedOptionIds);
+
+  return (
+    <div className="ml-2 flex flex-col gap-0.5 text-xs">
+      {card.options.map((opt) => {
+        const wasSelected = selectedSet.has(opt.id);
+        return (
+          <div key={opt.id} className="flex items-center gap-1.5 px-2 py-0.5">
+            <span className={cn(
+              "shrink-0",
+              opt.correct && wasSelected && "text-green-600 dark:text-green-400",
+              !opt.correct && wasSelected && "text-red-600 dark:text-red-400",
+              opt.correct && !wasSelected && "text-yellow-600 dark:text-yellow-400",
+              !opt.correct && !wasSelected && "text-muted-foreground/50",
+            )}>
+              {wasSelected ? (opt.correct ? "\u2713" : "\u2717") : (opt.correct ? "\u25CB" : "\u00B7")}
+            </span>
+            <span className={cn(
+              wasSelected ? "text-foreground" : "text-muted-foreground/60",
+              opt.correct && "font-medium",
+            )}>
+              {opt.text}
+            </span>
+            {opt.correct && !wasSelected && (
+              <span className="text-yellow-600 dark:text-yellow-400">(missed)</span>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

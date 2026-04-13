@@ -78,12 +78,12 @@ export function ExportDialog({ trigger, deck }: ExportDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[85vh] overflow-y-auto overflow-x-hidden sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Export &amp; Share</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex min-w-0 flex-col gap-3">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">LLM Prompt Template</p>
             <Button
@@ -94,14 +94,14 @@ export function ExportDialog({ trigger, deck }: ExportDialogProps) {
               {copiedSchema ? "Copied!" : "Copy"}
             </Button>
           </div>
-          <pre className="max-h-40 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed">
+          <pre className="max-h-40 min-w-0 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre">
             {SCHEMA_PROMPT}
           </pre>
         </div>
 
         <Separator />
 
-        <div className="flex flex-col gap-3">
+        <div className="flex min-w-0 flex-col gap-3">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">Deck Data</p>
             <Button
@@ -112,7 +112,7 @@ export function ExportDialog({ trigger, deck }: ExportDialogProps) {
               {copiedData ? "Copied!" : "Copy"}
             </Button>
           </div>
-          <pre className="max-h-60 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed">
+          <pre className="max-h-60 min-w-0 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre">
             {deckJson}
           </pre>
         </div>

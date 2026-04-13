@@ -58,6 +58,8 @@ export type CardDisposition = "skip" | "save_for_later" | AnswerResult;
 export interface CardAttempt {
   result: CardDisposition;
   durationMs: number;
+  /** For choice cards: IDs of options the user selected */
+  selectedOptionIds?: string[];
 }
 
 export interface CardRunResult {

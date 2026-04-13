@@ -170,9 +170,9 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
     resetCardState();
   }
 
-  function handleGraded(result: AnswerResult, redoLater: boolean) {
+  function handleGraded(result: AnswerResult, redoLater: boolean, selectedOptionIds?: string[]) {
     const durationMs = getCardDuration();
-    recordAttempt(currentCard, { result, durationMs });
+    recordAttempt(currentCard, { result, durationMs, selectedOptionIds });
 
     if (redoLater) {
       setRemaining((prev) => {
