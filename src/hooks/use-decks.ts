@@ -9,6 +9,7 @@ function importCardToCard(c: DeckImportCard): Card {
       type: "choice",
       title: c.title,
       complexity: c.complexity ?? "medium",
+      tags: c.tags ?? [],
       multiSelect: c.multiSelect ?? c.options.filter((o) => o.correct).length > 1,
       options: c.options.map((o) => ({
         id: crypto.randomUUID(),
@@ -23,6 +24,7 @@ function importCardToCard(c: DeckImportCard): Card {
     title: c.title,
     response: c.response ?? "",
     complexity: c.complexity ?? "medium",
+    tags: c.tags ?? [],
   };
 }
 
@@ -33,10 +35,11 @@ export function useDecks() {
     saveDecks(decks);
   }, [decks]);
 
-  function addDeck(title: string): Deck {
+  function addDeck(title: string, tags: string[] = []): Deck {
     const deck: Deck = {
       id: crypto.randomUUID(),
       title,
+      tags,
       cards: [],
       createdAt: Date.now(),
     };
@@ -48,9 +51,9 @@ export function useDecks() {
     setDecks((prev) => prev.filter((d) => d.id !== id));
   }
 
-  function updateDeckTitle(id: string, title: string) {
+  function updateDeck(id: string, title: string, tags: string[]) {
     setDecks((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, title } : d))
+      prev.map((d) => (d.id === id ? { ...d, title, tags } : d))
     );
   }
 
@@ -99,6 +102,7 @@ export function useDecks() {
     const deck: Deck = {
       id: crypto.randomUUID(),
       title: data.title,
+      tags: data.tags ?? [],
       cards: data.cards.map(importCardToCard),
       createdAt: Date.now(),
     };
@@ -123,7 +127,7 @@ export function useDecks() {
     decks,
     addDeck,
     deleteDeck,
-    updateDeckTitle,
+    updateDeck,
     addCard,
     deleteCard,
     editCard,

@@ -7,6 +7,7 @@ export interface CardBase {
   title: string;
   complexity: Complexity;
   type: CardType;
+  tags: string[];
 }
 
 export interface StandardCard extends CardBase {
@@ -32,6 +33,7 @@ export type Card = StandardCard | ChoiceCard;
 export interface Deck {
   id: string;
   title: string;
+  tags: string[];
   cards: Card[];
   createdAt: number;
 }
@@ -39,6 +41,7 @@ export interface Deck {
 export interface DeckImportCard {
   title: string;
   complexity?: Complexity;
+  tags?: string[];
   // Standard card fields
   response?: string;
   // Choice card fields
@@ -49,6 +52,7 @@ export interface DeckImportCard {
 
 export interface DeckImport {
   title: string;
+  tags?: string[];
   cards: DeckImportCard[];
 }
 

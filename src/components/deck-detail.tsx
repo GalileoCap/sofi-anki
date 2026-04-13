@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { CardForm } from "@/components/card-form";
+import { DeckForm } from "@/components/deck-form";
 import { ComplexityBadge } from "@/components/complexity-badge";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
@@ -32,6 +33,7 @@ interface DeckDetailProps {
   onBack: () => void;
   onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null) => void;
   onViewStats: () => void;
+  onEditDeck: (title: string, tags: string[]) => void;
   onAddCard: (card: Omit<Card, "id">) => void;
   onEditCard: (cardId: string, card: Omit<Card, "id">) => void;
   onDeleteCard: (cardId: string) => void;
@@ -47,6 +49,7 @@ export function DeckDetail({
   onBack,
   onStartStudy,
   onViewStats,
+  onEditDeck,
   onAddCard,
   onEditCard,
   onDeleteCard,
@@ -56,6 +59,7 @@ export function DeckDetail({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [search, setSearch] = useState("");
   const [complexityFilter, setComplexityFilter] = useState<Set<Complexity>>(new Set());
+  const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
 
   const complexityCounts = useMemo(() => {
     const counts: Record<Complexity, number> = { easy: 0, medium: 0, hard: 0 };
@@ -65,23 +69,48 @@ export function DeckDetail({
     return counts;
   }, [deck.cards]);
 
+  const allCardTags = useMemo(() => {
+    const tags = new Set<string>();
+    for (const card of deck.cards) {
+      for (const t of card.tags ?? []) tags.add(t);
+    }
+    return Array.from(tags).sort();
+  }, [deck.cards]);
+
   const filteredCards = useMemo(() => {
     let cards = deck.cards;
     if (complexityFilter.size > 0) {
       cards = cards.filter((c) => complexityFilter.has(c.complexity));
     }
+    if (tagFilter.size > 0) {
+      cards = cards.filter((c) =>
+        (c.tags ?? []).some((t) => tagFilter.has(t))
+      );
+    }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      cards = cards.filter((c) => c.title.toLowerCase().includes(q));
+      cards = cards.filter((c) =>
+        c.title.toLowerCase().includes(q) ||
+        (c.tags ?? []).some((t) => t.includes(q))
+      );
     }
     return cards;
-  }, [deck.cards, complexityFilter, search]);
+  }, [deck.cards, complexityFilter, tagFilter, search]);
 
   function toggleComplexity(c: Complexity) {
     setComplexityFilter((prev) => {
       const next = new Set(prev);
       if (next.has(c)) next.delete(c);
       else next.add(c);
+      return next;
+    });
+  }
+
+  function toggleTag(tag: string) {
+    setTagFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
       return next;
     });
   }
@@ -97,6 +126,18 @@ export function DeckDetail({
             Back
           </Button>
           <h1 className="text-2xl font-medium text-foreground">{deck.title}</h1>
+          <DeckForm
+            trigger={
+              <Button variant="ghost" size="xs">
+                Edit
+              </Button>
+            }
+            onSubmit={onEditDeck}
+            initialTitle={deck.title}
+            initialTags={deck.tags ?? []}
+            dialogTitle="Edit Deck"
+            submitLabel="Save"
+          />
         </div>
         <Badge variant="secondary" className="text-sm">
           {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
@@ -179,7 +220,7 @@ export function DeckDetail({
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-xs"
           />
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {COMPLEXITIES.map((c) => (
               <button
                 key={c}
@@ -196,11 +237,29 @@ export function DeckDetail({
                 <span className="font-mono text-muted-foreground">{complexityCounts[c]}</span>
               </button>
             ))}
-            {complexityFilter.size > 0 && (
+            {allCardTags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className={cn(
+                  "inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-medium transition-all",
+                  tagFilter.has(tag)
+                    ? "border-foreground/20 bg-foreground/5 text-foreground"
+                    : "border-transparent text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {tag}
+              </button>
+            ))}
+            {(complexityFilter.size > 0 || tagFilter.size > 0) && (
               <Button
                 variant="ghost"
                 size="xs"
-                onClick={() => setComplexityFilter(new Set())}
+                onClick={() => {
+                  setComplexityFilter(new Set());
+                  setTagFilter(new Set());
+                }}
               >
                 Clear
               </Button>
@@ -228,13 +287,18 @@ export function DeckDetail({
               <CardHeader>
                 <div className="flex items-center gap-2 min-w-0">
                   <CardTitle className="text-sm truncate">{card.title}</CardTitle>
-                  <div className="flex shrink-0 items-center gap-1.5">
+                  <div className="flex shrink-0 flex-wrap items-center gap-1.5">
                     <ComplexityBadge complexity={card.complexity} />
                     {card.type === "choice" && (
                       <Badge variant="outline" className="text-xs">
                         {card.multiSelect ? "Multi" : "Single"}
                       </Badge>
                     )}
+                    {(card.tags ?? []).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
                 <CardAction>

@@ -10,6 +10,7 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { TagInput } from "@/components/tag-input";
 import type { Card, CardType, Complexity } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +54,7 @@ export function CardForm({
   const [title, setTitle] = useState(initial?.title ?? "");
   const [complexity, setComplexity] = useState<Complexity>(initial?.complexity ?? "medium");
   const [cardType, setCardType] = useState<CardType>(initial?.type ?? "standard");
+  const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
 
   // Standard fields
   const [response, setResponse] = useState(
@@ -73,6 +75,7 @@ export function CardForm({
       setTitle(initial?.title ?? "");
       setComplexity(initial?.complexity ?? "medium");
       setCardType(initial?.type ?? "standard");
+      setTags(initial?.tags ?? []);
       setResponse(initial?.type === "standard" ? initial.response : "");
       setOptions(
         initial?.type === "choice"
@@ -116,6 +119,7 @@ export function CardForm({
         title: title.trim(),
         response: response.trim(),
         complexity,
+        tags,
       } as Omit<Card, "id">);
     } else {
       const correctCount = options.filter((o) => o.correct).length;
@@ -123,6 +127,7 @@ export function CardForm({
         type: "choice",
         title: title.trim(),
         complexity,
+        tags,
         multiSelect: correctCount > 1,
         options: options.map((o) => ({
           id: o.id,
@@ -241,6 +246,10 @@ export function CardForm({
                 </Button>
               ))}
             </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm text-muted-foreground">Tags</label>
+            <TagInput tags={tags} onChange={setTags} placeholder="Add tags..." />
           </div>
           <DialogFooter>
             <Button type="submit" disabled={!isValid}>

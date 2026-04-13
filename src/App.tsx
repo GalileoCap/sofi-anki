@@ -21,6 +21,7 @@ function App() {
     decks,
     addDeck,
     deleteDeck,
+    updateDeck,
     addCard,
     deleteCard,
     editCard,
@@ -108,6 +109,7 @@ function App() {
           onViewStats={() =>
             setView({ kind: "stats", deckId: currentDeck.id })
           }
+          onEditDeck={(title, tags) => updateDeck(currentDeck.id, title, tags)}
           onAddCard={(card) => addCard(currentDeck.id, card)}
           onEditCard={(cardId, card) => editCard(currentDeck.id, cardId, card)}
           onDeleteCard={(cardId) => deleteCard(currentDeck.id, cardId)}
@@ -123,7 +125,7 @@ function App() {
         <DeckList
           decks={decks}
           onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
-          onAddDeck={(title) => addDeck(title)}
+          onAddDeck={(title, tags) => addDeck(title, tags)}
           onImportDeck={(data) => importDeck(data)}
         />
       )}

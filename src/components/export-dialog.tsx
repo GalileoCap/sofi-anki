@@ -14,16 +14,19 @@ const SCHEMA_PROMPT = `Generate flashcards in the following JSON format:
 
 {
   "title": "Deck Title",
+  "tags": ["topic1", "topic2"],
   "cards": [
     {
       "title": "Question or front of card",
       "response": "Answer or back of card",
-      "complexity": "easy" | "medium" | "hard"
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"]
     },
     {
       "type": "choice",
       "title": "Multiple choice question",
       "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"],
       "options": [
         { "text": "Option A", "correct": true },
         { "text": "Option B", "correct": false }
@@ -32,9 +35,10 @@ const SCHEMA_PROMPT = `Generate flashcards in the following JSON format:
   ]
 }
 
-Standard cards have "title", "response", and "complexity".
-Choice cards have "type": "choice", "title", "complexity", and "options" (array of { "text", "correct" }).
+Standard cards have "title", "response", "complexity", and optional "tags".
+Choice cards have "type": "choice", "title", "complexity", optional "tags", and "options" (array of { "text", "correct" }).
 If multiple options are correct, it becomes a multi-select question.
+The deck and each card can have "tags" (array of strings) for categorization.
 Return only the JSON, no extra text.`;
 
 interface ExportDialogProps {
@@ -49,12 +53,15 @@ export function ExportDialog({ trigger, deck }: ExportDialogProps) {
   const deckJson = JSON.stringify(
     {
       title: deck.title,
+      ...(deck.tags?.length ? { tags: deck.tags } : {}),
       cards: deck.cards.map((c) => {
+        const tags = c.tags?.length ? { tags: c.tags } : {};
         if (c.type === "choice") {
           return {
             type: "choice",
             title: c.title,
             complexity: c.complexity,
+            ...tags,
             options: c.options.map((o) => ({ text: o.text, correct: o.correct })),
           };
         }
@@ -62,6 +69,7 @@ export function ExportDialog({ trigger, deck }: ExportDialogProps) {
           title: c.title,
           response: c.response,
           complexity: c.complexity,
+          ...tags,
         };
       }),
     },
