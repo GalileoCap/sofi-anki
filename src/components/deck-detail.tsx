@@ -28,10 +28,10 @@ import { cn } from "@/lib/utils";
 function formatDue(dueAt: number, now: number): string {
   const diffMs = dueAt - now;
   const diffDays = Math.round(diffMs / 86_400_000);
-  if (diffDays < -1) return `${Math.abs(diffDays)}d overdue`;
-  if (diffDays <= 0) return "today";
-  if (diffDays === 1) return "tomorrow";
-  return `in ${diffDays}d`;
+  if (diffDays < -1) return `${Math.abs(diffDays)}d Overdue`;
+  if (diffDays <= 0) return "Today";
+  if (diffDays === 1) return "Tomorrow";
+  return `In ${diffDays}d`;
 }
 
 const COMPLEXITIES: Complexity[] = ["easy", "medium", "hard"];
@@ -592,7 +592,7 @@ export function DeckDetail({
                                 Interval:{" "}
                                 <span className="font-medium text-foreground">
                                   {perf.srs.intervalDays === 0
-                                    ? "review"
+                                    ? "Review"
                                     : `${perf.srs.intervalDays}d`}
                                 </span>
                               </span>
