@@ -74,3 +74,14 @@ export interface RunRecord {
   totalTimeMs: number;
   results: CardRunResult[];
 }
+
+export interface CardSRS {
+  cardId: string;
+  deckId: string;
+  intervalDays: number;
+  easeFactor: number;
+  dueAt: number;
+  lastResult: AnswerResult | null;
+}
+
+export type RunMode = "all" | "due" | "weak";

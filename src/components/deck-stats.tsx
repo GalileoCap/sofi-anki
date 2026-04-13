@@ -9,7 +9,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ComplexityBadge } from "@/components/complexity-badge";
-import type { CardDisposition, Deck, RunRecord } from "@/types";
+import type { CardDisposition, CardSRS, Deck, RunRecord } from "@/types";
+import type { useSRS } from "@/hooks/use-srs";
 import { cn } from "@/lib/utils";
 
 function formatTime(ms: number): string {
@@ -48,6 +49,7 @@ const RESULT_COLORS: Record<CardDisposition, string> = {
 interface DeckStatsProps {
   deck: Deck;
   runs: RunRecord[];
+  srs: ReturnType<typeof useSRS>;
   onBack: () => void;
 }
 
@@ -62,13 +64,19 @@ interface CardStat {
   totalGraded: number;
   accuracyPct: number;
   avgTimeMs: number;
+  srsInfo: CardSRS | undefined;
 }
 
-export function DeckStats({ deck, runs, onBack }: DeckStatsProps) {
+export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
+  const [now] = useState(() => Date.now());
+
   const sortedRuns = useMemo(
     () => [...runs].sort((a, b) => b.completedAt - a.completedAt),
     [runs]
   );
+
+  const dueCount = srs.getDueCards(deck).length;
+  const weakCount = srs.getWeakCards(deck).length;
 
   const overview = useMemo(() => {
     const totalRuns = runs.length;
@@ -114,6 +122,7 @@ export function DeckStats({ deck, runs, onBack }: DeckStatsProps) {
         totalGraded: 0,
         accuracyPct: 0,
         avgTimeMs: 0,
+        srsInfo: srs.getSRS(deck.id, card.id),
       });
     }
 
@@ -134,6 +143,7 @@ export function DeckStats({ deck, runs, onBack }: DeckStatsProps) {
             totalGraded: 0,
             accuracyPct: 0,
             avgTimeMs: 0,
+            srsInfo: srs.getSRS(deck.id, result.card.id),
           };
           statsMap.set(result.card.id, stat);
         }
@@ -173,7 +183,7 @@ export function DeckStats({ deck, runs, onBack }: DeckStatsProps) {
       if (b.accuracyPct === -1 && a.accuracyPct !== -1) return 1;
       return a.accuracyPct - b.accuracyPct;
     });
-  }, [deck.cards, runs]);
+  }, [deck.cards, deck.id, runs, srs]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -187,10 +197,12 @@ export function DeckStats({ deck, runs, onBack }: DeckStatsProps) {
       </div>
 
       {/* Overview */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
         <StatCard label="Total Runs" value={String(overview.totalRuns)} />
         <StatCard label="Total Time" value={formatTime(overview.totalTime)} />
         <StatCard label="Cards Studied" value={String(overview.totalCards)} />
+        <StatCard label="Due" value={String(dueCount)} />
+        <StatCard label="Weak" value={String(weakCount)} />
       </div>
 
       {/* Timing */}
@@ -273,6 +285,7 @@ export function DeckStats({ deck, runs, onBack }: DeckStatsProps) {
                   <span className="font-mono text-xs text-muted-foreground">
                     ~{formatDuration(stat.avgTimeMs)}
                   </span>
+                  <SRSBadge srsInfo={stat.srsInfo} now={now} />
                 </>
               )}
             </div>
@@ -391,3 +404,30 @@ const RESULT_SHORT: Record<CardDisposition, string> = {
   skip: "Skip",
   save_for_later: "Later",
 };
+
+function SRSBadge({ srsInfo, now }: { srsInfo: CardSRS | undefined; now: number }) {
+  if (!srsInfo) {
+    return (
+      <Badge variant="outline" className="text-xs text-muted-foreground">
+        New
+      </Badge>
+    );
+  }
+
+  const isDue = srsInfo.dueAt <= now;
+
+  if (isDue) {
+    return (
+      <Badge variant="outline" className="text-xs text-yellow-700 dark:text-yellow-400">
+        Due now
+      </Badge>
+    );
+  }
+
+  const daysUntil = Math.ceil((srsInfo.dueAt - now) / 86_400_000);
+  return (
+    <Badge variant="outline" className="text-xs text-muted-foreground">
+      {daysUntil}d
+    </Badge>
+  );
+}

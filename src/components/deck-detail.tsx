@@ -13,7 +13,7 @@ import { CardForm } from "@/components/card-form";
 import { ComplexityBadge } from "@/components/complexity-badge";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
-import type { Card, Complexity, Deck, DeckImportCard } from "@/types";
+import type { Card, Complexity, Deck, DeckImportCard, RunMode } from "@/types";
 import { cn } from "@/lib/utils";
 
 const COMPLEXITIES: Complexity[] = ["easy", "medium", "hard"];
@@ -26,8 +26,10 @@ const COMPLEXITY_LABELS: Record<Complexity, string> = {
 interface DeckDetailProps {
   deck: Deck;
   hasRuns: boolean;
+  dueCount: number;
+  weakCount: number;
   onBack: () => void;
-  onStartStudy: (complexityFilter: Complexity[] | null) => void;
+  onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null) => void;
   onViewStats: () => void;
   onAddCard: (card: Omit<Card, "id">) => void;
   onEditCard: (cardId: string, card: Omit<Card, "id">) => void;
@@ -39,6 +41,8 @@ interface DeckDetailProps {
 export function DeckDetail({
   deck,
   hasRuns,
+  dueCount,
+  weakCount,
   onBack,
   onStartStudy,
   onViewStats,
@@ -102,10 +106,24 @@ export function DeckDetail({
 
       <div className="flex flex-wrap gap-2">
         <Button
-          onClick={() => onStartStudy(activeFilter)}
+          onClick={() => onStartStudy("all", activeFilter)}
           disabled={filteredCards.length === 0}
         >
-          Start Run{activeFilter ? ` (${filteredCards.length})` : ""}
+          All Cards{activeFilter ? ` (${filteredCards.length})` : ""}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => onStartStudy("due", activeFilter)}
+          disabled={dueCount === 0}
+        >
+          Due ({dueCount})
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => onStartStudy("weak", activeFilter)}
+          disabled={weakCount === 0}
+        >
+          Weak ({weakCount})
         </Button>
         <Button variant="outline" onClick={onViewStats} disabled={!hasRuns}>
           Stats
