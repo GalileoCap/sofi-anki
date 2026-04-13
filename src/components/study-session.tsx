@@ -23,9 +23,10 @@ function formatTime(ms: number): string {
 interface StudySessionProps {
   deck: Deck;
   onExit: () => void;
+  onRunComplete: (totalTimeMs: number, results: CardRunResult[]) => void;
 }
 
-export function StudySession({ deck, onExit }: StudySessionProps) {
+export function StudySession({ deck, onExit, onRunComplete }: StudySessionProps) {
   const [remaining, setRemaining] = useState<Card[]>(() => shuffle(deck.cards));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -66,14 +67,20 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
   const currentCard = remaining[currentIndex];
   const isFinished = currentIndex >= remaining.length;
 
-  // Stop timer when run completes
+  // Stop timer and persist run when completed
+  const runSavedRef = useRef(false);
   useEffect(() => {
-    if (isFinished && timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-      setElapsed(Date.now() - sessionStartRef.current - sessionPausedMsRef.current);
+    if (isFinished && !runSavedRef.current) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      const finalElapsed = Date.now() - sessionStartRef.current - sessionPausedMsRef.current;
+      setElapsed(finalElapsed);
+      runSavedRef.current = true;
+      onRunComplete(finalElapsed, Array.from(results.values()));
     }
-  }, [isFinished]);
+  }, [isFinished, onRunComplete, results]);
 
   // Pause/resume keyboard shortcut
   useEffect(() => {
@@ -197,6 +204,7 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
     setCurrentIndex(0);
     setResults(new Map());
     resetCardState();
+    runSavedRef.current = false;
     sessionStartRef.current = Date.now();
     sessionPausedMsRef.current = 0;
     setElapsed(0);

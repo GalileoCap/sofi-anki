@@ -25,8 +25,10 @@ const COMPLEXITY_LABELS: Record<Complexity, string> = {
 
 interface DeckDetailProps {
   deck: Deck;
+  hasRuns: boolean;
   onBack: () => void;
   onStartStudy: (complexityFilter: Complexity[] | null) => void;
+  onViewStats: () => void;
   onAddCard: (card: Omit<Card, "id">) => void;
   onEditCard: (cardId: string, card: Omit<Card, "id">) => void;
   onDeleteCard: (cardId: string) => void;
@@ -36,8 +38,10 @@ interface DeckDetailProps {
 
 export function DeckDetail({
   deck,
+  hasRuns,
   onBack,
   onStartStudy,
+  onViewStats,
   onAddCard,
   onEditCard,
   onDeleteCard,
@@ -102,6 +106,9 @@ export function DeckDetail({
           disabled={filteredCards.length === 0}
         >
           Start Run{activeFilter ? ` (${filteredCards.length})` : ""}
+        </Button>
+        <Button variant="outline" onClick={onViewStats} disabled={!hasRuns}>
+          Stats
         </Button>
         <CardForm
           trigger={<Button variant="outline">Add Card</Button>}

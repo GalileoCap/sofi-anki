@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { useDecks } from "@/hooks/use-decks";
+import { useRuns } from "@/hooks/use-runs";
 import { DeckList } from "@/components/deck-list";
 import { DeckDetail } from "@/components/deck-detail";
+import { DeckStats } from "@/components/deck-stats";
 import { StudySession } from "@/components/study-session";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Complexity, Deck } from "@/types";
@@ -9,7 +11,8 @@ import type { Complexity, Deck } from "@/types";
 type View =
   | { kind: "home" }
   | { kind: "deck"; deckId: string }
-  | { kind: "study"; deckId: string; complexityFilter: Complexity[] | null };
+  | { kind: "study"; deckId: string; complexityFilter: Complexity[] | null }
+  | { kind: "stats"; deckId: string };
 
 function App() {
   const [view, setView] = useState<View>({ kind: "home" });
@@ -23,6 +26,7 @@ function App() {
     importDeck,
     importCards,
   } = useDecks();
+  const { addRun, deleteRunsForDeck, getRunsForDeck } = useRuns();
 
   const currentDeck =
     view.kind !== "home"
@@ -46,6 +50,25 @@ function App() {
         <StudySession
           deck={studyDeck}
           onExit={() => setView({ kind: "deck", deckId: studyDeck.id })}
+          onRunComplete={(totalTimeMs, results) =>
+            addRun(studyDeck.id, totalTimeMs, results)
+          }
+        />
+      </div>
+    );
+  }
+
+  if (view.kind === "stats" && currentDeck) {
+    const deckRuns = getRunsForDeck(currentDeck.id);
+    return (
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
+        <div className="flex justify-end mb-4">
+          <ThemeToggle />
+        </div>
+        <DeckStats
+          deck={currentDeck}
+          runs={deckRuns}
+          onBack={() => setView({ kind: "deck", deckId: currentDeck.id })}
         />
       </div>
     );
@@ -60,14 +83,19 @@ function App() {
       {view.kind === "deck" && currentDeck ? (
         <DeckDetail
           deck={currentDeck}
+          hasRuns={getRunsForDeck(currentDeck.id).length > 0}
           onBack={() => setView({ kind: "home" })}
           onStartStudy={(complexityFilter) =>
             setView({ kind: "study", deckId: currentDeck.id, complexityFilter })
+          }
+          onViewStats={() =>
+            setView({ kind: "stats", deckId: currentDeck.id })
           }
           onAddCard={(card) => addCard(currentDeck.id, card)}
           onEditCard={(cardId, card) => editCard(currentDeck.id, cardId, card)}
           onDeleteCard={(cardId) => deleteCard(currentDeck.id, cardId)}
           onDeleteDeck={() => {
+            deleteRunsForDeck(currentDeck.id);
             deleteDeck(currentDeck.id);
             setView({ kind: "home" });
           }}

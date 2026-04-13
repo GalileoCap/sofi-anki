@@ -66,3 +66,11 @@ export interface CardRunResult {
   card: Card;
   attempts: CardAttempt[];
 }
+
+export interface RunRecord {
+  id: string;
+  deckId: string;
+  completedAt: number;
+  totalTimeMs: number;
+  results: CardRunResult[];
+}
