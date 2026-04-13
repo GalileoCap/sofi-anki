@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card as UiCard,
+  CardContent,
   CardHeader,
   CardTitle,
   CardAction,
@@ -89,65 +90,76 @@ export function DeckDetail({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          Back
-        </Button>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            Back
+          </Button>
           <h1 className="text-2xl font-medium text-foreground">{deck.title}</h1>
-          <Badge variant="secondary">
-            {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
-          </Badge>
         </div>
+        <Badge variant="secondary" className="text-sm">
+          {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
+        </Badge>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          onClick={() => onStartStudy("all", activeFilter)}
-          disabled={filteredCards.length === 0}
-        >
-          All Cards{activeFilter ? ` (${filteredCards.length})` : ""}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => onStartStudy("due", activeFilter)}
-          disabled={dueCount === 0}
-        >
-          Due ({dueCount})
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => onStartStudy("weak", activeFilter)}
-          disabled={weakCount === 0}
-        >
-          Weak ({weakCount})
-        </Button>
-        <Button variant="outline" onClick={onViewStats} disabled={!hasRuns}>
-          Stats
-        </Button>
+      {/* Study section */}
+      <UiCard size="sm">
+        <CardContent className="flex flex-col gap-4">
+          <p className="text-sm font-medium text-foreground">Study</p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => onStartStudy("all", activeFilter)}
+              disabled={filteredCards.length === 0}
+            >
+              All Cards{activeFilter ? ` (${filteredCards.length})` : ""}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => onStartStudy("due", activeFilter)}
+              disabled={dueCount === 0}
+            >
+              Due
+              <Badge variant="outline" className="ml-1 text-xs">{dueCount}</Badge>
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => onStartStudy("weak", activeFilter)}
+              disabled={weakCount === 0}
+            >
+              Weak
+              <Badge variant="outline" className="ml-1 text-xs">{weakCount}</Badge>
+            </Button>
+            <Button variant="outline" onClick={onViewStats} disabled={!hasRuns}>
+              Stats
+            </Button>
+          </div>
+        </CardContent>
+      </UiCard>
+
+      {/* Manage section */}
+      <div className="flex flex-wrap items-center gap-2">
         <CardForm
-          trigger={<Button variant="outline">Add Card</Button>}
+          trigger={<Button variant="outline" size="sm">Add Card</Button>}
           onSubmit={onAddCard}
         />
         <ImportCardsDialog
-          trigger={<Button variant="outline">Import Cards</Button>}
+          trigger={<Button variant="outline" size="sm">Import Cards</Button>}
           onImport={onImportCards}
         />
         <ExportDialog
-          trigger={<Button variant="outline">Export JSON</Button>}
+          trigger={<Button variant="outline" size="sm">Export JSON</Button>}
           deck={deck}
         />
+        <div className="flex-1" />
         {!confirmDelete ? (
-          <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
+          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>
             Delete Deck
           </Button>
         ) : (
           <div className="flex items-center gap-2">
-            <Button variant="destructive" onClick={onDeleteDeck}>
-              Confirm Delete
+            <Button variant="destructive" size="sm" onClick={onDeleteDeck}>
+              Confirm
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
               Cancel
@@ -160,15 +172,14 @@ export function DeckDetail({
 
       {/* Filters */}
       {deck.cards.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <Input
             placeholder="Search cards..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-xs"
           />
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Filter:</span>
+          <div className="flex items-center gap-1.5">
             {COMPLEXITIES.map((c) => (
               <button
                 key={c}
@@ -198,9 +209,10 @@ export function DeckDetail({
         </div>
       )}
 
+      {/* Card list */}
       {deck.cards.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-12 text-center">
-          <p className="text-muted-foreground">No cards yet.</p>
+        <div className="flex flex-col items-center gap-3 py-16 text-center">
+          <p className="text-lg text-muted-foreground">No cards yet</p>
           <p className="text-sm text-muted-foreground">
             Add cards manually or import them from JSON.
           </p>
@@ -210,18 +222,20 @@ export function DeckDetail({
           <p className="text-sm text-muted-foreground">No cards match your filters.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {filteredCards.map((card) => (
             <UiCard key={card.id} size="sm">
               <CardHeader>
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-sm">{card.title}</CardTitle>
-                  <ComplexityBadge complexity={card.complexity} />
-                  {card.type === "choice" && (
-                    <Badge variant="outline" className="text-xs">
-                      {card.multiSelect ? "Multi" : "Single"} Choice
-                    </Badge>
-                  )}
+                <div className="flex items-center gap-2 min-w-0">
+                  <CardTitle className="text-sm truncate">{card.title}</CardTitle>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <ComplexityBadge complexity={card.complexity} />
+                    {card.type === "choice" && (
+                      <Badge variant="outline" className="text-xs">
+                        {card.multiSelect ? "Multi" : "Single"}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <CardAction>
                   <div className="flex gap-1">
