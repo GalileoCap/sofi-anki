@@ -10,12 +10,21 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { Complexity } from "@/types";
+import { cn } from "@/lib/utils";
+
+const COMPLEXITIES: { value: Complexity; label: string }[] = [
+  { value: "easy", label: "Easy" },
+  { value: "medium", label: "Medium" },
+  { value: "hard", label: "Hard" },
+];
 
 interface CardFormProps {
   trigger: React.ReactNode;
-  onSubmit: (title: string, response: string) => void;
+  onSubmit: (title: string, response: string, complexity: Complexity) => void;
   initialTitle?: string;
   initialResponse?: string;
+  initialComplexity?: Complexity;
   dialogTitle?: string;
   submitLabel?: string;
 }
@@ -25,18 +34,21 @@ export function CardForm({
   onSubmit,
   initialTitle = "",
   initialResponse = "",
+  initialComplexity = "medium",
   dialogTitle = "New Card",
   submitLabel = "Add",
 }: CardFormProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [response, setResponse] = useState(initialResponse);
+  const [complexity, setComplexity] = useState<Complexity>(initialComplexity);
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (next) {
       setTitle(initialTitle);
       setResponse(initialResponse);
+      setComplexity(initialComplexity);
     }
   }
 
@@ -45,9 +57,10 @@ export function CardForm({
     const t = title.trim();
     const r = response.trim();
     if (!t || !r) return;
-    onSubmit(t, r);
+    onSubmit(t, r, complexity);
     setTitle("");
     setResponse("");
+    setComplexity("medium");
     setOpen(false);
   }
 
@@ -71,6 +84,23 @@ export function CardForm({
             onChange={(e) => setResponse(e.target.value)}
             rows={4}
           />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm text-muted-foreground">Complexity</label>
+            <div className="flex gap-1.5">
+              {COMPLEXITIES.map((c) => (
+                <Button
+                  key={c.value}
+                  type="button"
+                  variant={complexity === c.value ? "default" : "outline"}
+                  size="sm"
+                  className={cn("flex-1")}
+                  onClick={() => setComplexity(c.value)}
+                >
+                  {c.label}
+                </Button>
+              ))}
+            </div>
+          </div>
           <DialogFooter>
             <Button type="submit" disabled={!title.trim() || !response.trim()}>
               {submitLabel}

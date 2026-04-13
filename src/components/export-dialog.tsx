@@ -17,12 +17,13 @@ const SCHEMA_PROMPT = `Generate flashcards in the following JSON format:
   "cards": [
     {
       "title": "Question or front of card",
-      "response": "Answer or back of card"
+      "response": "Answer or back of card",
+      "complexity": "easy" | "medium" | "hard"
     }
   ]
 }
 
-Each card must have a "title" (the question) and a "response" (the answer). Return only the JSON, no extra text.`;
+Each card must have a "title" (the question), a "response" (the answer), and a "complexity" ("easy", "medium", or "hard"). Return only the JSON, no extra text.`;
 
 interface ExportDialogProps {
   trigger: React.ReactNode;
@@ -36,7 +37,11 @@ export function ExportDialog({ trigger, deck }: ExportDialogProps) {
   const deckJson = JSON.stringify(
     {
       title: deck.title,
-      cards: deck.cards.map((c) => ({ title: c.title, response: c.response })),
+      cards: deck.cards.map((c) => ({
+        title: c.title,
+        response: c.response,
+        complexity: c.complexity,
+      })),
     },
     null,
     2

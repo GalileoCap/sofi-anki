@@ -47,11 +47,11 @@ function App() {
           onStartStudy={() =>
             setView({ kind: "study", deckId: currentDeck.id })
           }
-          onAddCard={(title, response) =>
-            addCard(currentDeck.id, title, response)
+          onAddCard={(title, response, complexity) =>
+            addCard(currentDeck.id, title, response, complexity)
           }
-          onEditCard={(cardId, title, response) =>
-            editCard(currentDeck.id, cardId, title, response)
+          onEditCard={(cardId, title, response, complexity) =>
+            editCard(currentDeck.id, cardId, title, response, complexity)
           }
           onDeleteCard={(cardId) => deleteCard(currentDeck.id, cardId)}
           onDeleteDeck={() => {

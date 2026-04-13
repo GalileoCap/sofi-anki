@@ -10,19 +10,20 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CardForm } from "@/components/card-form";
+import { ComplexityBadge } from "@/components/complexity-badge";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
-import type { Deck } from "@/types";
+import type { Complexity, Deck } from "@/types";
 
 interface DeckDetailProps {
   deck: Deck;
   onBack: () => void;
   onStartStudy: () => void;
-  onAddCard: (title: string, response: string) => void;
-  onEditCard: (cardId: string, title: string, response: string) => void;
+  onAddCard: (title: string, response: string, complexity: Complexity) => void;
+  onEditCard: (cardId: string, title: string, response: string, complexity: Complexity) => void;
   onDeleteCard: (cardId: string) => void;
   onDeleteDeck: () => void;
-  onImportCards: (cards: { title: string; response: string }[]) => void;
+  onImportCards: (cards: { title: string; response: string; complexity?: Complexity }[]) => void;
 }
 
 export function DeckDetail({
@@ -100,7 +101,10 @@ export function DeckDetail({
           {deck.cards.map((card) => (
             <Card key={card.id} size="sm">
               <CardHeader>
-                <CardTitle className="text-sm">{card.title}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-sm">{card.title}</CardTitle>
+                  <ComplexityBadge complexity={card.complexity} />
+                </div>
                 <CardDescription className="line-clamp-2 text-xs">
                   {card.response}
                 </CardDescription>
@@ -112,9 +116,12 @@ export function DeckDetail({
                           Edit
                         </Button>
                       }
-                      onSubmit={(title, response) => onEditCard(card.id, title, response)}
+                      onSubmit={(title, response, complexity) =>
+                        onEditCard(card.id, title, response, complexity)
+                      }
                       initialTitle={card.title}
                       initialResponse={card.response}
+                      initialComplexity={card.complexity}
                       dialogTitle="Edit Card"
                       submitLabel="Save"
                     />

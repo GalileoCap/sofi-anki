@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { Card, Deck, DeckImport } from "@/types";
+import type { Card, Complexity, Deck, DeckImport } from "@/types";
 import { loadDecks, saveDecks } from "@/lib/storage";
 
 export function useDecks() {
@@ -30,8 +30,8 @@ export function useDecks() {
     );
   }
 
-  function addCard(deckId: string, title: string, response: string): Card {
-    const card: Card = { id: crypto.randomUUID(), title, response };
+  function addCard(deckId: string, title: string, response: string, complexity: Complexity): Card {
+    const card: Card = { id: crypto.randomUUID(), title, response, complexity };
     setDecks((prev) =>
       prev.map((d) =>
         d.id === deckId ? { ...d, cards: [...d.cards, card] } : d
@@ -50,14 +50,14 @@ export function useDecks() {
     );
   }
 
-  function editCard(deckId: string, cardId: string, title: string, response: string) {
+  function editCard(deckId: string, cardId: string, title: string, response: string, complexity: Complexity) {
     setDecks((prev) =>
       prev.map((d) =>
         d.id === deckId
           ? {
               ...d,
               cards: d.cards.map((c) =>
-                c.id === cardId ? { ...c, title, response } : c
+                c.id === cardId ? { ...c, title, response, complexity } : c
               ),
             }
           : d
@@ -73,6 +73,7 @@ export function useDecks() {
         id: crypto.randomUUID(),
         title: c.title,
         response: c.response,
+        complexity: c.complexity ?? "medium",
       })),
       createdAt: Date.now(),
     };
@@ -80,7 +81,7 @@ export function useDecks() {
     return deck;
   }
 
-  function importCards(deckId: string, cards: { title: string; response: string }[]) {
+  function importCards(deckId: string, cards: { title: string; response: string; complexity?: Complexity }[]) {
     setDecks((prev) =>
       prev.map((d) =>
         d.id === deckId
@@ -92,6 +93,7 @@ export function useDecks() {
                   id: crypto.randomUUID(),
                   title: c.title,
                   response: c.response,
+                  complexity: c.complexity ?? "medium",
                 })),
               ],
             }

@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { StudyCard } from "@/components/study-card";
-import type { Card, Deck } from "@/types";
+import { RunSummary } from "@/components/run-summary";
+import type { AnswerResult, Card, CardAttempt, CardRunResult, Deck } from "@/types";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -10,6 +11,13 @@ function shuffle<T>(arr: T[]): T[] {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+function formatTime(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 interface StudySessionProps {
@@ -21,26 +29,74 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
   const [remaining, setRemaining] = useState<Card[]>(() => shuffle(deck.cards));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  const [complexityRevealed, setComplexityRevealed] = useState(false);
+  const [results, setResults] = useState<Map<string, CardRunResult>>(() => new Map());
 
-  const totalCards = useMemo(() => deck.cards.length, [deck.cards.length]);
+  // Timer — initialize in effect to avoid impure render (React Compiler)
+  const sessionStartRef = useRef(0);
+  const [elapsed, setElapsed] = useState(0);
+  const [showTimer, setShowTimer] = useState(true);
+
+  // Per-card timing
+  const cardStartRef = useRef(0);
+
+  useEffect(() => {
+    const now = Date.now();
+    sessionStartRef.current = now;
+    cardStartRef.current = now;
+    const id = setInterval(() => {
+      setElapsed(Date.now() - sessionStartRef.current);
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const currentCard = remaining[currentIndex];
   const isFinished = currentIndex >= remaining.length;
 
-  function handleReveal() {
-    setRevealed(true);
+  const recordAttempt = useCallback(
+    (card: Card, attempt: CardAttempt) => {
+      setResults((prev) => {
+        const next = new Map(prev);
+        const existing = next.get(card.id);
+        if (existing) {
+          next.set(card.id, {
+            ...existing,
+            attempts: [...existing.attempts, attempt],
+          });
+        } else {
+          next.set(card.id, { card, attempts: [attempt] });
+        }
+        return next;
+      });
+    },
+    []
+  );
+
+  function resetCardState() {
+    setRevealed(false);
+    setComplexityRevealed(false);
+    cardStartRef.current = Date.now();
   }
 
-  function handleNext() {
-    setCurrentIndex((i) => i + 1);
-    setRevealed(false);
+  function handleReveal() {
+    setRevealed(true);
+    setComplexityRevealed(true);
+  }
+
+  function handleRevealComplexity() {
+    setComplexityRevealed(true);
   }
 
   function handleSkip() {
+    const durationMs = Date.now() - cardStartRef.current;
+    recordAttempt(currentCard, { result: "skip", durationMs });
     setCurrentIndex((i) => i + 1);
-    setRevealed(false);
+    resetCardState();
   }
 
   function handleSaveForLater() {
+    const durationMs = Date.now() - cardStartRef.current;
+    recordAttempt(currentCard, { result: "save_for_later", durationMs });
     setRemaining((prev) => {
       const next = [...prev];
       const [card] = next.splice(currentIndex, 1);
@@ -52,31 +108,49 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
       next.splice(insertAt, 0, card);
       return next;
     });
-    setRevealed(false);
+    resetCardState();
+  }
+
+  function handleGraded(result: AnswerResult, redoLater: boolean) {
+    const durationMs = Date.now() - cardStartRef.current;
+    recordAttempt(currentCard, { result, durationMs });
+
+    if (redoLater) {
+      setRemaining((prev) => {
+        const next = [...prev];
+        const [card] = next.splice(currentIndex, 1);
+        const remainingAfter = next.length - currentIndex;
+        const insertAt =
+          remainingAfter > 0
+            ? currentIndex + 1 + Math.floor(Math.random() * remainingAfter)
+            : next.length;
+        next.splice(insertAt, 0, card);
+        return next;
+      });
+    } else {
+      setCurrentIndex((i) => i + 1);
+    }
+    resetCardState();
   }
 
   function handleRestart() {
     setRemaining(shuffle(deck.cards));
     setCurrentIndex(0);
-    setRevealed(false);
+    setResults(new Map());
+    resetCardState();
+    sessionStartRef.current = Date.now();
+    setElapsed(0);
   }
 
   if (isFinished) {
+    const resultsList = Array.from(results.values());
     return (
-      <div className="flex flex-col items-center gap-6 py-12">
-        <div className="text-center">
-          <h2 className="text-2xl font-medium text-foreground">Run Complete!</h2>
-          <p className="mt-2 text-muted-foreground">
-            You went through all {totalCards} cards.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Button onClick={handleRestart}>Restart</Button>
-          <Button variant="outline" onClick={onExit}>
-            Back to Deck
-          </Button>
-        </div>
-      </div>
+      <RunSummary
+        results={resultsList}
+        totalTimeMs={elapsed}
+        onRestart={handleRestart}
+        onExit={onExit}
+      />
     );
   }
 
@@ -86,18 +160,35 @@ export function StudySession({ deck, onExit }: StudySessionProps) {
         <Button variant="ghost" size="sm" onClick={onExit}>
           Exit
         </Button>
-        <p className="text-sm text-muted-foreground">
-          {currentIndex + 1} / {remaining.length}
-        </p>
+        <div className="flex items-center gap-3">
+          {showTimer && (
+            <span className="font-mono text-sm text-muted-foreground">
+              {formatTime(elapsed)}
+            </span>
+          )}
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => setShowTimer((v) => !v)}
+          >
+            {showTimer ? "Hide" : "Show"} Timer
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            {currentIndex + 1} / {remaining.length}
+          </p>
+        </div>
       </div>
 
       <StudyCard
+        key={`${currentCard.id}-${currentIndex}`}
         card={currentCard}
         revealed={revealed}
+        complexityRevealed={complexityRevealed}
         onReveal={handleReveal}
-        onNext={handleNext}
+        onRevealComplexity={handleRevealComplexity}
         onSkip={handleSkip}
         onSaveForLater={handleSaveForLater}
+        onGraded={handleGraded}
       />
     </div>
   );
