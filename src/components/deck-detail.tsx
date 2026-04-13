@@ -15,7 +15,8 @@ import { DeckForm } from "@/components/deck-form";
 import { ComplexityBadge } from "@/components/complexity-badge";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
-import type { Card, Complexity, Deck, DeckImportCard, RunMode } from "@/types";
+import { RunStartDialog } from "@/components/run-start-dialog";
+import type { Card, Complexity, Deck, DeckImportCard, RunMode, SessionGoal } from "@/types";
 import { cn } from "@/lib/utils";
 
 const COMPLEXITIES: Complexity[] = ["easy", "medium", "hard"];
@@ -31,7 +32,7 @@ interface DeckDetailProps {
   dueCount: number;
   weakCount: number;
   onBack: () => void;
-  onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null) => void;
+  onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null, goal?: SessionGoal) => void;
   onViewStats: () => void;
   onEditDeck: (title: string, tags: string[]) => void;
   onAddCard: (card: Omit<Card, "id">) => void;
@@ -57,6 +58,11 @@ export function DeckDetail({
   onImportCards,
 }: DeckDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [runDialog, setRunDialog] = useState<{ open: boolean; mode: RunMode; label: string }>({
+    open: false,
+    mode: "all",
+    label: "All Cards",
+  });
   const [search, setSearch] = useState("");
   const [complexityFilter, setComplexityFilter] = useState<Set<Complexity>>(new Set());
   const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
@@ -150,14 +156,14 @@ export function DeckDetail({
           <p className="text-sm font-medium text-foreground">Study</p>
           <div className="flex flex-wrap gap-2">
             <Button
-              onClick={() => onStartStudy("all", activeFilter)}
+              onClick={() => setRunDialog({ open: true, mode: "all", label: "All Cards" })}
               disabled={filteredCards.length === 0}
             >
               All Cards{activeFilter ? ` (${filteredCards.length})` : ""}
             </Button>
             <Button
               variant="secondary"
-              onClick={() => onStartStudy("due", activeFilter)}
+              onClick={() => setRunDialog({ open: true, mode: "due", label: "Due Cards" })}
               disabled={dueCount === 0}
             >
               Due
@@ -165,7 +171,7 @@ export function DeckDetail({
             </Button>
             <Button
               variant="secondary"
-              onClick={() => onStartStudy("weak", activeFilter)}
+              onClick={() => setRunDialog({ open: true, mode: "weak", label: "Weak Cards" })}
               disabled={weakCount === 0}
             >
               Weak
@@ -177,6 +183,13 @@ export function DeckDetail({
           </div>
         </CardContent>
       </UiCard>
+
+      <RunStartDialog
+        open={runDialog.open}
+        onOpenChange={(open) => setRunDialog((prev) => ({ ...prev, open }))}
+        label={runDialog.label}
+        onStart={(goal) => onStartStudy(runDialog.mode, activeFilter, goal)}
+      />
 
       {/* Manage section */}
       <div className="flex flex-wrap items-center gap-2">

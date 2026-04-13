@@ -89,3 +89,12 @@ export interface CardSRS {
 }
 
 export type RunMode = "all" | "due" | "weak";
+
+export interface SessionGoal {
+  type: "cards" | "minutes";
+  value: number;
+}
+
+export interface AppSettings {
+  dailyCardGoal: number;
+}

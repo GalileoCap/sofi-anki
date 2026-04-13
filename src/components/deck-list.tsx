@@ -10,11 +10,46 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { DeckForm } from "@/components/deck-form";
 import { ImportDeckDialog } from "@/components/import-dialog";
-import type { Deck, DeckImport } from "@/types";
+import { StudyHeatmap } from "@/components/study-heatmap";
+import type { Deck, DeckImport, RunRecord } from "@/types";
 import { cn } from "@/lib/utils";
+
+function dateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function computeStreak(runs: RunRecord[], now: Date): number {
+  if (runs.length === 0) return 0;
+  const studyDays = new Set(runs.map((r) => dateKey(new Date(r.completedAt))));
+  const today = dateKey(now);
+  let streak = 0;
+  const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // If no run today, check if yesterday had one; if not, streak is 0
+  if (!studyDays.has(today)) {
+    cursor.setDate(cursor.getDate() - 1);
+    if (!studyDays.has(dateKey(cursor))) return 0;
+  }
+
+  while (studyDays.has(dateKey(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function todayCards(runs: RunRecord[], now: Date): number {
+  const today = dateKey(now);
+  return runs
+    .filter((r) => dateKey(new Date(r.completedAt)) === today)
+    .reduce((sum, r) => sum + r.results.length, 0);
+}
 
 interface DeckListProps {
   decks: Deck[];
+  allRuns: RunRecord[];
+  dailyGoal: number;
+  onUpdateDailyGoal: (goal: number) => void;
   onSelectDeck: (id: string) => void;
   onAddDeck: (title: string, tags: string[]) => void;
   onImportDeck: (data: DeckImport) => void;
@@ -22,12 +57,21 @@ interface DeckListProps {
 
 export function DeckList({
   decks,
+  allRuns,
+  dailyGoal,
+  onUpdateDailyGoal,
   onSelectDeck,
   onAddDeck,
   onImportDeck,
 }: DeckListProps) {
   const [search, setSearch] = useState("");
   const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState(String(dailyGoal));
+  const [now] = useState(() => new Date());
+
+  const streak = useMemo(() => computeStreak(allRuns, now), [allRuns, now]);
+  const todayCount = useMemo(() => todayCards(allRuns, now), [allRuns, now]);
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -68,6 +112,12 @@ export function DeckList({
     });
   }
 
+  function handleGoalSave() {
+    const val = parseInt(goalInput) || 0;
+    onUpdateDailyGoal(Math.max(0, val));
+    setEditingGoal(false);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -83,6 +133,78 @@ export function DeckList({
           />
         </div>
       </div>
+
+      {/* Streak + daily goal + heatmap */}
+      {allRuns.length > 0 && (
+        <Card size="sm">
+          <CardHeader>
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Streak:</span>
+                <span className="font-mono font-medium text-foreground">
+                  {streak} {streak === 1 ? "day" : "days"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Today:</span>
+                <span className={cn(
+                  "font-mono font-medium",
+                  dailyGoal > 0 && todayCount >= dailyGoal
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-foreground"
+                )}>
+                  {todayCount}
+                </span>
+                {dailyGoal > 0 && (
+                  <>
+                    <span className="text-muted-foreground">/</span>
+                    {editingGoal ? (
+                      <span className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          value={goalInput}
+                          onChange={(e) => setGoalInput(e.target.value)}
+                          onBlur={handleGoalSave}
+                          onKeyDown={(e) => e.key === "Enter" && handleGoalSave()}
+                          className="w-14 rounded border bg-transparent px-1.5 py-0.5 text-center font-mono text-sm"
+                          autoFocus
+                        />
+                        <span className="text-muted-foreground">cards</span>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGoalInput(String(dailyGoal));
+                          setEditingGoal(true);
+                        }}
+                        className="inline-flex items-center gap-1 rounded border border-dashed border-muted-foreground/30 px-1.5 py-0.5 font-mono font-medium text-foreground transition-colors hover:border-foreground/50 hover:bg-muted/50"
+                        title="Click to edit daily goal"
+                      >
+                        {dailyGoal} cards
+                        <span className="text-[10px] text-muted-foreground">&#9998;</span>
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+              {dailyGoal > 0 && (
+                <div className="flex-1 min-w-20">
+                  <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-green-500 transition-all"
+                      style={{ width: `${Math.min(100, (todayCount / dailyGoal) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+          <div className="px-6 pb-4">
+            <StudyHeatmap runs={allRuns} />
+          </div>
+        </Card>
+      )}
 
       {decks.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">

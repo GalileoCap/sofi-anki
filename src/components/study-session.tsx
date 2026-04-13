@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { StudyCard } from "@/components/study-card";
 import { RunSummary } from "@/components/run-summary";
-import type { AnswerResult, Card, CardAttempt, CardRunResult, Deck } from "@/types";
+import type { AnswerResult, Card, CardAttempt, CardRunResult, Deck, SessionGoal } from "@/types";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -22,17 +22,21 @@ function formatTime(ms: number): string {
 
 interface StudySessionProps {
   deck: Deck;
+  goal?: SessionGoal;
   onExit: () => void;
   onRunComplete: (totalTimeMs: number, results: CardRunResult[]) => void;
 }
 
-export function StudySession({ deck, onExit, onRunComplete }: StudySessionProps) {
+export function StudySession({ deck, goal, onExit, onRunComplete }: StudySessionProps) {
   const [remaining, setRemaining] = useState<Card[]>(() => shuffle(deck.cards));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [complexityRevealed, setComplexityRevealed] = useState(false);
   const [results, setResults] = useState<Map<string, CardRunResult>>(() => new Map());
   const [confirmExit, setConfirmExit] = useState(false);
+  const [cardsCompleted, setCardsCompleted] = useState(0);
+  const [goalReached, setGoalReached] = useState(false);
+  const [goalDismissed, setGoalDismissed] = useState(false);
   const [paused, setPaused] = useState(false);
 
   // Timer — initialize in effect to avoid impure render (React Compiler)
@@ -153,10 +157,30 @@ export function StudySession({ deck, onExit, onRunComplete }: StudySessionProps)
     setComplexityRevealed(true);
   }
 
+  function onCardDone() {
+    const newCount = cardsCompleted + 1;
+    setCardsCompleted(newCount);
+    if (goal && !goalDismissed) {
+      if (goal.type === "cards" && newCount >= goal.value) {
+        setGoalReached(true);
+      }
+    }
+  }
+
+  // Check minute-based goal via elapsed
+  const minuteGoalReached = goal?.type === "minutes" && !goalDismissed && elapsed >= goal.value * 60_000;
+  const showGoalBanner = (goalReached || minuteGoalReached) && !goalDismissed;
+
+  function handleFinishEarly() {
+    // Force finish: set index past remaining to trigger isFinished
+    setCurrentIndex(remaining.length);
+  }
+
   function handleSkip() {
     const durationMs = getCardDuration();
     recordAttempt(currentCard, { result: "skip", durationMs });
     setCurrentIndex((i) => i + 1);
+    onCardDone();
     resetCardState();
   }
 
@@ -181,6 +205,7 @@ export function StudySession({ deck, onExit, onRunComplete }: StudySessionProps)
     const durationMs = getCardDuration();
     recordAttempt(currentCard, { result, durationMs, selectedOptionIds });
 
+    if (!redoLater) onCardDone();
     if (redoLater) {
       setRemaining((prev) => {
         const next = [...prev];
@@ -210,6 +235,9 @@ export function StudySession({ deck, onExit, onRunComplete }: StudySessionProps)
     setElapsed(0);
     setPaused(false);
     setConfirmExit(false);
+    setCardsCompleted(0);
+    setGoalReached(false);
+    setGoalDismissed(false);
     // Restart the timer interval
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
@@ -282,6 +310,48 @@ export function StudySession({ deck, onExit, onRunComplete }: StudySessionProps)
           </p>
         </div>
       </div>
+
+      {/* Goal progress */}
+      {goal && (
+        <div className="w-full max-w-lg">
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+            <span>
+              {goal.type === "cards"
+                ? `${Math.min(cardsCompleted, goal.value)} / ${goal.value} cards`
+                : `${formatTime(Math.min(elapsed, goal.value * 60_000))} / ${formatTime(goal.value * 60_000)}`}
+            </span>
+            {showGoalBanner && <span className="text-green-600 dark:text-green-400 font-medium">Goal reached!</span>}
+          </div>
+          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-green-500 transition-all duration-300"
+              style={{
+                width: `${Math.min(100, goal.type === "cards"
+                  ? (cardsCompleted / goal.value) * 100
+                  : (elapsed / (goal.value * 60_000)) * 100
+                )}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Goal reached banner */}
+      {showGoalBanner && !paused && (
+        <div className="flex w-full max-w-lg items-center justify-between rounded-lg border border-green-300 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950">
+          <p className="text-sm font-medium text-green-700 dark:text-green-300">
+            You reached your goal!
+          </p>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setGoalDismissed(true)}>
+              Continue
+            </Button>
+            <Button size="sm" onClick={handleFinishEarly}>
+              Finish
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Paused overlay */}
       {paused ? (

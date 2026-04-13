@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ComplexityBadge } from "@/components/complexity-badge";
+import { StudyHeatmap } from "@/components/study-heatmap";
 import type { CardDisposition, CardSRS, Deck, RunRecord } from "@/types";
 import type { useSRS } from "@/hooks/use-srs";
 import { cn } from "@/lib/utils";
@@ -234,6 +235,29 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
         </UiCard>
       )}
 
+      {/* Heatmap + Accuracy Trend side by side */}
+      <div className={cn("grid gap-3", sortedRuns.length > 1 ? "grid-cols-1 lg:grid-cols-[1fr_auto]" : "grid-cols-1")}>
+        <UiCard size="sm">
+          <CardHeader>
+            <CardTitle>Study Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <StudyHeatmap runs={runs} />
+          </CardContent>
+        </UiCard>
+
+        {sortedRuns.length > 1 && (
+          <UiCard size="sm" className="lg:w-64">
+            <CardHeader>
+              <CardTitle>Accuracy Trend</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AccuracyTrend runs={sortedRuns} />
+            </CardContent>
+          </UiCard>
+        )}
+      </div>
+
       {/* Run History */}
       <UiCard size="sm">
         <CardHeader>
@@ -253,42 +277,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           {cardStats.map((stat) => (
-            <div
-              key={stat.cardId}
-              className={cn(
-                "flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-sm",
-                stat.timesStudied === 0 && "bg-muted/30",
-                stat.accuracyPct >= 0 && stat.accuracyPct < 50 && "bg-red-50/50 dark:bg-red-950/20"
-              )}
-            >
-              <span className="flex-1 min-w-0 truncate text-foreground">
-                {stat.title}
-              </span>
-              <ComplexityBadge complexity={stat.complexity as "easy" | "medium" | "hard"} />
-              {stat.timesStudied === 0 ? (
-                <Badge variant="outline" className="text-xs text-muted-foreground">
-                  Not studied
-                </Badge>
-              ) : (
-                <>
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {stat.timesStudied}x
-                  </span>
-                  <span className={cn(
-                    "font-mono text-xs font-medium",
-                    stat.accuracyPct >= 80 && "text-green-700 dark:text-green-400",
-                    stat.accuracyPct >= 50 && stat.accuracyPct < 80 && "text-yellow-700 dark:text-yellow-400",
-                    stat.accuracyPct >= 0 && stat.accuracyPct < 50 && "text-red-700 dark:text-red-400",
-                  )}>
-                    {stat.accuracyPct >= 0 ? `${stat.accuracyPct}%` : "—"}
-                  </span>
-                  <span className="font-mono text-xs text-muted-foreground">
-                    ~{formatDuration(stat.avgTimeMs)}
-                  </span>
-                  <SRSBadge srsInfo={stat.srsInfo} now={now} />
-                </>
-              )}
-            </div>
+            <CardStatRow key={stat.cardId} stat={stat} runs={runs} now={now} />
           ))}
         </CardContent>
       </UiCard>
@@ -429,5 +418,162 @@ function SRSBadge({ srsInfo, now }: { srsInfo: CardSRS | undefined; now: number 
     <Badge variant="outline" className="text-xs text-muted-foreground">
       {daysUntil}d
     </Badge>
+  );
+}
+
+function AccuracyTrend({ runs }: { runs: RunRecord[] }) {
+  // Show last 20 runs, oldest first (runs are already sorted newest-first)
+  const display = runs.slice(0, 20).reverse();
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-end gap-1" style={{ height: 80 }}>
+        {display.map((run) => {
+          let correct = 0, approximate = 0, wrong = 0, other = 0;
+          for (const r of run.results) {
+            const first = r.attempts[0]?.result;
+            if (first === "correct") correct++;
+            else if (first === "approximate") approximate++;
+            else if (first === "wrong") wrong++;
+            else other++;
+          }
+          const total = correct + approximate + wrong + other;
+          if (total === 0) return null;
+          const cPct = (correct / total) * 100;
+          const aPct = (approximate / total) * 100;
+          const wPct = (wrong / total) * 100;
+          const oPct = (other / total) * 100;
+
+          return (
+            <div
+              key={run.id}
+              className="flex flex-1 flex-col overflow-hidden rounded-sm"
+              style={{ height: "100%" }}
+              title={`${new Date(run.completedAt).toLocaleDateString()}: ${correct} correct, ${approximate} approx, ${wrong} wrong${other > 0 ? `, ${other} other` : ""}`}
+            >
+              {oPct > 0 && <div className="bg-muted" style={{ height: `${oPct}%` }} />}
+              {wPct > 0 && <div className="bg-red-400 dark:bg-red-600" style={{ height: `${wPct}%` }} />}
+              {aPct > 0 && <div className="bg-yellow-400 dark:bg-yellow-600" style={{ height: `${aPct}%` }} />}
+              {cPct > 0 && <div className="bg-green-400 dark:bg-green-600" style={{ height: `${cPct}%` }} />}
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-green-400 dark:bg-green-600" /> Correct</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-yellow-400 dark:bg-yellow-600" /> Approx</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-red-400 dark:bg-red-600" /> Wrong</span>
+      </div>
+    </div>
+  );
+}
+
+function CardStatRow({ stat, runs, now }: { stat: CardStat; runs: RunRecord[]; now: number }) {
+  const [expanded, setExpanded] = useState(false);
+
+  // Build SRS timeline from runs
+  const timeline = useMemo(() => {
+    if (!expanded || stat.timesStudied === 0) return [];
+    const entries: { date: number; result: CardDisposition; intervalAfter?: number }[] = [];
+    for (const run of runs) {
+      for (const result of run.results) {
+        if (result.card.id !== stat.cardId) continue;
+        const lastGraded = [...result.attempts].reverse().find(
+          (a) => a.result === "correct" || a.result === "approximate" || a.result === "wrong"
+        );
+        entries.push({
+          date: run.completedAt,
+          result: lastGraded?.result ?? result.attempts[0]?.result ?? "skip",
+        });
+      }
+    }
+    entries.sort((a, b) => a.date - b.date);
+
+    // Simulate interval growth
+    let interval = 0;
+    let ease = 2.5;
+    for (const entry of entries) {
+      if (entry.result === "correct") {
+        interval = Math.max(1, Math.round(interval === 0 ? 1 : interval * ease));
+        ease += 0.1;
+      } else if (entry.result === "approximate") {
+        interval = Math.max(1, interval);
+      } else if (entry.result === "wrong") {
+        interval = 0;
+        ease = Math.max(1.3, ease - 0.2);
+      }
+      entry.intervalAfter = interval;
+    }
+    return entries;
+  }, [expanded, stat.cardId, stat.timesStudied, runs]);
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => stat.timesStudied > 0 && setExpanded((v) => !v)}
+        className={cn(
+          "flex w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-sm",
+          stat.timesStudied === 0 && "bg-muted/30",
+          stat.accuracyPct >= 0 && stat.accuracyPct < 50 && "bg-red-50/50 dark:bg-red-950/20",
+          stat.timesStudied > 0 && "cursor-pointer hover:bg-muted/50"
+        )}
+      >
+        <span className="flex-1 min-w-0 truncate text-left text-foreground">
+          {stat.title}
+        </span>
+        <ComplexityBadge complexity={stat.complexity as "easy" | "medium" | "hard"} />
+        {stat.timesStudied === 0 ? (
+          <Badge variant="outline" className="text-xs text-muted-foreground">
+            Not studied
+          </Badge>
+        ) : (
+          <>
+            <span className="font-mono text-xs text-muted-foreground">
+              {stat.timesStudied}x
+            </span>
+            <span className={cn(
+              "font-mono text-xs font-medium",
+              stat.accuracyPct >= 80 && "text-green-700 dark:text-green-400",
+              stat.accuracyPct >= 50 && stat.accuracyPct < 80 && "text-yellow-700 dark:text-yellow-400",
+              stat.accuracyPct >= 0 && stat.accuracyPct < 50 && "text-red-700 dark:text-red-400",
+            )}>
+              {stat.accuracyPct >= 0 ? `${stat.accuracyPct}%` : "\u2014"}
+            </span>
+            <span className="font-mono text-xs text-muted-foreground">
+              ~{formatDuration(stat.avgTimeMs)}
+            </span>
+            <SRSBadge srsInfo={stat.srsInfo} now={now} />
+          </>
+        )}
+      </button>
+
+      {expanded && timeline.length > 0 && (
+        <div className="ml-6 border-l-2 border-muted pl-3 pb-2 pt-1">
+          <div className="flex flex-col gap-1">
+            {timeline.map((entry, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs">
+                <span className="shrink-0 text-muted-foreground">
+                  {new Date(entry.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                </span>
+                <Badge variant="outline" className={cn("text-xs", RESULT_BADGE_STYLES[entry.result])}>
+                  {RESULT_SHORT[entry.result]}
+                </Badge>
+                {entry.intervalAfter !== undefined && (
+                  <span className="font-mono text-muted-foreground">
+                    {entry.intervalAfter === 0 ? "due now" : `${entry.intervalAfter}d`}
+                  </span>
+                )}
+                {i > 0 && timeline[i - 1].intervalAfter !== undefined && (
+                  <span className="text-muted-foreground/50">
+                    {entry.intervalAfter! > (timeline[i - 1].intervalAfter ?? 0) ? "\u2191" : entry.intervalAfter! < (timeline[i - 1].intervalAfter ?? 0) ? "\u2193" : "\u2192"}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

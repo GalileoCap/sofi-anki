@@ -2,17 +2,18 @@ import { useState, useMemo } from "react";
 import { useDecks } from "@/hooks/use-decks";
 import { useRuns } from "@/hooks/use-runs";
 import { useSRS } from "@/hooks/use-srs";
+import { useSettings } from "@/hooks/use-settings";
 import { DeckList } from "@/components/deck-list";
 import { DeckDetail } from "@/components/deck-detail";
 import { DeckStats } from "@/components/deck-stats";
 import { StudySession } from "@/components/study-session";
 import { ThemeToggle } from "@/components/theme-toggle";
-import type { Complexity, Deck, RunMode } from "@/types";
+import type { Complexity, Deck, RunMode, SessionGoal } from "@/types";
 
 type View =
   | { kind: "home" }
   | { kind: "deck"; deckId: string }
-  | { kind: "study"; deckId: string; runMode: RunMode; complexityFilter: Complexity[] | null }
+  | { kind: "study"; deckId: string; runMode: RunMode; complexityFilter: Complexity[] | null; goal?: SessionGoal }
   | { kind: "stats"; deckId: string };
 
 function App() {
@@ -28,8 +29,9 @@ function App() {
     importDeck,
     importCards,
   } = useDecks();
-  const { addRun, deleteRunsForDeck, getRunsForDeck } = useRuns();
+  const { runs, addRun, deleteRunsForDeck, getRunsForDeck } = useRuns();
   const srs = useSRS();
+  const { settings, updateDailyGoal } = useSettings();
 
   const currentDeck =
     view.kind !== "home"
@@ -63,6 +65,7 @@ function App() {
       <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
         <StudySession
           deck={studyDeck}
+          goal={view.goal}
           onExit={() => setView({ kind: "deck", deckId: studyDeck.id })}
           onRunComplete={(totalTimeMs, results) => {
             addRun(studyDeck.id, totalTimeMs, results);
@@ -103,8 +106,8 @@ function App() {
           dueCount={srs.getDueCards(currentDeck).length}
           weakCount={srs.getWeakCards(currentDeck).length}
           onBack={() => setView({ kind: "home" })}
-          onStartStudy={(runMode, complexityFilter) =>
-            setView({ kind: "study", deckId: currentDeck.id, runMode, complexityFilter })
+          onStartStudy={(runMode, complexityFilter, goal) =>
+            setView({ kind: "study", deckId: currentDeck.id, runMode, complexityFilter, goal })
           }
           onViewStats={() =>
             setView({ kind: "stats", deckId: currentDeck.id })
@@ -124,6 +127,9 @@ function App() {
       ) : (
         <DeckList
           decks={decks}
+          allRuns={runs}
+          dailyGoal={settings.dailyCardGoal}
+          onUpdateDailyGoal={updateDailyGoal}
           onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
           onAddDeck={(title, tags) => addDeck(title, tags)}
           onImportDeck={(data) => importDeck(data)}
