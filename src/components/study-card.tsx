@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ComplexityBadge } from "@/components/complexity-badge";
+import { Markdown } from "@/components/markdown";
 import type { AnswerResult, Card as CardType } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -170,7 +171,7 @@ export function StudyCard({
                   : <span className="block h-2 w-2 rounded-full bg-background" />
               )}
             </span>
-            {opt.text}
+            <Markdown inline>{opt.text}</Markdown>
           </button>
         );
       })}
@@ -195,7 +196,7 @@ export function StudyCard({
       {card.hint && (
         hintVisible ? (
           <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
-            {card.hint}
+            <Markdown>{card.hint!}</Markdown>
           </div>
         ) : (
           <button
@@ -238,8 +239,8 @@ export function StudyCard({
   const gradingSection = revealed ? (
     <>
       {card.type === "standard" && (
-        <div className="w-full rounded-lg bg-muted/50 p-4">
-          <p className="text-muted-foreground whitespace-pre-wrap">{card.response}</p>
+        <div className="w-full rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">
+          <Markdown>{card.response}</Markdown>
         </div>
       )}
 
@@ -298,7 +299,7 @@ export function StudyCard({
         {/* Front face */}
         <Card className="card-flip-front">
           <CardContent className="flex flex-col items-center gap-6 text-center">
-            <p className="text-lg font-medium text-foreground">{card.title}</p>
+            <Markdown className="text-lg font-medium text-foreground">{card.title}</Markdown>
             {complexitySection}
             {choiceOptions}
             {actionButtons}
@@ -308,7 +309,7 @@ export function StudyCard({
         {/* Back face */}
         <Card className="card-flip-back">
           <CardContent className="flex flex-col items-center gap-6 text-center">
-            <p className="text-lg font-medium text-foreground">{card.title}</p>
+            <Markdown className="text-lg font-medium text-foreground">{card.title}</Markdown>
             {complexitySection}
             {choiceOptions}
             {gradingSection}

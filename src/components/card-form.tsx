@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { TagInput } from "@/components/tag-input";
+import { Markdown } from "@/components/markdown";
 import type { Card, CardType, Complexity } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,7 @@ export function CardForm({
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [hint, setHint] = useState(initial?.hint ?? "");
   const [showHintInput, setShowHintInput] = useState(!!(initial?.hint));
+  const [previewResponse, setPreviewResponse] = useState(false);
 
   // Standard fields
   const [response, setResponse] = useState(
@@ -86,6 +88,7 @@ export function CardForm({
       setTags(initial?.tags ?? []);
       setHint(initial?.hint ?? "");
       setShowHintInput(!!(initial?.hint));
+      setPreviewResponse(false);
       setResponse(initial?.type === "standard" ? initial.response : "");
       setOptions(
         initial?.type === "choice"
@@ -187,12 +190,39 @@ export function CardForm({
           />
 
           {cardType === "standard" ? (
-            <Textarea
-              placeholder="Answer / back of card"
-              value={response}
-              onChange={(e) => setResponse(e.target.value)}
-              rows={4}
-            />
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-muted-foreground">Answer</label>
+                <button
+                  type="button"
+                  onClick={() => setPreviewResponse((v) => !v)}
+                  className={cn(
+                    "text-xs underline underline-offset-2",
+                    previewResponse
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {previewResponse ? "Edit" : "Preview"}
+                </button>
+              </div>
+              {previewResponse ? (
+                <div className="min-h-[96px] rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+                  {response.trim() ? (
+                    <Markdown>{response}</Markdown>
+                  ) : (
+                    <span className="italic opacity-50">Nothing to preview</span>
+                  )}
+                </div>
+              ) : (
+                <Textarea
+                  placeholder="Answer / back of card — supports **markdown**"
+                  value={response}
+                  onChange={(e) => setResponse(e.target.value)}
+                  rows={4}
+                />
+              )}
+            </div>
           ) : (
             <div className="flex flex-col gap-2">
               <label className="text-sm text-muted-foreground">
