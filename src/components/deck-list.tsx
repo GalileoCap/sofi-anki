@@ -52,9 +52,10 @@ interface DeckListProps {
   dailyGoal: number;
   onUpdateDailyGoal: (goal: number) => void;
   onSelectDeck: (id: string) => void;
-  onAddDeck: (title: string, tags: string[]) => void;
+  onAddDeck: (title: string, tags: string[], color?: string, emoji?: string) => void;
   onImportDeck: (data: DeckImport) => void;
   onRestored: () => void;
+  onViewGlobalStats: () => void;
 }
 
 export function DeckList({
@@ -66,6 +67,7 @@ export function DeckList({
   onAddDeck,
   onImportDeck,
   onRestored,
+  onViewGlobalStats,
 }: DeckListProps) {
   const [search, setSearch] = useState("");
   const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
@@ -130,13 +132,18 @@ export function DeckList({
             trigger={<Button variant="ghost" size="sm">Backup</Button>}
             onRestored={onRestored}
           />
+          {allRuns.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={onViewGlobalStats}>
+              Stats
+            </Button>
+          )}
           <ImportDeckDialog
             trigger={<Button variant="outline">Import</Button>}
             onImport={onImportDeck}
           />
           <DeckForm
             trigger={<Button>New Deck</Button>}
-            onSubmit={onAddDeck}
+            onSubmit={(title, tags, color, emoji) => onAddDeck(title, tags, color, emoji)}
           />
         </div>
       </div>
@@ -267,7 +274,18 @@ export function DeckList({
               onClick={() => onSelectDeck(deck.id)}
               className="text-left"
             >
-              <Card className="h-full transition-colors hover:bg-muted/50 cursor-pointer" size="sm">
+              <Card className="h-full transition-colors hover:bg-muted/50 cursor-pointer overflow-hidden" size="sm">
+                {deck.color && (
+                  <div
+                    className="flex h-12 items-center justify-center text-2xl"
+                    style={{ backgroundColor: deck.color }}
+                  >
+                    {deck.emoji ?? null}
+                  </div>
+                )}
+                {!deck.color && deck.emoji && (
+                  <div className="pt-3 text-center text-3xl leading-none">{deck.emoji}</div>
+                )}
                 <CardHeader>
                   <CardTitle>{deck.title}</CardTitle>
                   <CardDescription className="flex flex-wrap items-center gap-1.5">

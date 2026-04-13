@@ -6,6 +6,7 @@ import { useSettings } from "@/hooks/use-settings";
 import { DeckList } from "@/components/deck-list";
 import { DeckDetail } from "@/components/deck-detail";
 import { DeckStats } from "@/components/deck-stats";
+import { GlobalStats } from "@/components/global-stats";
 import { StudySession } from "@/components/study-session";
 import { SharedDeckView } from "@/components/shared-deck-view";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -14,6 +15,7 @@ import type { Complexity, Deck, RunMode, SessionGoal } from "@/types";
 
 type View =
   | { kind: "home" }
+  | { kind: "globalStats" }
   | { kind: "deck"; deckId: string }
   | { kind: "study"; deckId: string; runMode: RunMode; complexityFilter: Complexity[] | null; goal?: SessionGoal }
   | { kind: "stats"; deckId: string }
@@ -55,7 +57,7 @@ function App() {
   }, []);
 
   const currentDeck =
-    view.kind !== "home" && view.kind !== "shared"
+    view.kind !== "home" && view.kind !== "globalStats" && view.kind !== "shared"
       ? decks.find((d) => d.id === view.deckId)
       : undefined;
 
@@ -114,6 +116,23 @@ function App() {
     );
   }
 
+  if (view.kind === "globalStats") {
+    return (
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
+        <div className="flex justify-end mb-4">
+          <ThemeToggle />
+        </div>
+        <GlobalStats
+          decks={decks}
+          allRuns={runs}
+          srs={srs}
+          onBack={goHome}
+          onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
+        />
+      </div>
+    );
+  }
+
   if (view.kind === "stats" && currentDeck) {
     const deckRuns = getRunsForDeck(currentDeck.id);
     return (
@@ -150,7 +169,7 @@ function App() {
           onViewStats={() =>
             setView({ kind: "stats", deckId: currentDeck.id })
           }
-          onEditDeck={(title, tags) => updateDeck(currentDeck.id, title, tags)}
+          onEditDeck={(title, tags, color, emoji) => updateDeck(currentDeck.id, title, tags, color, emoji)}
           onAddCard={(card) => addCard(currentDeck.id, card)}
           onEditCard={(cardId, card) => editCard(currentDeck.id, cardId, card)}
           onDeleteCard={(cardId) => deleteCard(currentDeck.id, cardId)}
@@ -169,9 +188,10 @@ function App() {
           dailyGoal={settings.dailyCardGoal}
           onUpdateDailyGoal={updateDailyGoal}
           onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
-          onAddDeck={(title, tags) => addDeck(title, tags)}
+          onAddDeck={(title, tags, color, emoji) => addDeck(title, tags, color, emoji)}
           onImportDeck={(data) => importDeck(data)}
           onRestored={reloadFromStorage}
+          onViewGlobalStats={() => setView({ kind: "globalStats" })}
         />
       )}
     </div>

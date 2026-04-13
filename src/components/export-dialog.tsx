@@ -19,12 +19,14 @@ const SCHEMA_PROMPT = `Generate flashcards in the following JSON format:
     {
       "title": "Question or front of card",
       "response": "Answer or back of card",
+      "hint": "Optional hint shown before revealing the answer",
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtopic"]
     },
     {
       "type": "choice",
       "title": "Multiple choice question",
+      "hint": "Optional hint shown before answer",
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtopic"],
       "options": [
@@ -35,8 +37,8 @@ const SCHEMA_PROMPT = `Generate flashcards in the following JSON format:
   ]
 }
 
-Standard cards have "title", "response", "complexity", and optional "tags".
-Choice cards have "type": "choice", "title", "complexity", optional "tags", and "options" (array of { "text", "correct" }).
+Standard cards have "title", "response", "complexity", optional "tags", and optional "hint".
+Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", and "options" (array of { "text", "correct" }).
 If multiple options are correct, it becomes a multi-select question.
 The deck and each card can have "tags" (array of strings) for categorization.
 Return only the JSON, no extra text.`;
@@ -54,14 +56,18 @@ export function ExportDialog({ trigger, deck }: ExportDialogProps) {
     {
       title: deck.title,
       ...(deck.tags?.length ? { tags: deck.tags } : {}),
+      ...(deck.color ? { color: deck.color } : {}),
+      ...(deck.emoji ? { emoji: deck.emoji } : {}),
       cards: deck.cards.map((c) => {
         const tags = c.tags?.length ? { tags: c.tags } : {};
+        const hint = c.hint ? { hint: c.hint } : {};
         if (c.type === "choice") {
           return {
             type: "choice",
             title: c.title,
             complexity: c.complexity,
             ...tags,
+            ...hint,
             options: c.options.map((o) => ({ text: o.text, correct: o.correct })),
           };
         }
@@ -70,6 +76,7 @@ export function ExportDialog({ trigger, deck }: ExportDialogProps) {
           response: c.response,
           complexity: c.complexity,
           ...tags,
+          ...hint,
         };
       }),
     },

@@ -35,7 +35,7 @@ interface DeckDetailProps {
   onBack: () => void;
   onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null, goal?: SessionGoal) => void;
   onViewStats: () => void;
-  onEditDeck: (title: string, tags: string[]) => void;
+  onEditDeck: (title: string, tags: string[], color?: string, emoji?: string) => void;
   onAddCard: (card: Omit<Card, "id">) => void;
   onEditCard: (cardId: string, card: Omit<Card, "id">) => void;
   onDeleteCard: (cardId: string) => void;
@@ -129,20 +129,25 @@ export function DeckDetail({
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <Button variant="ghost" size="sm" onClick={onBack}>
             Back
           </Button>
-          <h1 className="text-2xl font-medium text-foreground">{deck.title}</h1>
+          {deck.emoji && (
+            <span className="text-2xl leading-none shrink-0">{deck.emoji}</span>
+          )}
+          <h1 className="text-2xl font-medium text-foreground truncate">{deck.title}</h1>
           <DeckForm
             trigger={
-              <Button variant="ghost" size="xs">
+              <Button variant="ghost" size="xs" className="shrink-0">
                 Edit
               </Button>
             }
             onSubmit={onEditDeck}
             initialTitle={deck.title}
             initialTags={deck.tags ?? []}
+            initialColor={deck.color}
+            initialEmoji={deck.emoji}
             dialogTitle="Edit Deck"
             submitLabel="Save"
           />

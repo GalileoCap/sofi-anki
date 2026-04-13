@@ -8,6 +8,7 @@ export interface CardBase {
   complexity: Complexity;
   type: CardType;
   tags: string[];
+  hint?: string;
 }
 
 export interface StandardCard extends CardBase {
@@ -36,12 +37,15 @@ export interface Deck {
   tags: string[];
   cards: Card[];
   createdAt: number;
+  color?: string;
+  emoji?: string;
 }
 
 export interface DeckImportCard {
   title: string;
   complexity?: Complexity;
   tags?: string[];
+  hint?: string;
   // Standard card fields
   response?: string;
   // Choice card fields

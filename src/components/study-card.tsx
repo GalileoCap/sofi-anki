@@ -37,6 +37,7 @@ export function StudyCard({
 }: StudyCardProps) {
   const [grade, setGrade] = useState<AnswerResult | null>(null);
   const [redoLater, setRedoLater] = useState(false);
+  const [hintVisible, setHintVisible] = useState(false);
 
   // Choice card state
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
@@ -106,6 +107,8 @@ export function StudyCard({
           onSaveForLater();
         } else if (e.key === "c") {
           onRevealComplexity();
+        } else if (e.key === "h" && card.hint) {
+          setHintVisible((v) => !v);
         }
       } else {
         if (e.key === "1") setGrade("wrong");
@@ -188,29 +191,47 @@ export function StudyCard({
   );
 
   const actionButtons = !revealed ? (
-    <div className="flex flex-wrap justify-center gap-2">
-      {isChoice ? (
-        <Button
-          onClick={handleRevealOrSubmitChoice}
-          disabled={selectedOptions.size === 0}
-        >
-          Submit &amp; Reveal
-          <Kbd>Space</Kbd>
-        </Button>
-      ) : (
-        <Button onClick={onReveal}>
-          Reveal Answer
-          <Kbd>Space</Kbd>
-        </Button>
+    <div className="flex flex-col items-center gap-3 w-full">
+      {card.hint && (
+        hintVisible ? (
+          <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+            {card.hint}
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setHintVisible(true)}
+            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+          >
+            Show Hint
+            <Kbd className="ml-1">H</Kbd>
+          </button>
+        )
       )}
-      <Button variant="outline" onClick={onSkip}>
-        Skip
-        <Kbd>S</Kbd>
-      </Button>
-      <Button variant="secondary" onClick={onSaveForLater}>
-        Save For Later
-        <Kbd>L</Kbd>
-      </Button>
+      <div className="flex flex-wrap justify-center gap-2">
+        {isChoice ? (
+          <Button
+            onClick={handleRevealOrSubmitChoice}
+            disabled={selectedOptions.size === 0}
+          >
+            Submit &amp; Reveal
+            <Kbd>Space</Kbd>
+          </Button>
+        ) : (
+          <Button onClick={onReveal}>
+            Reveal Answer
+            <Kbd>Space</Kbd>
+          </Button>
+        )}
+        <Button variant="outline" onClick={onSkip}>
+          Skip
+          <Kbd>S</Kbd>
+        </Button>
+        <Button variant="secondary" onClick={onSaveForLater}>
+          Save For Later
+          <Kbd>L</Kbd>
+        </Button>
+      </div>
     </div>
   ) : null;
 

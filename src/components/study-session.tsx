@@ -4,6 +4,13 @@ import { StudyCard } from "@/components/study-card";
 import { RunSummary } from "@/components/run-summary";
 import type { AnswerResult, Card, CardAttempt, CardRunResult, Deck, SessionGoal } from "@/types";
 
+interface UndoSnapshot {
+  remaining: Card[];
+  currentIndex: number;
+  results: Map<string, CardRunResult>;
+  cardsCompleted: number;
+}
+
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -35,6 +42,7 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
   const [results, setResults] = useState<Map<string, CardRunResult>>(() => new Map());
   const [confirmExit, setConfirmExit] = useState(false);
   const [cardsCompleted, setCardsCompleted] = useState(0);
+  const [undoStack, setUndoStack] = useState<UndoSnapshot[]>([]);
   const [goalReached, setGoalReached] = useState(false);
   const [goalDismissed, setGoalDismissed] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -86,6 +94,31 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
     }
   }, [isFinished, onRunComplete, results]);
 
+  function pushSnapshot() {
+    const snap: UndoSnapshot = {
+      remaining,
+      currentIndex,
+      results,
+      cardsCompleted,
+    };
+    setUndoStack((prev) => {
+      const next = [...prev, snap];
+      return next.length > 20 ? next.slice(-20) : next;
+    });
+  }
+
+  function handleUndo() {
+    if (undoStack.length === 0) return;
+    const snap = undoStack[undoStack.length - 1];
+    setUndoStack((prev) => prev.slice(0, -1));
+    setRemaining(snap.remaining);
+    setCurrentIndex(snap.currentIndex);
+    setResults(snap.results);
+    setCardsCompleted(snap.cardsCompleted);
+    setRevealed(false);
+    setComplexityRevealed(false);
+  }
+
   // Pause/resume keyboard shortcut
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -101,10 +134,22 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
           setConfirmExit(true);
         }
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !isFinished) {
+        e.preventDefault();
+        if (undoStack.length === 0) return;
+        const snap = undoStack[undoStack.length - 1];
+        setUndoStack((prev) => prev.slice(0, -1));
+        setRemaining(snap.remaining);
+        setCurrentIndex(snap.currentIndex);
+        setResults(snap.results);
+        setCardsCompleted(snap.cardsCompleted);
+        setRevealed(false);
+        setComplexityRevealed(false);
+      }
     }
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [isFinished, confirmExit]);
+  }, [isFinished, confirmExit, undoStack]);
 
   // Track pause durations
   useEffect(() => {
@@ -177,6 +222,7 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
   }
 
   function handleSkip() {
+    pushSnapshot();
     const durationMs = getCardDuration();
     recordAttempt(currentCard, { result: "skip", durationMs });
     setCurrentIndex((i) => i + 1);
@@ -185,6 +231,7 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
   }
 
   function handleSaveForLater() {
+    pushSnapshot();
     const durationMs = getCardDuration();
     recordAttempt(currentCard, { result: "save_for_later", durationMs });
     setRemaining((prev) => {
@@ -202,6 +249,7 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
   }
 
   function handleGraded(result: AnswerResult, redoLater: boolean, selectedOptionIds?: string[]) {
+    pushSnapshot();
     const durationMs = getCardDuration();
     recordAttempt(currentCard, { result, durationMs, selectedOptionIds });
 
@@ -228,6 +276,7 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
     setRemaining(shuffle(deck.cards));
     setCurrentIndex(0);
     setResults(new Map());
+    setUndoStack([]);
     resetCardState();
     runSavedRef.current = false;
     sessionStartRef.current = Date.now();
@@ -284,23 +333,36 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
         </div>
         <div className="flex items-center gap-3">
           <Button
+            variant="ghost"
+            size="xs"
+            disabled={undoStack.length === 0}
+            onClick={handleUndo}
+            title="Undo last action (Ctrl+Z)"
+          >
+            Undo
+            <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
+              &#8984;Z
+            </kbd>
+          </Button>
+          <Button
             variant={paused ? "secondary" : "ghost"}
             size="xs"
             onClick={() => setPaused((v) => !v)}
           >
             {paused ? "Resume" : "Pause"}
-            <kbd className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
+            <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
               P
             </kbd>
           </Button>
           {showTimer && (
-            <span className="font-mono text-sm text-muted-foreground">
+            <span className="hidden sm:inline font-mono text-sm text-muted-foreground">
               {formatTime(elapsed)}
             </span>
           )}
           <Button
             variant="ghost"
             size="xs"
+            className="hidden sm:inline-flex"
             onClick={() => setShowTimer((v) => !v)}
           >
             {showTimer ? "Hide" : "Show"}

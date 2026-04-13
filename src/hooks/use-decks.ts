@@ -10,6 +10,7 @@ function importCardToCard(c: DeckImportCard): Card {
       title: c.title,
       complexity: c.complexity ?? "medium",
       tags: c.tags ?? [],
+      ...(c.hint ? { hint: c.hint } : {}),
       multiSelect: c.multiSelect ?? c.options.filter((o) => o.correct).length > 1,
       options: c.options.map((o) => ({
         id: crypto.randomUUID(),
@@ -25,6 +26,7 @@ function importCardToCard(c: DeckImportCard): Card {
     response: c.response ?? "",
     complexity: c.complexity ?? "medium",
     tags: c.tags ?? [],
+    ...(c.hint ? { hint: c.hint } : {}),
   };
 }
 
@@ -35,13 +37,15 @@ export function useDecks() {
     saveDecks(decks);
   }, [decks]);
 
-  function addDeck(title: string, tags: string[] = []): Deck {
+  function addDeck(title: string, tags: string[] = [], color?: string, emoji?: string): Deck {
     const deck: Deck = {
       id: crypto.randomUUID(),
       title,
       tags,
       cards: [],
       createdAt: Date.now(),
+      ...(color ? { color } : {}),
+      ...(emoji ? { emoji } : {}),
     };
     setDecks((prev) => [...prev, deck]);
     return deck;
@@ -51,9 +55,13 @@ export function useDecks() {
     setDecks((prev) => prev.filter((d) => d.id !== id));
   }
 
-  function updateDeck(id: string, title: string, tags: string[]) {
+  function updateDeck(id: string, title: string, tags: string[], color?: string, emoji?: string) {
     setDecks((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, title, tags } : d))
+      prev.map((d) =>
+        d.id === id
+          ? { ...d, title, tags, color: color || undefined, emoji: emoji || undefined }
+          : d
+      )
     );
   }
 

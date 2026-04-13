@@ -198,7 +198,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
       </div>
 
       {/* Overview */}
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-5">
         <StatCard label="Total Runs" value={String(overview.totalRuns)} />
         <StatCard label="Total Time" value={formatTime(overview.totalTime)} />
         <StatCard label="Cards Studied" value={String(overview.totalCards)} />

@@ -55,6 +55,8 @@ export function CardForm({
   const [complexity, setComplexity] = useState<Complexity>(initial?.complexity ?? "medium");
   const [cardType, setCardType] = useState<CardType>(initial?.type ?? "standard");
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
+  const [hint, setHint] = useState(initial?.hint ?? "");
+  const [showHintInput, setShowHintInput] = useState(!!(initial?.hint));
 
   // Standard fields
   const [response, setResponse] = useState(
@@ -76,6 +78,8 @@ export function CardForm({
       setComplexity(initial?.complexity ?? "medium");
       setCardType(initial?.type ?? "standard");
       setTags(initial?.tags ?? []);
+      setHint(initial?.hint ?? "");
+      setShowHintInput(!!(initial?.hint));
       setResponse(initial?.type === "standard" ? initial.response : "");
       setOptions(
         initial?.type === "choice"
@@ -113,6 +117,7 @@ export function CardForm({
     e.preventDefault();
     if (!isValid) return;
 
+    const hintValue = hint.trim() || undefined;
     if (cardType === "standard") {
       onSubmit({
         type: "standard",
@@ -120,6 +125,7 @@ export function CardForm({
         response: response.trim(),
         complexity,
         tags,
+        hint: hintValue,
       } as Omit<Card, "id">);
     } else {
       const correctCount = options.filter((o) => o.correct).length;
@@ -128,6 +134,7 @@ export function CardForm({
         title: title.trim(),
         complexity,
         tags,
+        hint: hintValue,
         multiSelect: correctCount > 1,
         options: options.map((o) => ({
           id: o.id,
@@ -228,6 +235,36 @@ export function CardForm({
                 </p>
               )}
             </div>
+          )}
+
+          {/* Hint — collapsible */}
+          {showHintInput ? (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-muted-foreground">Hint</label>
+                <button
+                  type="button"
+                  onClick={() => { setShowHintInput(false); setHint(""); }}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Remove
+                </button>
+              </div>
+              <Textarea
+                placeholder="Optional hint shown before revealing the answer..."
+                value={hint}
+                onChange={(e) => setHint(e.target.value)}
+                rows={2}
+              />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowHintInput(true)}
+              className="self-start text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+            >
+              + Add hint
+            </button>
           )}
 
           <div className="flex flex-col gap-1.5">
