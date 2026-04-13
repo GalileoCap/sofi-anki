@@ -1,15 +1,17 @@
 /**
  * Demo seed — loaded once on first launch when localStorage is empty.
- * Provides a JavaScript Fundamentals deck with 3 weeks of realistic run history.
+ * Provides two sample decks with realistic run history to showcase all features.
  */
 import type { AnswerResult, Card, CardSRS, Deck, RunRecord } from "@/types";
 import { loadDecks, saveDecks, saveRuns, saveSRS } from "@/lib/storage";
 
-const DECK_ID = "demo-js-v1";
+const JS_DECK_ID   = "demo-js-v1";
+const APP_DECK_ID  = "demo-app-guide-v1";
 const DAY = 86_400_000;
 
 // ─── Card IDs ────────────────────────────────────────────────────────────────
 
+// JavaScript Fundamentals deck
 const ID = {
   letConst:   "demo-c01",
   exponent:   "demo-c02",
@@ -25,11 +27,27 @@ const ID = {
   symbol:     "demo-c12",
 };
 
-// ─── Deck definition ─────────────────────────────────────────────────────────
+// sofi-anki Guide deck
+const GID = {
+  cardTypes:    "demo-g01",
+  studyModes:   "demo-g02",
+  revealKey:    "demo-g03",
+  srsHow:       "demo-g04",
+  saveForLater: "demo-g05",
+  undo:         "demo-g06",
+  markdown:     "demo-g07",
+  hints:        "demo-g08",
+  complexity:   "demo-g09",
+  dailyGoal:    "demo-g10",
+  overflow:     "demo-g11",
+  sharing:      "demo-g12",
+};
 
-function buildDeck(now: number): Deck {
+// ─── Deck definitions ─────────────────────────────────────────────────────────
+
+function buildJsDeck(now: number): Deck {
   return {
-    id: DECK_ID,
+    id: JS_DECK_ID,
     title: "JavaScript Fundamentals",
     emoji: "⚡",
     color: "#f59e0b",
@@ -207,19 +225,177 @@ function buildDeck(now: number): Deck {
   };
 }
 
-// ─── Run schedule & results ───────────────────────────────────────────────────
+function buildAppDeck(now: number): Deck {
+  return {
+    id: APP_DECK_ID,
+    title: "sofi-anki Guide",
+    emoji: "📖",
+    color: "#863bff",
+    tags: ["guide"],
+    createdAt: now - 12 * DAY,
+    cards: [
+      {
+        id: GID.cardTypes,
+        type: "standard",
+        title: "What are the two card types?",
+        response:
+          "**Standard** — a question on the front, answer on the back. You self-grade as Correct, Approximate, or Wrong.\n\n" +
+          "**Choice** — multiple-choice options that are auto-graded. Mark one or more correct options; the app handles single-select vs multi-select automatically.",
+        complexity: "easy",
+        tags: ["cards"],
+      },
+      {
+        id: GID.studyModes,
+        type: "standard",
+        title: "What do the three study modes do?",
+        response:
+          "- **All Cards** — full deck, shuffled\n" +
+          "- **Due** — only cards whose SRS interval has elapsed (or never studied)\n" +
+          "- **Weak** — cards whose last result was Wrong or Approximate\n\n" +
+          "On mobile, tap **Start** to pick a mode. On desktop, the three buttons are always visible.",
+        complexity: "easy",
+        tags: ["study"],
+      },
+      {
+        id: GID.revealKey,
+        type: "choice",
+        title: "Which key reveals the answer on a standard card?",
+        complexity: "easy",
+        tags: ["study"],
+        multiSelect: false,
+        options: [
+          { id: "rk-a", text: "**Space** or **Enter**", correct: true  },
+          { id: "rk-b", text: "**R**",                  correct: false },
+          { id: "rk-c", text: "**A**",                  correct: false },
+          { id: "rk-d", text: "**Tab**",                correct: false },
+        ],
+      },
+      {
+        id: GID.srsHow,
+        type: "standard",
+        title: "How does spaced repetition (SRS) work in this app?",
+        response:
+          "Each card tracks an **interval** (days until next review) and an **ease factor** (how fast the interval grows).\n\n" +
+          "After grading:\n" +
+          "- **Correct** → interval × ease factor (grows fast)\n" +
+          "- **Approximate** → interval stays the same\n" +
+          "- **Wrong** → interval resets to 0 (due immediately), ease drops\n\n" +
+          "Cards you know well come back in weeks; cards you struggle with come back tomorrow.",
+        hint: "Think of it as the app \"forgetting\" harder cards faster so it can remind you more often.",
+        complexity: "medium",
+        tags: ["SRS"],
+      },
+      {
+        id: GID.saveForLater,
+        type: "standard",
+        title: "What does **Save For Later** do during a session?",
+        response:
+          "Moves the card to a random position **later in the same session** — it will come back before the session ends.\n\n" +
+          "Useful when you want to revisit a card with fresh eyes after seeing other cards.\n\n" +
+          "> Different from **Skip**, which just records a skip and moves on permanently.",
+        hint: "Keyboard shortcut: **L**",
+        complexity: "easy",
+        tags: ["study"],
+      },
+      {
+        id: GID.undo,
+        type: "standard",
+        title: "How do you undo an action during a study session?",
+        response:
+          "Press **Ctrl+Z** (or **Cmd+Z** on Mac), or tap the **Undo** button in the session header.\n\n" +
+          "Undo reverts the last Skip, Save For Later, or grade. Up to **20 undos** are kept per session. The stack clears on restart.",
+        complexity: "easy",
+        tags: ["study"],
+      },
+      {
+        id: GID.markdown,
+        type: "choice",
+        title: "Which of these markdown features work in card content? (select all)",
+        complexity: "easy",
+        tags: ["cards"],
+        multiSelect: true,
+        options: [
+          { id: "md-a", text: "`**bold**` and `*italic*`",   correct: true  },
+          { id: "md-b", text: "Fenced code blocks",          correct: true  },
+          { id: "md-c", text: "Tables",                      correct: true  },
+          { id: "md-d", text: "Embedded video",              correct: false },
+        ],
+      },
+      {
+        id: GID.hints,
+        type: "standard",
+        title: "What are card hints and how do you show one?",
+        response:
+          "An optional clue shown **before** you reveal the answer — useful for nudging your memory without giving it away.\n\n" +
+          "To add a hint: open the card form → tap **+ Add hint**.\n\n" +
+          "During study: tap **Show Hint** (or press **H**) on the front of the card.",
+        complexity: "easy",
+        tags: ["cards"],
+      },
+      {
+        id: GID.complexity,
+        type: "standard",
+        title: "What is card **complexity** used for?",
+        response:
+          "A self-assessed label (**Easy**, **Medium**, **Hard**) per card. It's used to:\n\n" +
+          "- **Filter** the card list in the deck detail view\n" +
+          "- **Filter** cards before starting a session (study only Hard cards, for example)\n" +
+          "- Show in the run summary so you can spot patterns",
+        complexity: "easy",
+        tags: ["cards"],
+      },
+      {
+        id: GID.dailyGoal,
+        type: "standard",
+        title: "How does the daily goal work?",
+        response:
+          "Set a target number of cards to study each day. The home screen shows **X / N cards** with a progress bar.\n\n" +
+          "During a session you can also set a **session goal** (cards or minutes) — a banner appears when you hit it.\n\n" +
+          "Tap the goal number on the home screen to edit it inline.",
+        complexity: "easy",
+        tags: ["stats"],
+      },
+      {
+        id: GID.overflow,
+        type: "choice",
+        title: "Which actions live in the **⋮** menu on the home screen?",
+        complexity: "easy",
+        tags: ["decks"],
+        multiSelect: true,
+        options: [
+          { id: "ov-a", text: "Import Deck",        correct: true  },
+          { id: "ov-b", text: "Backup & Restore",   correct: true  },
+          { id: "ov-c", text: "New Deck",            correct: false },
+          { id: "ov-d", text: "Global Stats",        correct: false },
+        ],
+      },
+      {
+        id: GID.sharing,
+        type: "standard",
+        title: "How do you share a deck with someone else?",
+        response:
+          "Open the deck → **Export JSON** (desktop) or **Share & Export** (mobile ⋮ menu).\n\n" +
+          "The export dialog includes a **Share Link** — a URL that encodes the entire deck. Anyone with the link can open it and import it, no account needed.\n\n" +
+          "> Very large decks may exceed URL length limits; use the JSON export instead.",
+        complexity: "medium",
+        tags: ["decks"],
+      },
+    ],
+  };
+}
 
-// Days ago for each of the 11 mock runs.
-// Last 7 are consecutive → streak of 7.
-const RUN_OFFSETS = [21, 16, 12, 9, 7, 6, 5, 4, 3, 2, 1];
+// ─── Run schedule & results ───────────────────────────────────────────────────
 
 type R = AnswerResult;
 const CR: R = "correct";
 const AP: R = "approximate";
 const WR: R = "wrong";
 
-// Results per card, one entry per run in RUN_OFFSETS order.
-const CARD_RESULTS: Record<string, R[]> = {
+// ── JavaScript Fundamentals runs ─────────────────────────────────────────────
+// 11 runs; last 7 consecutive → streak of 7.
+const JS_RUN_OFFSETS = [21, 16, 12, 9, 7, 6, 5, 4, 3, 2, 1];
+
+const JS_RESULTS: Record<string, R[]> = {
   //              [21, 16, 12,  9,  7,  6,  5,  4,  3,  2,  1]  days ago
   [ID.letConst]:  [WR, CR, CR, CR, CR, CR, CR, CR, CR, CR, CR],
   [ID.exponent]:  [CR, CR, CR, CR, CR, CR, CR, CR, CR, CR, CR],
@@ -235,36 +411,65 @@ const CARD_RESULTS: Record<string, R[]> = {
   [ID.symbol]:    [WR, WR, WR, WR, WR, WR, AP, WR, WR, WR, WR],
 };
 
-// Rough per-card durations (ms) — varied slightly by run index.
-const BASE_DURATION: Record<string, number> = {
+const JS_DURATION: Record<string, number> = {
   [ID.letConst]:   8_000, [ID.exponent]:   7_000, [ID.equality]:  9_000,
   [ID.typeofNull]: 10_000,[ID.optional]:   8_000, [ID.newArray]:  12_000,
   [ID.closure]:    18_000,[ID.promiseAll]: 15_000, [ID.mutating]: 14_000,
   [ID.bubbling]:   16_000,[ID.arrayFrom]:  22_000, [ID.symbol]:   25_000,
 };
 
-function cardDuration(cardId: string, runIdx: number): number {
-  return (BASE_DURATION[cardId] ?? 10_000) + (runIdx % 3) * 1_500;
-}
+// ── sofi-anki Guide runs ──────────────────────────────────────────────────────
+// 6 runs over 10 days — newer deck the user has just started.
+const APP_RUN_OFFSETS = [10, 8, 6, 4, 2, 1];
 
-function buildRuns(now: number, cards: Card[]): RunRecord[] {
-  return RUN_OFFSETS.map((daysAgo, runIdx) => {
+const APP_RESULTS: Record<string, R[]> = {
+  //                [10,  8,  6,  4,  2,  1]  days ago
+  [GID.cardTypes]:  [WR, CR, CR, CR, CR, CR],
+  [GID.studyModes]: [WR, AP, CR, CR, CR, CR],
+  [GID.revealKey]:  [CR, CR, CR, CR, CR, CR],
+  [GID.srsHow]:     [WR, WR, WR, AP, AP, AP],
+  [GID.saveForLater]:[WR,AP, CR, CR, CR, CR],
+  [GID.undo]:       [WR, CR, CR, CR, CR, CR],
+  [GID.markdown]:   [WR, WR, AP, CR, AP, CR],
+  [GID.hints]:      [WR, AP, CR, CR, CR, CR],
+  [GID.complexity]: [CR, CR, CR, CR, CR, CR],
+  [GID.dailyGoal]:  [WR, AP, CR, CR, AP, CR],
+  [GID.overflow]:   [WR, AP, AP, CR, CR, CR],
+  [GID.sharing]:    [WR, WR, AP, AP, CR, AP],
+};
+
+const APP_DURATION: Record<string, number> = {
+  [GID.cardTypes]:   9_000, [GID.studyModes]: 11_000, [GID.revealKey]:    7_000,
+  [GID.srsHow]:     20_000, [GID.saveForLater]: 9_000, [GID.undo]:         8_000,
+  [GID.markdown]:   12_000, [GID.hints]:        9_000, [GID.complexity]:   8_000,
+  [GID.dailyGoal]:  10_000, [GID.overflow]:     9_000, [GID.sharing]:     14_000,
+};
+
+// ── Generic run builder ───────────────────────────────────────────────────────
+
+function buildRuns(
+  deckId: string,
+  idPrefix: string,
+  offsets: number[],
+  results: Record<string, R[]>,
+  durations: Record<string, number>,
+  cards: Card[],
+  now: number,
+): RunRecord[] {
+  return offsets.map((daysAgo, runIdx) => {
     const completedAt = now - daysAgo * DAY;
-    const results = cards.map((card) => {
-      const result = CARD_RESULTS[card.id]?.[runIdx] ?? "correct";
-      const durationMs = cardDuration(card.id, runIdx);
-      return {
-        card,
-        attempts: [{ result, durationMs }],
-      };
+    const runResults = cards.map((card) => {
+      const result = results[card.id]?.[runIdx] ?? "correct";
+      const durationMs = (durations[card.id] ?? 10_000) + (runIdx % 3) * 1_500;
+      return { card, attempts: [{ result, durationMs }] };
     });
-    const totalTimeMs = results.reduce((s, r) => s + r.attempts[0].durationMs, 0);
+    const totalTimeMs = runResults.reduce((s, r) => s + r.attempts[0].durationMs, 0);
     return {
-      id: `demo-run-${String(runIdx).padStart(2, "0")}`,
-      deckId: DECK_ID,
+      id: `${idPrefix}-run-${String(runIdx).padStart(2, "0")}`,
+      deckId,
       completedAt,
       totalTimeMs,
-      results,
+      results: runResults,
     };
   });
 }
@@ -285,7 +490,7 @@ function buildSRS(runs: RunRecord[]): CardSRS[] {
         .find((a) => a.result === "correct" || a.result === "approximate" || a.result === "wrong");
       if (!lastGraded) continue;
 
-      const existing = state.get(cardId);
+      const existing = state.get(`${run.deckId}:${cardId}`);
       let intervalDays = existing?.intervalDays ?? 0;
       let easeFactor = existing?.easeFactor ?? DEFAULT_EASE;
 
@@ -299,9 +504,9 @@ function buildSRS(runs: RunRecord[]): CardSRS[] {
         easeFactor = Math.max(MIN_EASE, easeFactor - 0.2);
       }
 
-      state.set(cardId, {
+      state.set(`${run.deckId}:${cardId}`, {
         cardId,
-        deckId: DECK_ID,
+        deckId: run.deckId,
         intervalDays,
         easeFactor,
         dueAt: intervalDays === 0 ? run.completedAt : run.completedAt + intervalDays * DAY,
@@ -319,11 +524,17 @@ export function seedIfEmpty(): void {
   if (loadDecks().length > 0) return;
 
   const now = Date.now();
-  const deck = buildDeck(now);
-  const runs = buildRuns(now, deck.cards);
-  const srs = buildSRS(runs);
 
-  saveDecks([deck]);
-  saveRuns(runs);
+  const jsDeck  = buildJsDeck(now);
+  const appDeck = buildAppDeck(now);
+
+  const jsRuns  = buildRuns(JS_DECK_ID,  "js",  JS_RUN_OFFSETS,  JS_RESULTS,  JS_DURATION,  jsDeck.cards,  now);
+  const appRuns = buildRuns(APP_DECK_ID, "app", APP_RUN_OFFSETS, APP_RESULTS, APP_DURATION, appDeck.cards, now);
+
+  const allRuns = [...jsRuns, ...appRuns];
+  const srs = buildSRS(allRuns);
+
+  saveDecks([jsDeck, appDeck]);
+  saveRuns(allRuns);
   saveSRS(srs);
 }
