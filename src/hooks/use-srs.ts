@@ -100,5 +100,14 @@ export function useSRS() {
     });
   }
 
-  return { getSRS, updateAfterRun, getDueCards, getWeakCards, deleteSRSForDeck };
+  /** Returns a cardId → CardSRS map for all cards in a given deck. */
+  function getSRSForDeck(deckId: string): Map<string, CardSRS> {
+    const result = new Map<string, CardSRS>();
+    for (const entry of srsMap.values()) {
+      if (entry.deckId === deckId) result.set(entry.cardId, entry);
+    }
+    return result;
+  }
+
+  return { getSRS, getSRSForDeck, updateAfterRun, getDueCards, getWeakCards, deleteSRSForDeck };
 }

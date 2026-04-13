@@ -21,6 +21,7 @@ import { ExportDialog } from "@/components/export-dialog";
 import { RunStartDialog } from "@/components/run-start-dialog";
 import { encodeDeck, MAX_SHARE_URL_LENGTH } from "@/lib/share";
 import type { Card, Complexity, Deck, DeckImportCard, RunMode, SessionGoal } from "@/types";
+import type { CardPerf } from "@/App";
 import { cn } from "@/lib/utils";
 
 const COMPLEXITIES: Complexity[] = ["easy", "medium", "hard"];
@@ -41,6 +42,7 @@ interface DeckDetailProps {
   hasRuns: boolean;
   dueCount: number;
   weakCount: number;
+  cardPerf: Map<string, CardPerf>;
   onBack: () => void;
   onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null, goal?: SessionGoal) => void;
   onViewStats: () => void;
@@ -57,6 +59,7 @@ export function DeckDetail({
   hasRuns,
   dueCount,
   weakCount,
+  cardPerf,
   onBack,
   onStartStudy,
   onViewStats,
@@ -67,6 +70,7 @@ export function DeckDetail({
   onDeleteDeck,
   onImportCards,
 }: DeckDetailProps) {
+  const [now] = useState(() => Date.now());
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Study run dialog state (desktop: pre-selected mode; mobile: mode picker shown)
@@ -122,8 +126,19 @@ export function DeckDetail({
         (c.tags ?? []).some((t) => t.includes(q))
       );
     }
-    return cards;
-  }, [deck.cards, complexityFilter, tagFilter, search]);
+    // Sort: due/overdue first, then wrong, then new, then approximate, then correct
+    const rank = (cardId: string): number => {
+      const p = cardPerf.get(cardId);
+      if (!p || p.attempts === 0) return 2; // new
+      const isDue = p.srs ? p.srs.dueAt <= now : false;
+      if (isDue && p.lastResult === "wrong") return 0;
+      if (isDue) return 1;
+      if (p.lastResult === "wrong") return 3;
+      if (p.lastResult === "approximate") return 4;
+      return 5; // correct & not due
+    };
+    return [...cards].sort((a, b) => rank(a.id) - rank(b.id));
+  }, [deck.cards, complexityFilter, tagFilter, search, cardPerf, now]);
 
   function toggleComplexity(c: Complexity) {
     setComplexityFilter((prev) => {
@@ -408,7 +423,11 @@ export function DeckDetail({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {filteredCards.map((card) => (
+          {filteredCards.map((card) => {
+            const perf = cardPerf.get(card.id);
+            const isDue = perf?.srs ? perf.srs.dueAt <= now : false;
+            const isNew = !perf || perf.attempts === 0;
+            return (
             <UiCard key={card.id} size="sm">
               <CardHeader>
                 <div className="flex items-center gap-2 min-w-0">
@@ -425,6 +444,18 @@ export function DeckDetail({
                         {tag}
                       </Badge>
                     ))}
+                    {/* Performance indicator */}
+                    {isNew ? (
+                      <Badge variant="outline" className="text-xs text-muted-foreground">New</Badge>
+                    ) : isDue ? (
+                      <Badge variant="outline" className="text-xs border-amber-400/60 bg-amber-50 text-amber-700 dark:border-amber-700/60 dark:bg-amber-950 dark:text-amber-400">Due</Badge>
+                    ) : perf?.lastResult === "correct" ? (
+                      <span title={`${Math.round(perf.accuracy * 100)}% accuracy · ${perf.attempts} session${perf.attempts === 1 ? "" : "s"}`} className="flex h-2 w-2 rounded-full bg-green-500 shrink-0" />
+                    ) : perf?.lastResult === "approximate" ? (
+                      <span title={`${Math.round(perf.accuracy * 100)}% accuracy · ${perf.attempts} session${perf.attempts === 1 ? "" : "s"}`} className="flex h-2 w-2 rounded-full bg-yellow-400 shrink-0" />
+                    ) : perf?.lastResult === "wrong" ? (
+                      <span title={`${Math.round(perf.accuracy * 100)}% accuracy · ${perf.attempts} session${perf.attempts === 1 ? "" : "s"}`} className="flex h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                    ) : null}
                   </div>
                 </div>
                 <CardAction>
@@ -467,7 +498,8 @@ export function DeckDetail({
                 </CardAction>
               </CardHeader>
             </UiCard>
-          ))}
+          );
+          })}
         </div>
       )}
 

@@ -11,7 +11,14 @@ import { StudySession } from "@/components/study-session";
 import { SharedDeckView } from "@/components/shared-deck-view";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { decodeDeck } from "@/lib/share";
-import type { Complexity, Deck, RunMode, SessionGoal } from "@/types";
+import type { AnswerResult, CardSRS, Complexity, Deck, RunMode, SessionGoal } from "@/types";
+
+export interface CardPerf {
+  attempts: number;
+  accuracy: number; // 0–1
+  lastResult: AnswerResult | null;
+  srs: CardSRS | undefined;
+}
 
 type View =
   | { kind: "home" }
@@ -60,6 +67,43 @@ function App() {
     view.kind !== "home" && view.kind !== "globalStats" && view.kind !== "shared"
       ? decks.find((d) => d.id === view.deckId)
       : undefined;
+
+  // Per-card performance for the current deck view
+  const deckCardPerf = useMemo((): Map<string, CardPerf> => {
+    if (!currentDeck) return new Map();
+    const deckSrs = srs.getSRSForDeck(currentDeck.id);
+    const deckRuns = getRunsForDeck(currentDeck.id);
+
+    // Aggregate attempts across all runs for this deck
+    const attemptsMap = new Map<string, { total: number; weighted: number }>();
+    for (const run of deckRuns) {
+      for (const cr of run.results) {
+        const cardId = cr.card.id;
+        const graded = cr.attempts.filter(
+          (a) => a.result === "correct" || a.result === "approximate" || a.result === "wrong"
+        );
+        if (graded.length === 0) continue;
+        // Use last graded attempt per session
+        const last = graded[graded.length - 1];
+        const score = last.result === "correct" ? 1 : last.result === "approximate" ? 0.5 : 0;
+        const prev = attemptsMap.get(cardId) ?? { total: 0, weighted: 0 };
+        attemptsMap.set(cardId, { total: prev.total + 1, weighted: prev.weighted + score });
+      }
+    }
+
+    const result = new Map<string, CardPerf>();
+    for (const card of currentDeck.cards) {
+      const agg = attemptsMap.get(card.id);
+      const srsEntry = deckSrs.get(card.id);
+      result.set(card.id, {
+        attempts: agg?.total ?? 0,
+        accuracy: agg ? agg.weighted / agg.total : 0,
+        lastResult: srsEntry?.lastResult ?? null,
+        srs: srsEntry,
+      });
+    }
+    return result;
+  }, [currentDeck, srs, getRunsForDeck]);
 
   // Build a filtered deck for study sessions
   const studyDeck = useMemo((): Deck | undefined => {
@@ -162,6 +206,7 @@ function App() {
           hasRuns={getRunsForDeck(currentDeck.id).length > 0}
           dueCount={srs.getDueCards(currentDeck).length}
           weakCount={srs.getWeakCards(currentDeck).length}
+          cardPerf={deckCardPerf}
           onBack={() => setView({ kind: "home" })}
           onStartStudy={(runMode, complexityFilter, goal) =>
             setView({ kind: "study", deckId: currentDeck.id, runMode, complexityFilter, goal })
