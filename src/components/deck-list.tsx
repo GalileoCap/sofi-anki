@@ -1,4 +1,7 @@
 import { useState, useMemo } from "react";
+import { DropdownMenu } from "radix-ui";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MoreVerticalIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,6 +17,11 @@ import { BackupDialog } from "@/components/backup-dialog";
 import { StudyHeatmap } from "@/components/study-heatmap";
 import type { Deck, DeckImport, RunRecord } from "@/types";
 import { cn } from "@/lib/utils";
+
+const ITEM_CLASS =
+  "flex w-full cursor-pointer select-none items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-muted";
+const MENU_CONTENT_CLASS =
+  "z-50 min-w-36 rounded-lg border bg-popover p-1 shadow-md";
 
 function dateKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -74,6 +82,8 @@ export function DeckList({
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState(String(dailyGoal));
   const [now] = useState(() => new Date());
+  const [backupOpen, setBackupOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const streak = useMemo(() => computeStreak(allRuns, now), [allRuns, now]);
   const todayCount = useMemo(() => todayCards(allRuns, now), [allRuns, now]);
@@ -125,28 +135,56 @@ export function DeckList({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h1 className="text-2xl font-medium text-foreground">Your Decks</h1>
-        <div className="flex gap-2">
-          <BackupDialog
-            trigger={<Button variant="ghost" size="sm">Backup</Button>}
-            onRestored={onRestored}
-          />
+        <div className="flex items-center gap-2">
           {allRuns.length > 0 && (
             <Button variant="ghost" size="sm" onClick={onViewGlobalStats}>
               Stats
             </Button>
           )}
-          <ImportDeckDialog
-            trigger={<Button variant="outline">Import</Button>}
-            onImport={onImportDeck}
-          />
           <DeckForm
-            trigger={<Button>New Deck</Button>}
+            trigger={<Button size="sm">New Deck</Button>}
             onSubmit={(title, tags, color, emoji) => onAddDeck(title, tags, color, emoji)}
           />
+          {/* "..." menu for secondary actions */}
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="More options">
+                <HugeiconsIcon icon={MoreVerticalIcon} size={16} strokeWidth={2} />
+              </Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content className={MENU_CONTENT_CLASS} align="end" sideOffset={4}>
+                <DropdownMenu.Item
+                  className={ITEM_CLASS}
+                  onSelect={() => setImportOpen(true)}
+                >
+                  Import Deck
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  className={ITEM_CLASS}
+                  onSelect={() => setBackupOpen(true)}
+                >
+                  Backup &amp; Restore
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
         </div>
       </div>
+
+      {/* Controlled dialogs from overflow menu */}
+      <ImportDeckDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImport={onImportDeck}
+      />
+      <BackupDialog
+        open={backupOpen}
+        onOpenChange={setBackupOpen}
+        onRestored={onRestored}
+      />
 
       {/* Streak + daily goal + heatmap */}
       {allRuns.length > 0 && (

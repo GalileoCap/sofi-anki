@@ -323,7 +323,7 @@ function Kbd({ children, className }: { children: React.ReactNode; className?: s
   return (
     <kbd
       className={cn(
-        "ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60",
+        "ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60",
         className
       )}
     >

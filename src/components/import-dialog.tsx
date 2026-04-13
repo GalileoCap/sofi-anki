@@ -32,17 +32,21 @@ function isValidCard(c: unknown): c is DeckImportCard {
 }
 
 interface ImportDeckDialogProps {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onImport: (data: DeckImport) => void;
 }
 
-export function ImportDeckDialog({ trigger, onImport }: ImportDeckDialogProps) {
-  const [open, setOpen] = useState(false);
+export function ImportDeckDialog({ trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange, onImport }: ImportDeckDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
   const [json, setJson] = useState("");
   const [error, setError] = useState("");
 
   function handleOpenChange(next: boolean) {
-    setOpen(next);
+    setInternalOpen(next);
+    controlledOnOpenChange?.(next);
     if (next) {
       setJson("");
       setError("");
@@ -61,7 +65,7 @@ export function ImportDeckDialog({ trigger, onImport }: ImportDeckDialogProps) {
         return;
       }
       onImport(parsed as DeckImport);
-      setOpen(false);
+      handleOpenChange(false);
     } catch {
       setError("Invalid JSON. Please check the format and try again.");
     }
@@ -69,7 +73,7 @@ export function ImportDeckDialog({ trigger, onImport }: ImportDeckDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Import Deck</DialogTitle>
@@ -102,17 +106,21 @@ export function ImportDeckDialog({ trigger, onImport }: ImportDeckDialogProps) {
 }
 
 interface ImportCardsDialogProps {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onImport: (cards: DeckImportCard[]) => void;
 }
 
-export function ImportCardsDialog({ trigger, onImport }: ImportCardsDialogProps) {
-  const [open, setOpen] = useState(false);
+export function ImportCardsDialog({ trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange, onImport }: ImportCardsDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
   const [json, setJson] = useState("");
   const [error, setError] = useState("");
 
   function handleOpenChange(next: boolean) {
-    setOpen(next);
+    setInternalOpen(next);
+    controlledOnOpenChange?.(next);
     if (next) {
       setJson("");
       setError("");
@@ -131,7 +139,7 @@ export function ImportCardsDialog({ trigger, onImport }: ImportCardsDialogProps)
         return;
       }
       onImport(cards as DeckImportCard[]);
-      setOpen(false);
+      handleOpenChange(false);
     } catch {
       setError("Invalid JSON. Please check the format and try again.");
     }
@@ -139,7 +147,7 @@ export function ImportCardsDialog({ trigger, onImport }: ImportCardsDialogProps)
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Import Cards</DialogTitle>

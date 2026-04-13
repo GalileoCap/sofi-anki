@@ -1,4 +1,7 @@
 import { useState, useMemo } from "react";
+import { DropdownMenu } from "radix-ui";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MoreVerticalIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import {
   Card as UiCard,
@@ -26,6 +29,12 @@ const COMPLEXITY_LABELS: Record<Complexity, string> = {
   medium: "Medium",
   hard: "Hard",
 };
+
+// Dropdown menu item styles
+const ITEM_CLASS =
+  "flex w-full cursor-pointer select-none items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-40";
+const MENU_CONTENT_CLASS =
+  "z-50 min-w-36 rounded-lg border bg-popover p-1 shadow-md";
 
 interface DeckDetailProps {
   deck: Deck;
@@ -59,12 +68,23 @@ export function DeckDetail({
   onImportCards,
 }: DeckDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [shareStatus, setShareStatus] = useState<"idle" | "copying" | "copied" | "too-large">("idle");
+
+  // Study run dialog state (desktop: pre-selected mode; mobile: mode picker shown)
   const [runDialog, setRunDialog] = useState<{ open: boolean; mode: RunMode; label: string }>({
     open: false,
     mode: "all",
     label: "All Cards",
   });
+  const [mobileStartOpen, setMobileStartOpen] = useState(false);
+
+  // Manage section dialog open states (for mobile overflow menu)
+  const [importOpen, setImportOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+
+  // Card editing state (for mobile "..." per card)
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const editingCard = editingCardId ? deck.cards.find((c) => c.id === editingCardId) : undefined;
+
   const [search, setSearch] = useState("");
   const [complexityFilter, setComplexityFilter] = useState<Set<Complexity>>(new Set());
   const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
@@ -125,6 +145,10 @@ export function DeckDetail({
 
   const activeFilter = complexityFilter.size > 0 ? Array.from(complexityFilter) : null;
 
+  function handleRunStart(mode: RunMode, goal?: SessionGoal) {
+    onStartStudy(mode, activeFilter, goal);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
@@ -137,22 +161,21 @@ export function DeckDetail({
             <span className="text-2xl leading-none shrink-0">{deck.emoji}</span>
           )}
           <h1 className="text-2xl font-medium text-foreground truncate">{deck.title}</h1>
-          <DeckForm
-            trigger={
-              <Button variant="ghost" size="xs" className="shrink-0">
-                Edit
-              </Button>
-            }
-            onSubmit={onEditDeck}
-            initialTitle={deck.title}
-            initialTags={deck.tags ?? []}
-            initialColor={deck.color}
-            initialEmoji={deck.emoji}
-            dialogTitle="Edit Deck"
-            submitLabel="Save"
-          />
+          {/* Desktop: inline Edit button */}
+          <div className="hidden sm:block shrink-0">
+            <DeckForm
+              trigger={<Button variant="ghost" size="xs">Edit</Button>}
+              onSubmit={onEditDeck}
+              initialTitle={deck.title}
+              initialTags={deck.tags ?? []}
+              initialColor={deck.color}
+              initialEmoji={deck.emoji}
+              dialogTitle="Edit Deck"
+              submitLabel="Save"
+            />
+          </div>
         </div>
-        <Badge variant="secondary" className="text-sm">
+        <Badge variant="secondary" className="text-sm shrink-0">
           {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
         </Badge>
       </div>
@@ -161,7 +184,20 @@ export function DeckDetail({
       <UiCard size="sm">
         <CardContent className="flex flex-col gap-4">
           <p className="text-sm font-medium text-foreground">Study</p>
-          <div className="flex flex-wrap gap-2">
+
+          {/* Mobile: single Start button */}
+          <div className="sm:hidden">
+            <Button
+              className="w-full"
+              onClick={() => setMobileStartOpen(true)}
+              disabled={deck.cards.length === 0}
+            >
+              Start
+            </Button>
+          </div>
+
+          {/* Desktop: original four buttons */}
+          <div className="hidden sm:flex flex-wrap gap-2">
             <Button
               onClick={() => setRunDialog({ open: true, mode: "all", label: "All Cards" })}
               disabled={filteredCards.length === 0}
@@ -188,54 +224,100 @@ export function DeckDetail({
               Stats
             </Button>
           </div>
+
+          {/* Mobile Stats link */}
+          {hasRuns && (
+            <Button variant="ghost" size="sm" className="sm:hidden self-start -mt-2 -ml-2 text-muted-foreground" onClick={onViewStats}>
+              View Stats
+            </Button>
+          )}
         </CardContent>
       </UiCard>
 
+      {/* Mobile start dialog — with mode picker */}
+      <RunStartDialog
+        open={mobileStartOpen}
+        onOpenChange={setMobileStartOpen}
+        showModePicker
+        dueCount={dueCount}
+        weakCount={weakCount}
+        onStart={handleRunStart}
+      />
+
+      {/* Desktop run dialog */}
       <RunStartDialog
         open={runDialog.open}
         onOpenChange={(open) => setRunDialog((prev) => ({ ...prev, open }))}
         label={runDialog.label}
-        onStart={(goal) => onStartStudy(runDialog.mode, activeFilter, goal)}
+        onStart={(mode, goal) => handleRunStart(mode, goal)}
       />
 
       {/* Manage section */}
       <div className="flex flex-wrap items-center gap-2">
+        {/* Add Card — always visible */}
         <CardForm
           trigger={<Button variant="outline" size="sm">Add Card</Button>}
           onSubmit={onAddCard}
         />
+
+        {/* Desktop secondary actions */}
+        <div className="hidden sm:flex items-center gap-2">
+          <ImportCardsDialog
+            trigger={<Button variant="outline" size="sm">Import Cards</Button>}
+            onImport={onImportCards}
+          />
+          <ExportDialog
+            trigger={<Button variant="outline" size="sm">Export JSON</Button>}
+            deck={deck}
+          />
+          <ShareLinkButton deck={deck} />
+        </div>
+
+        {/* Mobile "..." overflow menu */}
+        <div className="sm:hidden">
+          <OverflowMenu>
+            <DeckForm
+              trigger={
+                <DropdownMenu.Item className={ITEM_CLASS} onSelect={(e) => e.preventDefault()}>
+                  Edit Deck
+                </DropdownMenu.Item>
+              }
+              onSubmit={onEditDeck}
+              initialTitle={deck.title}
+              initialTags={deck.tags ?? []}
+              initialColor={deck.color}
+              initialEmoji={deck.emoji}
+              dialogTitle="Edit Deck"
+              submitLabel="Save"
+            />
+            <DropdownMenu.Item
+              className={ITEM_CLASS}
+              onSelect={() => setImportOpen(true)}
+            >
+              Import Cards
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              className={ITEM_CLASS}
+              onSelect={() => setExportOpen(true)}
+            >
+              Share &amp; Export
+            </DropdownMenu.Item>
+          </OverflowMenu>
+        </div>
+
+        {/* Mobile dialogs controlled by overflow menu */}
         <ImportCardsDialog
-          trigger={<Button variant="outline" size="sm">Import Cards</Button>}
+          open={importOpen}
+          onOpenChange={setImportOpen}
           onImport={onImportCards}
         />
         <ExportDialog
-          trigger={<Button variant="outline" size="sm">Export JSON</Button>}
+          open={exportOpen}
+          onOpenChange={setExportOpen}
           deck={deck}
+          includeShareUrl
         />
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={shareStatus === "copying"}
-          onClick={async () => {
-            setShareStatus("copying");
-            try {
-              const encoded = await encodeDeck(deck);
-              const url = `${window.location.origin}${window.location.pathname}#/share/${encoded}`;
-              if (url.length > MAX_SHARE_URL_LENGTH) {
-                setShareStatus("too-large");
-                setTimeout(() => setShareStatus("idle"), 3000);
-                return;
-              }
-              await navigator.clipboard.writeText(url);
-              setShareStatus("copied");
-              setTimeout(() => setShareStatus("idle"), 2000);
-            } catch {
-              setShareStatus("idle");
-            }
-          }}
-        >
-          {shareStatus === "copied" ? "Link Copied!" : shareStatus === "too-large" ? "Too Large" : "Share Link"}
-        </Button>
+
         <div className="flex-1" />
         {!confirmDelete ? (
           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>
@@ -346,13 +428,10 @@ export function DeckDetail({
                   </div>
                 </div>
                 <CardAction>
-                  <div className="flex gap-1">
+                  {/* Desktop: Edit + Delete */}
+                  <div className="hidden sm:flex gap-1">
                     <CardForm
-                      trigger={
-                        <Button variant="ghost" size="xs">
-                          Edit
-                        </Button>
-                      }
+                      trigger={<Button variant="ghost" size="xs">Edit</Button>}
                       onSubmit={(updates) => onEditCard(card.id, updates)}
                       initial={card}
                       dialogTitle="Edit Card"
@@ -367,12 +446,95 @@ export function DeckDetail({
                       Delete
                     </Button>
                   </div>
+
+                  {/* Mobile: "..." */}
+                  <div className="sm:hidden">
+                    <OverflowMenu>
+                      <DropdownMenu.Item
+                        className={ITEM_CLASS}
+                        onSelect={() => setEditingCardId(card.id)}
+                      >
+                        Edit
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item
+                        className={cn(ITEM_CLASS, "text-destructive data-[highlighted]:text-destructive")}
+                        onSelect={() => onDeleteCard(card.id)}
+                      >
+                        Delete
+                      </DropdownMenu.Item>
+                    </OverflowMenu>
+                  </div>
                 </CardAction>
               </CardHeader>
             </UiCard>
           ))}
         </div>
       )}
+
+      {/* Controlled CardForm for mobile card editing */}
+      {editingCard && (
+        <CardForm
+          open={!!editingCard}
+          onOpenChange={(o) => { if (!o) setEditingCardId(null); }}
+          onSubmit={(updates) => {
+            onEditCard(editingCard.id, updates);
+            setEditingCardId(null);
+          }}
+          initial={editingCard}
+          dialogTitle="Edit Card"
+          submitLabel="Save"
+        />
+      )}
     </div>
+  );
+}
+
+/** Reusable "⋮" overflow dropdown trigger */
+function OverflowMenu({ children }: { children: React.ReactNode }) {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <Button variant="ghost" size="icon-xs" aria-label="More options">
+          <HugeiconsIcon icon={MoreVerticalIcon} size={14} strokeWidth={2} />
+        </Button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content className={MENU_CONTENT_CLASS} align="end" sideOffset={4}>
+          {children}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+
+/** Desktop-only Share Link button (copy URL to clipboard) */
+function ShareLinkButton({ deck }: { deck: Deck }) {
+  const [shareStatus, setShareStatus] = useState<"idle" | "copying" | "copied" | "too-large">("idle");
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={shareStatus === "copying"}
+      onClick={async () => {
+        setShareStatus("copying");
+        try {
+          const encoded = await encodeDeck(deck);
+          const url = `${window.location.origin}${window.location.pathname}#/share/${encoded}`;
+          if (url.length > MAX_SHARE_URL_LENGTH) {
+            setShareStatus("too-large");
+            setTimeout(() => setShareStatus("idle"), 3000);
+            return;
+          }
+          await navigator.clipboard.writeText(url);
+          setShareStatus("copied");
+          setTimeout(() => setShareStatus("idle"), 2000);
+        } catch {
+          setShareStatus("idle");
+        }
+      }}
+    >
+      {shareStatus === "copied" ? "Link Copied!" : shareStatus === "too-large" ? "Too Large" : "Share Link"}
+    </Button>
   );
 }

@@ -26,7 +26,9 @@ const CARD_TYPES: { value: CardType; label: string }[] = [
 ];
 
 interface CardFormProps {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onSubmit: (card: Omit<Card, "id">) => void;
   initial?: Card;
   dialogTitle?: string;
@@ -45,12 +47,15 @@ function newOption(): OptionRow {
 
 export function CardForm({
   trigger,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
   onSubmit,
   initial,
   dialogTitle = "New Card",
   submitLabel = "Add",
 }: CardFormProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
   const [title, setTitle] = useState(initial?.title ?? "");
   const [complexity, setComplexity] = useState<Complexity>(initial?.complexity ?? "medium");
   const [cardType, setCardType] = useState<CardType>(initial?.type ?? "standard");
@@ -72,7 +77,8 @@ export function CardForm({
   });
 
   function handleOpenChange(next: boolean) {
-    setOpen(next);
+    setInternalOpen(next);
+    controlledOnOpenChange?.(next);
     if (next) {
       setTitle(initial?.title ?? "");
       setComplexity(initial?.complexity ?? "medium");
@@ -143,12 +149,12 @@ export function CardForm({
         })),
       } as Omit<Card, "id">);
     }
-    setOpen(false);
+    handleOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>

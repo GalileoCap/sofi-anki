@@ -11,16 +11,25 @@ import { Separator } from "@/components/ui/separator";
 import { exportAllData, importAllData } from "@/lib/storage";
 
 interface BackupDialogProps {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onRestored: () => void;
 }
 
-export function BackupDialog({ trigger, onRestored }: BackupDialogProps) {
+export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange, onRestored }: BackupDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [confirmReplace, setConfirmReplace] = useState(false);
   const [pendingJson, setPendingJson] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  function handleOpenChange(next: boolean) {
+    setInternalOpen(next);
+    controlledOnOpenChange?.(next);
+  }
 
   function handleExport() {
     const data = exportAllData();
@@ -69,8 +78,8 @@ export function BackupDialog({ trigger, onRestored }: BackupDialogProps) {
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Backup &amp; Restore</DialogTitle>

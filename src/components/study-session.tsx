@@ -311,65 +311,77 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
   return (
     <div className="flex flex-col items-center gap-6">
       {/* Header bar */}
-      <div className="flex w-full max-w-lg items-center justify-between">
-        <div className="flex items-center gap-1">
-          {!confirmExit ? (
-            <Button variant="ghost" size="sm" onClick={() => setConfirmExit(true)}>
-              Exit
-              <kbd className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
-                Esc
+      <div className="flex w-full max-w-lg flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        {/* Row 1: exit left, controls right */}
+        <div className="flex items-center justify-between">
+          {/* Exit / Confirm */}
+          <div className="flex items-center gap-1">
+            {!confirmExit ? (
+              <Button variant="ghost" size="sm" onClick={() => setConfirmExit(true)}>
+                Exit
+                <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
+                  Esc
+                </kbd>
+              </Button>
+            ) : (
+              <div className="flex items-center gap-1">
+                <Button variant="destructive" size="sm" onClick={onExit}>
+                  Exit
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setConfirmExit(false)}>
+                  Cancel
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Right controls */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="xs"
+              disabled={undoStack.length === 0}
+              onClick={handleUndo}
+              title="Undo last action (Ctrl+Z)"
+            >
+              Undo
+              <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
+                &#8984;Z
               </kbd>
             </Button>
-          ) : (
-            <div className="flex items-center gap-1">
-              <Button variant="destructive" size="sm" onClick={onExit}>
-                Confirm Exit
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => setConfirmExit(false)}>
-                Cancel
-              </Button>
-            </div>
-          )}
+            <Button
+              variant={paused ? "secondary" : "ghost"}
+              size="xs"
+              onClick={() => setPaused((v) => !v)}
+            >
+              {paused ? "Resume" : "Pause"}
+              <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
+                P
+              </kbd>
+            </Button>
+            {/* Desktop: timer + hide toggle */}
+            {showTimer && (
+              <span className="hidden sm:inline font-mono text-sm text-muted-foreground">
+                {formatTime(elapsed)}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="xs"
+              className="hidden sm:inline-flex"
+              onClick={() => setShowTimer((v) => !v)}
+            >
+              {showTimer ? "Hide" : "Show"}
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              {currentIndex + 1} / {remaining.length}
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="xs"
-            disabled={undoStack.length === 0}
-            onClick={handleUndo}
-            title="Undo last action (Ctrl+Z)"
-          >
-            Undo
-            <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
-              &#8984;Z
-            </kbd>
-          </Button>
-          <Button
-            variant={paused ? "secondary" : "ghost"}
-            size="xs"
-            onClick={() => setPaused((v) => !v)}
-          >
-            {paused ? "Resume" : "Pause"}
-            <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
-              P
-            </kbd>
-          </Button>
-          {showTimer && (
-            <span className="hidden sm:inline font-mono text-sm text-muted-foreground">
-              {formatTime(elapsed)}
-            </span>
-          )}
-          <Button
-            variant="ghost"
-            size="xs"
-            className="hidden sm:inline-flex"
-            onClick={() => setShowTimer((v) => !v)}
-          >
-            {showTimer ? "Hide" : "Show"}
-          </Button>
-          <p className="text-sm text-muted-foreground">
-            {currentIndex + 1} / {remaining.length}
-          </p>
+
+        {/* Row 2: timer — mobile only, always visible */}
+        <div className="flex justify-center sm:hidden">
+          <span className="font-mono text-xs text-muted-foreground">{formatTime(elapsed)}</span>
         </div>
       </div>
 
