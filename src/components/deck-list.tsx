@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { DeckForm } from "@/components/deck-form";
 import { ImportDeckDialog } from "@/components/import-dialog";
+import { BackupDialog } from "@/components/backup-dialog";
 import { StudyHeatmap } from "@/components/study-heatmap";
 import type { Deck, DeckImport, RunRecord } from "@/types";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,7 @@ interface DeckListProps {
   onSelectDeck: (id: string) => void;
   onAddDeck: (title: string, tags: string[]) => void;
   onImportDeck: (data: DeckImport) => void;
+  onRestored: () => void;
 }
 
 export function DeckList({
@@ -63,6 +65,7 @@ export function DeckList({
   onSelectDeck,
   onAddDeck,
   onImportDeck,
+  onRestored,
 }: DeckListProps) {
   const [search, setSearch] = useState("");
   const [tagFilter, setTagFilter] = useState<Set<string>>(new Set());
@@ -123,6 +126,10 @@ export function DeckList({
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-medium text-foreground">Your Decks</h1>
         <div className="flex gap-2">
+          <BackupDialog
+            trigger={<Button variant="ghost" size="sm">Backup</Button>}
+            onRestored={onRestored}
+          />
           <ImportDeckDialog
             trigger={<Button variant="outline">Import</Button>}
             onImport={onImportDeck}

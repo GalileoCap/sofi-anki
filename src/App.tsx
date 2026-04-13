@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useDecks } from "@/hooks/use-decks";
 import { useRuns } from "@/hooks/use-runs";
 import { useSRS } from "@/hooks/use-srs";
@@ -7,14 +7,17 @@ import { DeckList } from "@/components/deck-list";
 import { DeckDetail } from "@/components/deck-detail";
 import { DeckStats } from "@/components/deck-stats";
 import { StudySession } from "@/components/study-session";
+import { SharedDeckView } from "@/components/shared-deck-view";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { decodeDeck } from "@/lib/share";
 import type { Complexity, Deck, RunMode, SessionGoal } from "@/types";
 
 type View =
   | { kind: "home" }
   | { kind: "deck"; deckId: string }
   | { kind: "study"; deckId: string; runMode: RunMode; complexityFilter: Complexity[] | null; goal?: SessionGoal }
-  | { kind: "stats"; deckId: string };
+  | { kind: "stats"; deckId: string }
+  | { kind: "shared"; deckData: Deck };
 
 function App() {
   const [view, setView] = useState<View>({ kind: "home" });
@@ -28,13 +31,31 @@ function App() {
     editCard,
     importDeck,
     importCards,
+    importDeckWithId,
+    overwriteDeck,
+    mergeDeck,
+    reloadFromStorage,
   } = useDecks();
   const { runs, addRun, deleteRunsForDeck, getRunsForDeck } = useRuns();
   const srs = useSRS();
   const { settings, updateDailyGoal } = useSettings();
 
+  // Parse share URL on mount
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith("#/share/")) {
+      const encoded = hash.slice("#/share/".length);
+      decodeDeck(encoded)
+        .then((deck) => setView({ kind: "shared", deckData: deck }))
+        .catch(() => {
+          // Invalid share URL, go home
+          window.location.hash = "";
+        });
+    }
+  }, []);
+
   const currentDeck =
-    view.kind !== "home"
+    view.kind !== "home" && view.kind !== "shared"
       ? decks.find((d) => d.id === view.deckId)
       : undefined;
 
@@ -44,14 +65,12 @@ function App() {
 
     let cards = currentDeck.cards;
 
-    // Apply run mode filter
     if (view.runMode === "due") {
       cards = srs.getDueCards(currentDeck);
     } else if (view.runMode === "weak") {
       cards = srs.getWeakCards(currentDeck);
     }
 
-    // Apply complexity filter
     if (view.complexityFilter) {
       const filterSet = new Set(view.complexityFilter);
       cards = cards.filter((c) => filterSet.has(c.complexity));
@@ -59,6 +78,25 @@ function App() {
 
     return { ...currentDeck, cards };
   }, [view, currentDeck, srs]);
+
+  function goHome() {
+    window.location.hash = "";
+    setView({ kind: "home" });
+  }
+
+  if (view.kind === "shared") {
+    const existingDeck = decks.find((d) => d.id === view.deckData.id);
+    return (
+      <SharedDeckView
+        deck={view.deckData}
+        existingDeck={existingDeck}
+        onImportNew={() => importDeckWithId(view.deckData)}
+        onOverwrite={() => overwriteDeck(view.deckData)}
+        onMerge={() => mergeDeck(view.deckData)}
+        onGoHome={goHome}
+      />
+    );
+  }
 
   if (view.kind === "study" && studyDeck && studyDeck.cards.length > 0) {
     return (
@@ -133,6 +171,7 @@ function App() {
           onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
           onAddDeck={(title, tags) => addDeck(title, tags)}
           onImportDeck={(data) => importDeck(data)}
+          onRestored={reloadFromStorage}
         />
       )}
     </div>

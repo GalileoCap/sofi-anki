@@ -16,6 +16,7 @@ import { ComplexityBadge } from "@/components/complexity-badge";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
 import { RunStartDialog } from "@/components/run-start-dialog";
+import { encodeDeck, MAX_SHARE_URL_LENGTH } from "@/lib/share";
 import type { Card, Complexity, Deck, DeckImportCard, RunMode, SessionGoal } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +59,7 @@ export function DeckDetail({
   onImportCards,
 }: DeckDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [shareStatus, setShareStatus] = useState<"idle" | "copying" | "copied" | "too-large">("idle");
   const [runDialog, setRunDialog] = useState<{ open: boolean; mode: RunMode; label: string }>({
     open: false,
     mode: "all",
@@ -205,6 +207,30 @@ export function DeckDetail({
           trigger={<Button variant="outline" size="sm">Export JSON</Button>}
           deck={deck}
         />
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={shareStatus === "copying"}
+          onClick={async () => {
+            setShareStatus("copying");
+            try {
+              const encoded = await encodeDeck(deck);
+              const url = `${window.location.origin}${window.location.pathname}#/share/${encoded}`;
+              if (url.length > MAX_SHARE_URL_LENGTH) {
+                setShareStatus("too-large");
+                setTimeout(() => setShareStatus("idle"), 3000);
+                return;
+              }
+              await navigator.clipboard.writeText(url);
+              setShareStatus("copied");
+              setTimeout(() => setShareStatus("idle"), 2000);
+            } catch {
+              setShareStatus("idle");
+            }
+          }}
+        >
+          {shareStatus === "copied" ? "Link Copied!" : shareStatus === "too-large" ? "Too Large" : "Share Link"}
+        </Button>
         <div className="flex-1" />
         {!confirmDelete ? (
           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>

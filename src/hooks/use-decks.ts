@@ -123,6 +123,31 @@ export function useDecks() {
     );
   }
 
+  function importDeckWithId(deck: Deck) {
+    setDecks((prev) => [...prev, deck]);
+  }
+
+  function overwriteDeck(incoming: Deck) {
+    setDecks((prev) =>
+      prev.map((d) => (d.id === incoming.id ? incoming : d))
+    );
+  }
+
+  function mergeDeck(incoming: Deck) {
+    setDecks((prev) =>
+      prev.map((d) => {
+        if (d.id !== incoming.id) return d;
+        const existingCardIds = new Set(d.cards.map((c) => c.id));
+        const newCards = incoming.cards.filter((c) => !existingCardIds.has(c.id));
+        return { ...d, cards: [...d.cards, ...newCards] };
+      })
+    );
+  }
+
+  function reloadFromStorage() {
+    setDecks(loadDecks());
+  }
+
   return {
     decks,
     addDeck,
@@ -132,6 +157,10 @@ export function useDecks() {
     deleteCard,
     editCard,
     importDeck,
+    importDeckWithId,
+    overwriteDeck,
+    mergeDeck,
+    reloadFromStorage,
     importCards,
   };
 }

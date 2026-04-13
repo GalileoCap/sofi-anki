@@ -42,3 +42,53 @@ export function loadSettings(): AppSettings {
 export function saveSettings(settings: AppSettings): void {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
+
+export interface BackupData {
+  version: 1;
+  exportedAt: number;
+  decks: Deck[];
+  runs: RunRecord[];
+  srs: CardSRS[];
+  settings: AppSettings;
+}
+
+export function exportAllData(): string {
+  const data: BackupData = {
+    version: 1,
+    exportedAt: Date.now(),
+    decks: loadDecks(),
+    runs: loadRuns(),
+    srs: loadSRS(),
+    settings: loadSettings(),
+  };
+  return JSON.stringify(data, null, 2);
+}
+
+export function importAllData(json: string, mode: "replace" | "merge"): void {
+  const data = JSON.parse(json) as BackupData;
+
+  if (mode === "replace") {
+    saveDecks(data.decks ?? []);
+    saveRuns(data.runs ?? []);
+    saveSRS(data.srs ?? []);
+    saveSettings(data.settings ?? DEFAULT_SETTINGS);
+  } else {
+    // Merge: add items that don't exist by ID
+    const existingDecks = loadDecks();
+    const existingDeckIds = new Set(existingDecks.map((d) => d.id));
+    const newDecks = (data.decks ?? []).filter((d) => !existingDeckIds.has(d.id));
+    saveDecks([...existingDecks, ...newDecks]);
+
+    const existingRuns = loadRuns();
+    const existingRunIds = new Set(existingRuns.map((r) => r.id));
+    const newRuns = (data.runs ?? []).filter((r) => !existingRunIds.has(r.id));
+    saveRuns([...existingRuns, ...newRuns]);
+
+    const existingSrs = loadSRS();
+    const existingSrsKeys = new Set(existingSrs.map((s) => `${s.deckId}:${s.cardId}`));
+    const newSrs = (data.srs ?? []).filter((s) => !existingSrsKeys.has(`${s.deckId}:${s.cardId}`));
+    saveSRS([...existingSrs, ...newSrs]);
+
+    // Settings: keep current
+  }
+}
