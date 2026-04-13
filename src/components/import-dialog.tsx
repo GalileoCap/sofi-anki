@@ -10,7 +10,26 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type { DeckImport } from "@/types";
+import type { DeckImport, DeckImportCard } from "@/types";
+
+function isValidCard(c: unknown): c is DeckImportCard {
+  if (typeof c !== "object" || c === null) return false;
+  const obj = c as Record<string, unknown>;
+  if (typeof obj.title !== "string") return false;
+  // Choice card
+  if (obj.type === "choice") {
+    if (!Array.isArray(obj.options)) return false;
+    return obj.options.every(
+      (o: unknown) =>
+        typeof o === "object" &&
+        o !== null &&
+        typeof (o as Record<string, unknown>).text === "string" &&
+        typeof (o as Record<string, unknown>).correct === "boolean"
+    );
+  }
+  // Standard card
+  return typeof obj.response === "string";
+}
 
 interface ImportDeckDialogProps {
   trigger: React.ReactNode;
@@ -36,15 +55,9 @@ export function ImportDeckDialog({ trigger, onImport }: ImportDeckDialogProps) {
       if (
         typeof parsed.title !== "string" ||
         !Array.isArray(parsed.cards) ||
-        parsed.cards.some(
-          (c: unknown) =>
-            typeof c !== "object" ||
-            c === null ||
-            typeof (c as Record<string, unknown>).title !== "string" ||
-            typeof (c as Record<string, unknown>).response !== "string"
-        )
+        parsed.cards.some((c: unknown) => !isValidCard(c))
       ) {
-        setError('Invalid format. Expected { "title": "...", "cards": [{ "title": "...", "response": "..." }] }');
+        setError('Invalid format. Each card needs "title" + "response", or "type": "choice" + "options".');
         return;
       }
       onImport(parsed as DeckImport);
@@ -62,8 +75,9 @@ export function ImportDeckDialog({ trigger, onImport }: ImportDeckDialogProps) {
           <DialogTitle>Import Deck</DialogTitle>
           <DialogDescription>
             Paste a JSON object with a <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code> and
-            an array of <code className="rounded bg-muted px-1 py-0.5 text-xs">cards</code>, each
-            with <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code> and <code className="rounded bg-muted px-1 py-0.5 text-xs">response</code>.
+            an array of <code className="rounded bg-muted px-1 py-0.5 text-xs">cards</code>. Cards can be
+            standard (with <code className="rounded bg-muted px-1 py-0.5 text-xs">response</code>) or
+            choice (with <code className="rounded bg-muted px-1 py-0.5 text-xs">options</code>).
           </DialogDescription>
         </DialogHeader>
         <Textarea
@@ -89,7 +103,7 @@ export function ImportDeckDialog({ trigger, onImport }: ImportDeckDialogProps) {
 
 interface ImportCardsDialogProps {
   trigger: React.ReactNode;
-  onImport: (cards: { title: string; response: string }[]) => void;
+  onImport: (cards: DeckImportCard[]) => void;
 }
 
 export function ImportCardsDialog({ trigger, onImport }: ImportCardsDialogProps) {
@@ -111,18 +125,12 @@ export function ImportCardsDialog({ trigger, onImport }: ImportCardsDialogProps)
       const cards = Array.isArray(parsed) ? parsed : parsed.cards;
       if (
         !Array.isArray(cards) ||
-        cards.some(
-          (c: unknown) =>
-            typeof c !== "object" ||
-            c === null ||
-            typeof (c as Record<string, unknown>).title !== "string" ||
-            typeof (c as Record<string, unknown>).response !== "string"
-        )
+        cards.some((c: unknown) => !isValidCard(c))
       ) {
-        setError('Invalid format. Expected [{ "title": "...", "response": "..." }] or { "cards": [...] }');
+        setError('Invalid format. Each card needs "title" + "response", or "type": "choice" + "options".');
         return;
       }
-      onImport(cards as { title: string; response: string }[]);
+      onImport(cards as DeckImportCard[]);
       setOpen(false);
     } catch {
       setError("Invalid JSON. Please check the format and try again.");
@@ -136,12 +144,12 @@ export function ImportCardsDialog({ trigger, onImport }: ImportCardsDialogProps)
         <DialogHeader>
           <DialogTitle>Import Cards</DialogTitle>
           <DialogDescription>
-            Paste a JSON array of cards, each
-            with <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code> and <code className="rounded bg-muted px-1 py-0.5 text-xs">response</code>.
+            Paste a JSON array of cards. Standard cards need <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code> and <code className="rounded bg-muted px-1 py-0.5 text-xs">response</code>.
+            Choice cards need <code className="rounded bg-muted px-1 py-0.5 text-xs">type: "choice"</code> and <code className="rounded bg-muted px-1 py-0.5 text-xs">options</code>.
           </DialogDescription>
         </DialogHeader>
         <Textarea
-          placeholder={'[\n  { "title": "Q1", "response": "A1" },\n  { "title": "Q2", "response": "A2" }\n]'}
+          placeholder={'[\n  { "title": "Q1", "response": "A1" },\n  { "type": "choice", "title": "Q2", "options": [\n    { "text": "A", "correct": true },\n    { "text": "B", "correct": false }\n  ]}\n]'}
           value={json}
           onChange={(e) => {
             setJson(e.target.value);

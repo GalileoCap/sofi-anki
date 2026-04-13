@@ -1,11 +1,33 @@
 export type Complexity = "easy" | "medium" | "hard";
 
-export interface Card {
+export type CardType = "standard" | "choice";
+
+export interface CardBase {
   id: string;
   title: string;
-  response: string;
   complexity: Complexity;
+  type: CardType;
 }
+
+export interface StandardCard extends CardBase {
+  type: "standard";
+  response: string;
+}
+
+export interface ChoiceOption {
+  id: string;
+  text: string;
+  correct: boolean;
+}
+
+export interface ChoiceCard extends CardBase {
+  type: "choice";
+  options: ChoiceOption[];
+  /** true = multiple correct answers, false = single correct answer */
+  multiSelect: boolean;
+}
+
+export type Card = StandardCard | ChoiceCard;
 
 export interface Deck {
   id: string;
@@ -14,9 +36,20 @@ export interface Deck {
   createdAt: number;
 }
 
+export interface DeckImportCard {
+  title: string;
+  complexity?: Complexity;
+  // Standard card fields
+  response?: string;
+  // Choice card fields
+  type?: CardType;
+  options?: { text: string; correct: boolean }[];
+  multiSelect?: boolean;
+}
+
 export interface DeckImport {
   title: string;
-  cards: { title: string; response: string; complexity?: Complexity }[];
+  cards: DeckImportCard[];
 }
 
 export type AnswerResult = "wrong" | "approximate" | "correct";

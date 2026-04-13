@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,17 +38,68 @@ export function StudyCard({
   const [grade, setGrade] = useState<AnswerResult | null>(null);
   const [redoLater, setRedoLater] = useState(false);
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+  // Choice card state
+  const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
+  const [choiceSubmitted, setChoiceSubmitted] = useState(false);
+
+  const isChoice = card.type === "choice";
+  function computeChoiceGrade(selected: Set<string>): AnswerResult {
+    if (!isChoice) return "wrong";
+    const correctIds = new Set(card.options.filter((o) => o.correct).map((o) => o.id));
+    const allCorrectSelected = [...correctIds].every((id) => selected.has(id));
+    const noWrongSelected = [...selected].every((id) => correctIds.has(id));
+    if (allCorrectSelected && noWrongSelected) return "correct";
+    if ([...selected].some((id) => correctIds.has(id))) return "approximate";
+    return "wrong";
+  }
+
+  function toggleOption(optionId: string) {
+    if (choiceSubmitted) return;
+    if (!isChoice) return;
+    setSelectedOptions((prev) => {
+      const next = new Set(prev);
+      if (card.multiSelect) {
+        if (next.has(optionId)) next.delete(optionId);
+        else next.add(optionId);
+      } else {
+        // Single select: replace
+        next.clear();
+        next.add(optionId);
+      }
+      return next;
+    });
+  }
+
+  function handleSubmitChoice() {
+    setChoiceSubmitted(true);
+    setGrade(computeChoiceGrade(selectedOptions));
+  }
+
+  // Combined reveal for choice: reveals answer + submits choice
+  function handleRevealOrSubmitChoice() {
+    if (isChoice && !choiceSubmitted && selectedOptions.size > 0) {
+      handleSubmitChoice();
+      onReveal();
+    } else {
+      onReveal();
+    }
+  }
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
       if (paused) return;
-      // Ignore when typing in an input
       const tag = (e.target as HTMLElement).tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
       if (!revealed) {
         if (e.key === " " || e.key === "Enter") {
           e.preventDefault();
-          onReveal();
+          if (isChoice && selectedOptions.size > 0) {
+            handleSubmitChoice();
+            onReveal();
+          } else if (!isChoice) {
+            onReveal();
+          }
         } else if (e.key === "s") {
           onSkip();
         } else if (e.key === "l") {
@@ -66,14 +117,10 @@ export function StudyCard({
           onGraded(grade, redoLater);
         }
       }
-    },
-    [revealed, paused, grade, redoLater, onReveal, onSkip, onSaveForLater, onRevealComplexity, onGraded]
-  );
-
-  useEffect(() => {
+    }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
+  });
 
   return (
     <Card className="w-full max-w-lg mx-auto">
@@ -93,12 +140,59 @@ export function StudyCard({
           </Badge>
         )}
 
+        {/* Choice options — always shown for choice cards */}
+        {isChoice && (
+          <div className="flex flex-col gap-2 w-full">
+            <p className="text-xs text-muted-foreground">
+              {card.multiSelect ? "Select all that apply" : "Select one"}
+            </p>
+            {card.options.map((opt) => {
+              const isSelected = selectedOptions.has(opt.id);
+              let optStyle = "border-border hover:bg-muted/50";
+              if (choiceSubmitted) {
+                if (opt.correct) {
+                  optStyle = "border-green-400 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-300";
+                } else if (isSelected && !opt.correct) {
+                  optStyle = "border-red-400 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-300";
+                }
+              } else if (isSelected) {
+                optStyle = "border-foreground/30 bg-foreground/5 ring-1 ring-ring";
+              }
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => toggleOption(opt.id)}
+                  disabled={choiceSubmitted}
+                  className={cn(
+                    "w-full rounded-lg border px-4 py-2.5 text-left text-sm transition-all",
+                    optStyle,
+                    choiceSubmitted && "cursor-default"
+                  )}
+                >
+                  {opt.text}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {!revealed ? (
           <div className="flex flex-wrap justify-center gap-2">
-            <Button onClick={onReveal}>
-              Reveal Answer
-              <Kbd>Space</Kbd>
-            </Button>
+            {isChoice ? (
+              <Button
+                onClick={handleRevealOrSubmitChoice}
+                disabled={selectedOptions.size === 0}
+              >
+                Submit &amp; Reveal
+                <Kbd>Space</Kbd>
+              </Button>
+            ) : (
+              <Button onClick={onReveal}>
+                Reveal Answer
+                <Kbd>Space</Kbd>
+              </Button>
+            )}
             <Button variant="outline" onClick={onSkip}>
               Skip
               <Kbd>S</Kbd>
@@ -110,13 +204,20 @@ export function StudyCard({
           </div>
         ) : (
           <>
-            <div className="w-full rounded-lg bg-muted/50 p-4">
-              <p className="text-muted-foreground whitespace-pre-wrap">{card.response}</p>
-            </div>
+            {/* Standard card answer */}
+            {card.type === "standard" && (
+              <div className="w-full rounded-lg bg-muted/50 p-4">
+                <p className="text-muted-foreground whitespace-pre-wrap">{card.response}</p>
+              </div>
+            )}
 
             <div className="flex flex-col items-center gap-4 w-full">
               <div className="flex flex-col gap-1.5 w-full">
-                <p className="text-sm text-muted-foreground">How did you do?</p>
+                <p className="text-sm text-muted-foreground">
+                  {isChoice && choiceSubmitted
+                    ? "Auto-graded — override if needed:"
+                    : "How did you do?"}
+                </p>
                 <div className="flex gap-2 justify-center">
                   {GRADES.map((g) => (
                     <button

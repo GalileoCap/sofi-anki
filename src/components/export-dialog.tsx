@@ -19,11 +19,23 @@ const SCHEMA_PROMPT = `Generate flashcards in the following JSON format:
       "title": "Question or front of card",
       "response": "Answer or back of card",
       "complexity": "easy" | "medium" | "hard"
+    },
+    {
+      "type": "choice",
+      "title": "Multiple choice question",
+      "complexity": "easy" | "medium" | "hard",
+      "options": [
+        { "text": "Option A", "correct": true },
+        { "text": "Option B", "correct": false }
+      ]
     }
   ]
 }
 
-Each card must have a "title" (the question), a "response" (the answer), and a "complexity" ("easy", "medium", or "hard"). Return only the JSON, no extra text.`;
+Standard cards have "title", "response", and "complexity".
+Choice cards have "type": "choice", "title", "complexity", and "options" (array of { "text", "correct" }).
+If multiple options are correct, it becomes a multi-select question.
+Return only the JSON, no extra text.`;
 
 interface ExportDialogProps {
   trigger: React.ReactNode;
@@ -37,11 +49,21 @@ export function ExportDialog({ trigger, deck }: ExportDialogProps) {
   const deckJson = JSON.stringify(
     {
       title: deck.title,
-      cards: deck.cards.map((c) => ({
-        title: c.title,
-        response: c.response,
-        complexity: c.complexity,
-      })),
+      cards: deck.cards.map((c) => {
+        if (c.type === "choice") {
+          return {
+            type: "choice",
+            title: c.title,
+            complexity: c.complexity,
+            options: c.options.map((o) => ({ text: o.text, correct: o.correct })),
+          };
+        }
+        return {
+          title: c.title,
+          response: c.response,
+          complexity: c.complexity,
+        };
+      }),
     },
     null,
     2

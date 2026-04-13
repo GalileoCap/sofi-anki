@@ -1,6 +1,30 @@
 import { useState, useEffect } from "react";
-import type { Card, Complexity, Deck, DeckImport } from "@/types";
+import type { Card, ChoiceOption, Deck, DeckImport, DeckImportCard } from "@/types";
 import { loadDecks, saveDecks } from "@/lib/storage";
+
+function importCardToCard(c: DeckImportCard): Card {
+  if (c.type === "choice" && Array.isArray(c.options)) {
+    return {
+      id: crypto.randomUUID(),
+      type: "choice",
+      title: c.title,
+      complexity: c.complexity ?? "medium",
+      multiSelect: c.multiSelect ?? c.options.filter((o) => o.correct).length > 1,
+      options: c.options.map((o) => ({
+        id: crypto.randomUUID(),
+        text: o.text,
+        correct: o.correct,
+      })),
+    };
+  }
+  return {
+    id: crypto.randomUUID(),
+    type: "standard",
+    title: c.title,
+    response: c.response ?? "",
+    complexity: c.complexity ?? "medium",
+  };
+}
 
 export function useDecks() {
   const [decks, setDecks] = useState<Deck[]>(() => loadDecks());
@@ -30,14 +54,20 @@ export function useDecks() {
     );
   }
 
-  function addCard(deckId: string, title: string, response: string, complexity: Complexity): Card {
-    const card: Card = { id: crypto.randomUUID(), title, response, complexity };
+  function addCard(deckId: string, card: Omit<Card, "id">): Card {
+    const newCard = { ...card, id: crypto.randomUUID() } as Card;
+    if (newCard.type === "choice") {
+      newCard.options = newCard.options.map((o: ChoiceOption) => ({
+        ...o,
+        id: o.id || crypto.randomUUID(),
+      }));
+    }
     setDecks((prev) =>
       prev.map((d) =>
-        d.id === deckId ? { ...d, cards: [...d.cards, card] } : d
+        d.id === deckId ? { ...d, cards: [...d.cards, newCard] } : d
       )
     );
-    return card;
+    return newCard;
   }
 
   function deleteCard(deckId: string, cardId: string) {
@@ -50,14 +80,14 @@ export function useDecks() {
     );
   }
 
-  function editCard(deckId: string, cardId: string, title: string, response: string, complexity: Complexity) {
+  function editCard(deckId: string, cardId: string, updates: Omit<Card, "id">) {
     setDecks((prev) =>
       prev.map((d) =>
         d.id === deckId
           ? {
               ...d,
               cards: d.cards.map((c) =>
-                c.id === cardId ? { ...c, title, response, complexity } : c
+                c.id === cardId ? { ...updates, id: cardId } as Card : c
               ),
             }
           : d
@@ -69,33 +99,20 @@ export function useDecks() {
     const deck: Deck = {
       id: crypto.randomUUID(),
       title: data.title,
-      cards: data.cards.map((c) => ({
-        id: crypto.randomUUID(),
-        title: c.title,
-        response: c.response,
-        complexity: c.complexity ?? "medium",
-      })),
+      cards: data.cards.map(importCardToCard),
       createdAt: Date.now(),
     };
     setDecks((prev) => [...prev, deck]);
     return deck;
   }
 
-  function importCards(deckId: string, cards: { title: string; response: string; complexity?: Complexity }[]) {
+  function importCards(deckId: string, cards: DeckImportCard[]) {
     setDecks((prev) =>
       prev.map((d) =>
         d.id === deckId
           ? {
               ...d,
-              cards: [
-                ...d.cards,
-                ...cards.map((c) => ({
-                  id: crypto.randomUUID(),
-                  title: c.title,
-                  response: c.response,
-                  complexity: c.complexity ?? "medium",
-                })),
-              ],
+              cards: [...d.cards, ...cards.map(importCardToCard)],
             }
           : d
       )

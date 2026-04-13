@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
+  Card as UiCard,
   CardHeader,
   CardTitle,
   CardAction,
@@ -13,7 +13,7 @@ import { CardForm } from "@/components/card-form";
 import { ComplexityBadge } from "@/components/complexity-badge";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
-import type { Complexity, Deck } from "@/types";
+import type { Card, Complexity, Deck, DeckImportCard } from "@/types";
 import { cn } from "@/lib/utils";
 
 const COMPLEXITIES: Complexity[] = ["easy", "medium", "hard"];
@@ -27,11 +27,11 @@ interface DeckDetailProps {
   deck: Deck;
   onBack: () => void;
   onStartStudy: (complexityFilter: Complexity[] | null) => void;
-  onAddCard: (title: string, response: string, complexity: Complexity) => void;
-  onEditCard: (cardId: string, title: string, response: string, complexity: Complexity) => void;
+  onAddCard: (card: Omit<Card, "id">) => void;
+  onEditCard: (cardId: string, card: Omit<Card, "id">) => void;
   onDeleteCard: (cardId: string) => void;
   onDeleteDeck: () => void;
-  onImportCards: (cards: { title: string; response: string; complexity?: Complexity }[]) => void;
+  onImportCards: (cards: DeckImportCard[]) => void;
 }
 
 export function DeckDetail({
@@ -187,11 +187,16 @@ export function DeckDetail({
       ) : (
         <div className="flex flex-col gap-3">
           {filteredCards.map((card) => (
-            <Card key={card.id} size="sm">
+            <UiCard key={card.id} size="sm">
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-sm">{card.title}</CardTitle>
                   <ComplexityBadge complexity={card.complexity} />
+                  {card.type === "choice" && (
+                    <Badge variant="outline" className="text-xs">
+                      {card.multiSelect ? "Multi" : "Single"} Choice
+                    </Badge>
+                  )}
                 </div>
                 <CardAction>
                   <div className="flex gap-1">
@@ -201,12 +206,8 @@ export function DeckDetail({
                           Edit
                         </Button>
                       }
-                      onSubmit={(title, response, complexity) =>
-                        onEditCard(card.id, title, response, complexity)
-                      }
-                      initialTitle={card.title}
-                      initialResponse={card.response}
-                      initialComplexity={card.complexity}
+                      onSubmit={(updates) => onEditCard(card.id, updates)}
+                      initial={card}
                       dialogTitle="Edit Card"
                       submitLabel="Save"
                     />
@@ -221,7 +222,7 @@ export function DeckDetail({
                   </div>
                 </CardAction>
               </CardHeader>
-            </Card>
+            </UiCard>
           ))}
         </div>
       )}
