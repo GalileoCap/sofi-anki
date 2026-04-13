@@ -122,161 +122,179 @@ export function StudyCard({
     return () => window.removeEventListener("keydown", handleKeyDown);
   });
 
-  return (
-    <Card className="w-full max-w-lg mx-auto">
-      <CardContent className="flex flex-col items-center gap-6 text-center">
-        <p className="text-lg font-medium text-foreground">{card.title}</p>
-
-        {complexityRevealed ? (
-          <ComplexityBadge complexity={card.complexity} />
-        ) : (
-          <Badge
-            variant="outline"
-            className="cursor-pointer bg-muted/50 text-muted-foreground hover:bg-muted"
-            onClick={onRevealComplexity}
+  const choiceOptions = isChoice ? (
+    <div className="flex flex-col gap-2 w-full">
+      <div className="flex items-center justify-center gap-2">
+        <Badge variant="outline" className="text-xs">
+          {card.multiSelect ? "Multi-select" : "Single-select"}
+        </Badge>
+        <span className="text-xs text-muted-foreground">
+          {card.multiSelect ? "Check all correct answers" : "Pick one answer"}
+        </span>
+      </div>
+      {card.options.map((opt) => {
+        const isSelected = selectedOptions.has(opt.id);
+        let optStyle = "border-border hover:bg-muted/50";
+        if (choiceSubmitted) {
+          if (opt.correct) {
+            optStyle = "border-green-400 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-300";
+          } else if (isSelected && !opt.correct) {
+            optStyle = "border-red-400 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-300";
+          }
+        } else if (isSelected) {
+          optStyle = "border-foreground/30 bg-foreground/5 ring-1 ring-ring";
+        }
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => toggleOption(opt.id)}
+            disabled={choiceSubmitted}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg border px-4 py-2.5 text-left text-sm transition-all",
+              optStyle,
+              choiceSubmitted && "cursor-default"
+            )}
           >
-            Show Complexity
-            <Kbd>C</Kbd>
-          </Badge>
-        )}
+            <span className={cn(
+              "flex h-4 w-4 shrink-0 items-center justify-center border",
+              card.multiSelect ? "rounded" : "rounded-full",
+              isSelected ? "border-foreground bg-foreground text-background" : "border-muted-foreground/40"
+            )}>
+              {isSelected && (
+                card.multiSelect
+                  ? <span className="text-[10px] leading-none">{"\u2713"}</span>
+                  : <span className="block h-2 w-2 rounded-full bg-background" />
+              )}
+            </span>
+            {opt.text}
+          </button>
+        );
+      })}
+    </div>
+  ) : null;
 
-        {/* Choice options — always shown for choice cards */}
-        {isChoice && (
-          <div className="flex flex-col gap-2 w-full">
-            <div className="flex items-center justify-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                {card.multiSelect ? "Multi-select" : "Single-select"}
-              </Badge>
-              <span className="text-xs text-muted-foreground">
-                {card.multiSelect ? "Check all correct answers" : "Pick one answer"}
-              </span>
-            </div>
-            {card.options.map((opt) => {
-              const isSelected = selectedOptions.has(opt.id);
-              let optStyle = "border-border hover:bg-muted/50";
-              if (choiceSubmitted) {
-                if (opt.correct) {
-                  optStyle = "border-green-400 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-300";
-                } else if (isSelected && !opt.correct) {
-                  optStyle = "border-red-400 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-300";
-                }
-              } else if (isSelected) {
-                optStyle = "border-foreground/30 bg-foreground/5 ring-1 ring-ring";
-              }
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => toggleOption(opt.id)}
-                  disabled={choiceSubmitted}
-                  className={cn(
-                    "flex w-full items-center gap-3 rounded-lg border px-4 py-2.5 text-left text-sm transition-all",
-                    optStyle,
-                    choiceSubmitted && "cursor-default"
-                  )}
-                >
-                  <span className={cn(
-                    "flex h-4 w-4 shrink-0 items-center justify-center border",
-                    card.multiSelect ? "rounded" : "rounded-full",
-                    isSelected ? "border-foreground bg-foreground text-background" : "border-muted-foreground/40"
-                  )}>
-                    {isSelected && (
-                      card.multiSelect
-                        ? <span className="text-[10px] leading-none">{"\u2713"}</span>
-                        : <span className="block h-2 w-2 rounded-full bg-background" />
-                    )}
-                  </span>
-                  {opt.text}
-                </button>
-              );
-            })}
-          </div>
-        )}
+  const complexitySection = complexityRevealed ? (
+    <ComplexityBadge complexity={card.complexity} />
+  ) : (
+    <Badge
+      variant="outline"
+      className="cursor-pointer bg-muted/50 text-muted-foreground hover:bg-muted"
+      onClick={onRevealComplexity}
+    >
+      Show Complexity
+      <Kbd>C</Kbd>
+    </Badge>
+  );
 
-        {!revealed ? (
-          <div className="flex flex-wrap justify-center gap-2">
-            {isChoice ? (
-              <Button
-                onClick={handleRevealOrSubmitChoice}
-                disabled={selectedOptions.size === 0}
+  const actionButtons = !revealed ? (
+    <div className="flex flex-wrap justify-center gap-2">
+      {isChoice ? (
+        <Button
+          onClick={handleRevealOrSubmitChoice}
+          disabled={selectedOptions.size === 0}
+        >
+          Submit &amp; Reveal
+          <Kbd>Space</Kbd>
+        </Button>
+      ) : (
+        <Button onClick={onReveal}>
+          Reveal Answer
+          <Kbd>Space</Kbd>
+        </Button>
+      )}
+      <Button variant="outline" onClick={onSkip}>
+        Skip
+        <Kbd>S</Kbd>
+      </Button>
+      <Button variant="secondary" onClick={onSaveForLater}>
+        Save For Later
+        <Kbd>L</Kbd>
+      </Button>
+    </div>
+  ) : null;
+
+  const gradingSection = revealed ? (
+    <>
+      {card.type === "standard" && (
+        <div className="w-full rounded-lg bg-muted/50 p-4">
+          <p className="text-muted-foreground whitespace-pre-wrap">{card.response}</p>
+        </div>
+      )}
+
+      <div className="flex flex-col items-center gap-4 w-full">
+        <div className="flex flex-col gap-1.5 w-full">
+          <p className="text-sm text-muted-foreground">
+            {isChoice && choiceSubmitted
+              ? "Auto-graded \u2014 override if needed:"
+              : "How did you do?"}
+          </p>
+          <div className="flex gap-2 justify-center">
+            {GRADES.map((g) => (
+              <button
+                key={g.value}
+                type="button"
+                onClick={() => setGrade(g.value)}
+                className={cn(
+                  "flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-all",
+                  g.className,
+                  grade === g.value && "ring-2 ring-ring ring-offset-2"
+                )}
               >
-                Submit &amp; Reveal
-                <Kbd>Space</Kbd>
-              </Button>
-            ) : (
-              <Button onClick={onReveal}>
-                Reveal Answer
-                <Kbd>Space</Kbd>
-              </Button>
-            )}
-            <Button variant="outline" onClick={onSkip}>
-              Skip
-              <Kbd>S</Kbd>
-            </Button>
-            <Button variant="secondary" onClick={onSaveForLater}>
-              Save For Later
-              <Kbd>L</Kbd>
-            </Button>
+                {g.label}
+                <Kbd className="ml-1">{g.shortcut}</Kbd>
+              </button>
+            ))}
           </div>
-        ) : (
-          <>
-            {/* Standard card answer */}
-            {card.type === "standard" && (
-              <div className="w-full rounded-lg bg-muted/50 p-4">
-                <p className="text-muted-foreground whitespace-pre-wrap">{card.response}</p>
-              </div>
-            )}
+        </div>
 
-            <div className="flex flex-col items-center gap-4 w-full">
-              <div className="flex flex-col gap-1.5 w-full">
-                <p className="text-sm text-muted-foreground">
-                  {isChoice && choiceSubmitted
-                    ? "Auto-graded — override if needed:"
-                    : "How did you do?"}
-                </p>
-                <div className="flex gap-2 justify-center">
-                  {GRADES.map((g) => (
-                    <button
-                      key={g.value}
-                      type="button"
-                      onClick={() => setGrade(g.value)}
-                      className={cn(
-                        "flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-all",
-                        g.className,
-                        grade === g.value && "ring-2 ring-ring ring-offset-2"
-                      )}
-                    >
-                      {g.label}
-                      <Kbd className="ml-1">{g.shortcut}</Kbd>
-                    </button>
-                  ))}
-                </div>
-              </div>
+        <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={redoLater}
+            onChange={(e) => setRedoLater(e.target.checked)}
+            className="rounded"
+          />
+          Redo Later
+          <Kbd>R</Kbd>
+        </label>
 
-              <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground">
-                <input
-                  type="checkbox"
-                  checked={redoLater}
-                  onChange={(e) => setRedoLater(e.target.checked)}
-                  className="rounded"
-                />
-                Redo Later
-                <Kbd>R</Kbd>
-              </label>
+        <Button
+          onClick={() => onGraded(grade!, redoLater, isChoice ? Array.from(selectedOptions) : undefined)}
+          disabled={grade === null}
+          className="w-full max-w-xs"
+        >
+          Next
+          <Kbd>Enter</Kbd>
+        </Button>
+      </div>
+    </>
+  ) : null;
 
-              <Button
-                onClick={() => onGraded(grade!, redoLater, isChoice ? Array.from(selectedOptions) : undefined)}
-                disabled={grade === null}
-                className="w-full max-w-xs"
-              >
-                Next
-                <Kbd>Enter</Kbd>
-              </Button>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+  return (
+    <div className="w-full max-w-lg mx-auto card-flip-container">
+      <div className={cn("card-flip-inner", revealed && "flipped")}>
+        {/* Front face */}
+        <Card className="card-flip-front">
+          <CardContent className="flex flex-col items-center gap-6 text-center">
+            <p className="text-lg font-medium text-foreground">{card.title}</p>
+            {complexitySection}
+            {choiceOptions}
+            {actionButtons}
+          </CardContent>
+        </Card>
+
+        {/* Back face */}
+        <Card className="card-flip-back">
+          <CardContent className="flex flex-col items-center gap-6 text-center">
+            <p className="text-lg font-medium text-foreground">{card.title}</p>
+            {complexitySection}
+            {choiceOptions}
+            {gradingSection}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
 

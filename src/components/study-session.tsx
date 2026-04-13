@@ -311,6 +311,16 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
         </div>
       </div>
 
+      {/* Card progress bar */}
+      <div className="w-full max-w-lg">
+        <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-primary/60 transition-all duration-300"
+            style={{ width: `${((currentIndex + 1) / remaining.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
       {/* Goal progress */}
       {goal && (
         <div className="w-full max-w-lg">

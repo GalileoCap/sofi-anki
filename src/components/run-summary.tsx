@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ComplexityBadge } from "@/components/complexity-badge";
+import { Confetti } from "@/components/confetti";
 import type { CardAttempt, CardDisposition, CardRunResult } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -60,6 +61,11 @@ interface RunSummaryProps {
 export function RunSummary({ results, totalTimeMs, onRestart, onExit }: RunSummaryProps) {
   const [expandedCategory, setExpandedCategory] = useState<CardDisposition | null>(null);
 
+  const isPerfect = useMemo(() => {
+    if (results.length === 0) return false;
+    return results.every((r) => r.attempts[0]?.result === "correct");
+  }, [results]);
+
   // Group by first attempt result
   const byFirstAttempt = new Map<CardDisposition, CardRunResult[]>();
   for (const r of results) {
@@ -70,9 +76,12 @@ export function RunSummary({ results, totalTimeMs, onRestart, onExit }: RunSumma
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 py-8">
+    <div className="relative flex flex-col items-center gap-6 py-8">
+      {isPerfect && <Confetti />}
       <div className="text-center">
-        <h2 className="text-2xl font-medium text-foreground">Run Complete!</h2>
+        <h2 className="text-2xl font-medium text-foreground">
+          {isPerfect ? "Perfect Run!" : "Run Complete!"}
+        </h2>
         <p className="mt-2 font-mono text-lg text-muted-foreground">
           {formatTime(totalTimeMs)}
         </p>
