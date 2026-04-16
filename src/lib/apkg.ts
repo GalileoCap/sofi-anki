@@ -29,7 +29,6 @@ function ankiTagsToArray(raw: string): string[] {
 }
 
 function complexityFromLapses(lapses: number): 'easy' | 'medium' | 'hard' {
-  if (lapses === 0) return 'easy';
   if (lapses <= 3) return 'medium';
   return 'hard';
 }
