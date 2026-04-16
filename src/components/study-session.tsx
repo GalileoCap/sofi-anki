@@ -434,11 +434,16 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
       {/* Card progress bar */}
       {(() => {
         const total = remaining.length;
-        const donePercent = total > 0 ? (currentIndex / total) * 100 : 0;
-        const redoPercent = total > 0 ? (redoLaterIds.size / total) * 100 : 0;
+        const doneCount = currentIndex;
+        const redoCount = redoLaterIds.size;
+        const pendingCount = total - doneCount - redoCount;
+        const donePercent = total > 0 ? (doneCount / total) * 100 : 0;
+        const redoPercent = total > 0 ? (redoCount / total) * 100 : 0;
+        const pendingPercent = total > 0 ? (pendingCount / total) * 100 : 100;
+        const fmt = (n: number) => `${Math.round(n)}%`;
         return (
-          <div className="w-full">
-            <div className="h-2 w-full rounded-full bg-muted overflow-hidden flex">
+          <div className="w-full flex flex-col gap-1.5">
+            <div className="h-3 w-full rounded-full bg-muted overflow-hidden flex">
               <div
                 className="h-full bg-primary/60 transition-all duration-300 shrink-0"
                 style={{ width: `${donePercent}%` }}
@@ -447,6 +452,22 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
                 className="h-full bg-amber-400/80 dark:bg-amber-500/70 transition-all duration-300 shrink-0"
                 style={{ width: `${redoPercent}%` }}
               />
+            </div>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="inline-block h-2 w-2 rounded-full bg-primary/60 shrink-0" />
+                {fmt(donePercent)} done
+              </span>
+              {redoCount > 0 && (
+                <span className="flex items-center gap-1">
+                  <span className="inline-block h-2 w-2 rounded-full bg-amber-400/80 dark:bg-amber-500/70 shrink-0" />
+                  {fmt(redoPercent)} redo later
+                </span>
+              )}
+              <span className="flex items-center gap-1">
+                <span className="inline-block h-2 w-2 rounded-full bg-muted-foreground/30 shrink-0" />
+                {fmt(pendingPercent)} pending
+              </span>
             </div>
           </div>
         );
