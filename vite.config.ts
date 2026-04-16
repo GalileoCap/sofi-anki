@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/sofi-anki/',
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] }),
@@ -20,7 +21,7 @@ export default defineConfig({
         theme_color: '#863bff',
         background_color: '#09090b',
         display: 'standalone',
-        start_url: '/',
+        start_url: '/sofi-anki/',
         icons: [
           {
             src: 'pwa-192.png',
