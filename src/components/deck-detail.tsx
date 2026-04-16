@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { DropdownMenu } from "radix-ui";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreVerticalIcon } from "@hugeicons/core-free-icons";
@@ -83,6 +84,7 @@ export function DeckDetail({
   const [now] = useState(() => Date.now());
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const listRef = useRef<HTMLDivElement>(null);
 
   function toggleExpand(cardId: string) {
     setExpandedCards((prev) => {
@@ -159,6 +161,13 @@ export function DeckDetail({
     };
     return [...cards].sort((a, b) => rank(a.id) - rank(b.id));
   }, [deck.cards, complexityFilter, tagFilter, search, cardPerf, now]);
+
+  const virtualizer = useWindowVirtualizer({
+    count: filteredCards.length,
+    estimateSize: () => 64,
+    overscan: 5,
+    scrollMargin: listRef.current?.offsetTop ?? 0,
+  });
 
   function toggleComplexity(c: Complexity) {
     setComplexityFilter((prev) => {
@@ -442,14 +451,28 @@ export function DeckDetail({
           <p className="text-sm text-muted-foreground">No cards match your filters.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          {filteredCards.map((card) => {
+        <div ref={listRef} style={{ position: 'relative', height: `${virtualizer.getTotalSize()}px` }}>
+          {virtualizer.getVirtualItems().map((vItem) => {
+            const card = filteredCards[vItem.index];
             const perf = cardPerf.get(card.id);
             const isDue = perf?.srs ? perf.srs.dueAt <= now : false;
             const isNew = !perf || perf.attempts === 0;
             const isExpanded = expandedCards.has(card.id);
             return (
-            <UiCard key={card.id} size="sm" className="cursor-pointer" onClick={() => toggleExpand(card.id)}>
+            <div
+              key={vItem.key}
+              data-index={vItem.index}
+              ref={virtualizer.measureElement}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${vItem.start - virtualizer.options.scrollMargin}px)`,
+                paddingBottom: '8px',
+              }}
+            >
+            <UiCard size="sm" className="cursor-pointer" onClick={() => toggleExpand(card.id)}>
               <CardHeader>
                 <div className="flex items-center gap-2 min-w-0">
                   <span className={cn(
@@ -620,6 +643,7 @@ export function DeckDetail({
                 </div>
               )}
             </UiCard>
+            </div>
           );
           })}
         </div>
