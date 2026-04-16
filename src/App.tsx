@@ -163,7 +163,7 @@ function App() {
 
   if (view.kind === "globalStats") {
     return (
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
+      <div className="mx-auto w-[80%] p-4 sm:p-8">
         <div className="flex justify-end mb-4">
           <ThemeToggle />
         </div>
@@ -181,7 +181,7 @@ function App() {
   if (view.kind === "stats" && currentDeck) {
     const deckRuns = getRunsForDeck(currentDeck.id);
     return (
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
+      <div className="mx-auto w-[80%] p-4 sm:p-8">
         <div className="flex justify-end mb-4">
           <ThemeToggle />
         </div>
@@ -196,7 +196,7 @@ function App() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
+    <div className="mx-auto w-[80%] p-4 sm:p-8">
       <div className="flex justify-end mb-4">
         <ThemeToggle />
       </div>

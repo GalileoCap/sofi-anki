@@ -151,7 +151,8 @@
   body {
     @apply bg-background text-foreground;}
   html {
-    @apply font-sans;}}
+    @apply font-sans;
+    font-size: 18px;}}
 
 .card-flip-container {
   perspective: 1200px;
