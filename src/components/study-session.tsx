@@ -230,21 +230,26 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
     resetCardState();
   }
 
+  function insertLater(prev: Card[]): Card[] {
+    const next = [...prev];
+    const [card] = next.splice(currentIndex, 1);
+    const remainingAfter = next.length - currentIndex;
+    if (remainingAfter === 0) {
+      next.push(card);
+    } else {
+      const minOffset = Math.min(2, remainingAfter);
+      const maxOffset = Math.min(10, remainingAfter);
+      const offset = minOffset + Math.floor(Math.random() * (maxOffset - minOffset + 1));
+      next.splice(currentIndex + offset, 0, card);
+    }
+    return next;
+  }
+
   function handleSaveForLater() {
     pushSnapshot();
     const durationMs = getCardDuration();
     recordAttempt(currentCard, { result: "save_for_later", durationMs });
-    setRemaining((prev) => {
-      const next = [...prev];
-      const [card] = next.splice(currentIndex, 1);
-      const remainingAfter = next.length - currentIndex;
-      const insertAt =
-        remainingAfter > 0
-          ? currentIndex + 1 + Math.floor(Math.random() * remainingAfter)
-          : next.length;
-      next.splice(insertAt, 0, card);
-      return next;
-    });
+    setRemaining(insertLater);
     resetCardState();
   }
 
@@ -255,17 +260,7 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
 
     if (!redoLater) onCardDone();
     if (redoLater) {
-      setRemaining((prev) => {
-        const next = [...prev];
-        const [card] = next.splice(currentIndex, 1);
-        const remainingAfter = next.length - currentIndex;
-        const insertAt =
-          remainingAfter > 0
-            ? currentIndex + 1 + Math.floor(Math.random() * remainingAfter)
-            : next.length;
-        next.splice(insertAt, 0, card);
-        return next;
-      });
+      setRemaining(insertLater);
     } else {
       setCurrentIndex((i) => i + 1);
     }
