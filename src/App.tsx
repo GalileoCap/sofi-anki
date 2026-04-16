@@ -24,7 +24,7 @@ type View =
   | { kind: "home" }
   | { kind: "globalStats" }
   | { kind: "deck"; deckId: string }
-  | { kind: "study"; deckId: string; runMode: RunMode; complexityFilter: Complexity[] | null; goal?: SessionGoal }
+  | { kind: "study"; deckId: string; runMode: RunMode; complexityFilter: Complexity[] | null; goal?: SessionGoal; shuffle?: boolean }
   | { kind: "stats"; deckId: string }
   | { kind: "shared"; deckData: Deck };
 
@@ -150,6 +150,7 @@ function App() {
         <StudySession
           deck={studyDeck}
           goal={view.goal}
+          shuffle={view.shuffle ?? false}
           onExit={() => setView({ kind: "deck", deckId: studyDeck.id })}
           onRunComplete={(totalTimeMs, results) => {
             addRun(studyDeck.id, totalTimeMs, results);
@@ -208,8 +209,8 @@ function App() {
           weakCount={srs.getWeakCards(currentDeck).length}
           cardPerf={deckCardPerf}
           onBack={() => setView({ kind: "home" })}
-          onStartStudy={(runMode, complexityFilter, goal) =>
-            setView({ kind: "study", deckId: currentDeck.id, runMode, complexityFilter, goal })
+          onStartStudy={(runMode, complexityFilter, goal, shuffle) =>
+            setView({ kind: "study", deckId: currentDeck.id, runMode, complexityFilter, goal, shuffle })
           }
           onViewStats={() =>
             setView({ kind: "stats", deckId: currentDeck.id })

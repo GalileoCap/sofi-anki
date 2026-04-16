@@ -21,7 +21,7 @@ interface RunStartDialogProps {
   showModePicker?: boolean;
   dueCount?: number;
   weakCount?: number;
-  onStart: (mode: RunMode, goal?: SessionGoal) => void;
+  onStart: (mode: RunMode, goal?: SessionGoal, shuffle?: boolean) => void;
 }
 
 export function RunStartDialog({
@@ -34,16 +34,18 @@ export function RunStartDialog({
   onStart,
 }: RunStartDialogProps) {
   const [selectedMode, setSelectedMode] = useState<RunMode>("all");
+  const [shuffle, setShuffle] = useState(false);
   const [useGoal, setUseGoal] = useState(false);
   const [goalType, setGoalType] = useState<"cards" | "minutes">("cards");
   const [goalValue, setGoalValue] = useState(20);
 
   function handleStart() {
     const mode = showModePicker ? selectedMode : (label ? modeFromLabel(label) : "all");
-    onStart(mode, useGoal ? { type: goalType, value: goalValue } : undefined);
+    onStart(mode, useGoal ? { type: goalType, value: goalValue } : undefined, shuffle);
     onOpenChange(false);
     setUseGoal(false);
     setSelectedMode("all");
+    setShuffle(false);
   }
 
   const title = showModePicker
@@ -89,6 +91,16 @@ export function RunStartDialog({
               </div>
             </div>
           )}
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={shuffle}
+              onChange={(e) => setShuffle(e.target.checked)}
+              className="rounded"
+            />
+            Shuffle cards
+          </label>
 
           <label className="flex items-center gap-2 text-sm">
             <input

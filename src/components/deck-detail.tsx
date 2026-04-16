@@ -54,7 +54,7 @@ interface DeckDetailProps {
   weakCount: number;
   cardPerf: Map<string, CardPerf>;
   onBack: () => void;
-  onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null, goal?: SessionGoal) => void;
+  onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null, goal?: SessionGoal, shuffle?: boolean) => void;
   onViewStats: () => void;
   onEditDeck: (title: string, tags: string[], color?: string, emoji?: string) => void;
   onAddCard: (card: Omit<Card, "id">) => void;
@@ -180,8 +180,8 @@ export function DeckDetail({
 
   const activeFilter = complexityFilter.size > 0 ? Array.from(complexityFilter) : null;
 
-  function handleRunStart(mode: RunMode, goal?: SessionGoal) {
-    onStartStudy(mode, activeFilter, goal);
+  function handleRunStart(mode: RunMode, goal?: SessionGoal, shuffle?: boolean) {
+    onStartStudy(mode, activeFilter, goal, shuffle);
   }
 
   return (
@@ -284,7 +284,7 @@ export function DeckDetail({
         open={runDialog.open}
         onOpenChange={(open) => setRunDialog((prev) => ({ ...prev, open }))}
         label={runDialog.label}
-        onStart={(mode, goal) => handleRunStart(mode, goal)}
+        onStart={(mode, goal, shuffle) => handleRunStart(mode, goal, shuffle)}
       />
 
       {/* Manage section */}

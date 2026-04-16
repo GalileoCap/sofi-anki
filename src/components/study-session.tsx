@@ -30,12 +30,13 @@ function formatTime(ms: number): string {
 interface StudySessionProps {
   deck: Deck;
   goal?: SessionGoal;
+  shuffle?: boolean;
   onExit: () => void;
   onRunComplete: (totalTimeMs: number, results: CardRunResult[]) => void;
 }
 
-export function StudySession({ deck, goal, onExit, onRunComplete }: StudySessionProps) {
-  const [remaining, setRemaining] = useState<Card[]>(() => shuffle(deck.cards));
+export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, onRunComplete }: StudySessionProps) {
+  const [remaining, setRemaining] = useState<Card[]>(() => doShuffle ? shuffle(deck.cards) : [...deck.cards]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [complexityRevealed, setComplexityRevealed] = useState(false);
@@ -268,7 +269,7 @@ export function StudySession({ deck, goal, onExit, onRunComplete }: StudySession
   }
 
   function handleRestart() {
-    setRemaining(shuffle(deck.cards));
+    setRemaining(doShuffle ? shuffle(deck.cards) : [...deck.cards]);
     setCurrentIndex(0);
     setResults(new Map());
     setUndoStack([]);
