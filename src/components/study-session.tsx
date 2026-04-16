@@ -9,6 +9,7 @@ interface UndoSnapshot {
   currentIndex: number;
   results: Map<string, CardRunResult>;
   cardsCompleted: number;
+  redoLaterIds: Set<string>;
 }
 
 function shuffle<T>(arr: T[]): T[] {
@@ -44,6 +45,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
   const [confirmExit, setConfirmExit] = useState(false);
   const [cardsCompleted, setCardsCompleted] = useState(0);
   const [undoStack, setUndoStack] = useState<UndoSnapshot[]>([]);
+  const [redoLaterIds, setRedoLaterIds] = useState<Set<string>>(() => new Set());
   const [goalReached, setGoalReached] = useState(false);
   const [goalDismissed, setGoalDismissed] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -101,6 +103,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
       currentIndex,
       results,
       cardsCompleted,
+      redoLaterIds,
     };
     setUndoStack((prev) => {
       const next = [...prev, snap];
@@ -116,6 +119,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
     setCurrentIndex(snap.currentIndex);
     setResults(snap.results);
     setCardsCompleted(snap.cardsCompleted);
+    setRedoLaterIds(snap.redoLaterIds);
     setRevealed(false);
     setComplexityRevealed(false);
   }
@@ -144,6 +148,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
         setCurrentIndex(snap.currentIndex);
         setResults(snap.results);
         setCardsCompleted(snap.cardsCompleted);
+        setRedoLaterIds(snap.redoLaterIds);
         setRevealed(false);
         setComplexityRevealed(false);
       }
@@ -226,6 +231,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
     pushSnapshot();
     const durationMs = getCardDuration();
     recordAttempt(currentCard, { result: "skip", durationMs });
+    setRedoLaterIds((prev) => { const next = new Set(prev); next.delete(currentCard.id); return next; });
     setCurrentIndex((i) => i + 1);
     onCardDone();
     resetCardState();
@@ -277,10 +283,12 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
     const durationMs = getCardDuration();
     recordAttempt(currentCard, { result, durationMs, selectedOptionIds });
 
-    if (!redoLater) onCardDone();
     if (redoLater) {
+      setRedoLaterIds((prev) => new Set([...prev, currentCard.id]));
       setRemaining((prev) => insertRedoLater(prev, result));
     } else {
+      setRedoLaterIds((prev) => { const next = new Set(prev); next.delete(currentCard.id); return next; });
+      onCardDone();
       setCurrentIndex((i) => i + 1);
     }
     resetCardState();
@@ -299,6 +307,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
     setPaused(false);
     setConfirmExit(false);
     setCardsCompleted(0);
+    setRedoLaterIds(new Set());
     setGoalReached(false);
     setGoalDismissed(false);
     // Restart the timer interval
@@ -400,14 +409,25 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
       </div>
 
       {/* Card progress bar */}
-      <div className="w-full">
-        <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full rounded-full bg-primary/60 transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / remaining.length) * 100}%` }}
-          />
-        </div>
-      </div>
+      {(() => {
+        const total = remaining.length;
+        const donePercent = total > 0 ? (currentIndex / total) * 100 : 0;
+        const redoPercent = total > 0 ? (redoLaterIds.size / total) * 100 : 0;
+        return (
+          <div className="w-full">
+            <div className="h-2 w-full rounded-full bg-muted overflow-hidden flex">
+              <div
+                className="h-full bg-primary/60 transition-all duration-300 shrink-0"
+                style={{ width: `${donePercent}%` }}
+              />
+              <div
+                className="h-full bg-amber-400/80 dark:bg-amber-500/70 transition-all duration-300 shrink-0"
+                style={{ width: `${redoPercent}%` }}
+              />
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Goal progress */}
       {goal && (
