@@ -231,6 +231,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
     resetCardState();
   }
 
+  // Save For Later: re-insert 2–10 positions ahead at random
   function insertLater(prev: Card[]): Card[] {
     const next = [...prev];
     const [card] = next.splice(currentIndex, 1);
@@ -242,6 +243,23 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
       const maxOffset = Math.min(10, remainingAfter);
       const offset = minOffset + Math.floor(Math.random() * (maxOffset - minOffset + 1));
       next.splice(currentIndex + offset, 0, card);
+    }
+    return next;
+  }
+
+  // Redo Later: exact position based on grade
+  //   wrong       → 5 ahead (or end if fewer cards remain)
+  //   approximate → 10 ahead (or end if fewer cards remain)
+  //   correct     → end of queue
+  function insertRedoLater(prev: Card[], result: AnswerResult): Card[] {
+    const next = [...prev];
+    const [card] = next.splice(currentIndex, 1);
+    if (result === "correct") {
+      next.push(card);
+    } else {
+      const offset = result === "wrong" ? 5 : 10;
+      const remainingAfter = next.length - currentIndex;
+      next.splice(currentIndex + Math.min(offset, remainingAfter), 0, card);
     }
     return next;
   }
@@ -261,7 +279,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
 
     if (!redoLater) onCardDone();
     if (redoLater) {
-      setRemaining(insertLater);
+      setRemaining((prev) => insertRedoLater(prev, result));
     } else {
       setCurrentIndex((i) => i + 1);
     }
