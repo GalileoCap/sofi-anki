@@ -1,6 +1,8 @@
-import { unzipSync } from 'fflate';
+import { unzipSync, zipSync } from 'fflate';
 import initSqlJs from 'sql.js';
 import sqlWasm from 'sql.js/dist/sql-wasm.wasm?url';
+import TurndownService from 'turndown';
+import { marked } from 'marked';
 import type { CardSRS, Deck, StandardCard } from '@/types';
 
 const FIELD_SEP = '\x1f';
@@ -12,16 +14,16 @@ async function getSqlJs() {
   return _sqlJs;
 }
 
-// ── HTML helpers ──────────────────────────────────────────────────────────────
+// ── HTML ↔ Markdown ───────────────────────────────────────────────────────────
 
-function htmlToText(html: string): string {
-  const withBreaks = html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<\/div>/gi, '\n')
-    .replace(/<hr[^>]*>/gi, '\n---\n');
-  const doc = new DOMParser().parseFromString(withBreaks, 'text/html');
-  return (doc.body.textContent ?? '').replace(/\n{3,}/g, '\n\n').trim();
+const turndown = new TurndownService({ headingStyle: 'atx', bulletListMarker: '-' });
+
+function htmlToMarkdown(html: string): string {
+  return turndown.turndown(html).trim();
+}
+
+function markdownToHtml(md: string): string {
+  return marked.parse(md, { async: false }) as string;
 }
 
 function ankiTagsToArray(raw: string): string[] {
@@ -148,6 +150,16 @@ function parseDeckNames(db: DB, decksJson: string | null): Map<number, string> {
   return out;
 }
 
+// ── Export helpers ────────────────────────────────────────────────────────────
+
+function fieldChecksum(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+  }
+  return h >>> 0;
+}
+
 // ── Public API ─────────────────────────────────────────────────────────────────
 
 export interface ParsedApkg {
@@ -238,12 +250,12 @@ export async function parseApkg(file: File): Promise<ParsedApkg> {
         const fieldMap: Record<string, string> = {};
         for (let i = 0; i < nt.fields.length; i++) fieldMap[nt.fields[i]] = fieldValues[i] ?? '';
 
-        const front = htmlToText(renderTemplate(tpl.qfmt, fieldMap));
+        const front = htmlToMarkdown(renderTemplate(tpl.qfmt, fieldMap));
         if (!front) continue;
 
         // Strip {{FrontSide}} from answer template so we don't repeat the question
         const backTpl = tpl.afmt.replace(/\{\{FrontSide\}\}/gi, '');
-        const back = htmlToText(renderTemplate(backTpl, fieldMap));
+        const back = htmlToMarkdown(renderTemplate(backTpl, fieldMap));
 
         if (!deckIdMap.has(did)) deckIdMap.set(did, `apkg-${did}-${importTs}`);
         const ourDeckId = deckIdMap.get(did)!;
@@ -306,4 +318,134 @@ export async function parseApkg(file: File): Promise<ParsedApkg> {
   } finally {
     db.close();
   }
+}
+
+export async function exportAsApkg(deck: Deck, srsMap: Map<string, CardSRS>): Promise<Uint8Array> {
+  const SQL = await getSqlJs();
+  const db = new SQL.Database();
+
+  db.run(`
+    CREATE TABLE col (
+      id integer primary key, crt integer not null, mod integer not null,
+      scm integer not null, ver integer not null, dty integer not null,
+      usn integer not null, ls integer not null, conf text not null,
+      models text not null, decks text not null, dconf text not null, tags text not null
+    );
+    CREATE TABLE notes (
+      id integer primary key, guid text not null, mid integer not null,
+      mod integer not null, usn integer not null, tags text not null,
+      flds text not null, sfld text not null, csum integer not null,
+      flags integer not null, data text not null
+    );
+    CREATE TABLE cards (
+      id integer primary key, nid integer not null, did integer not null,
+      ord integer not null, mod integer not null, usn integer not null,
+      type integer not null, queue integer not null, due integer not null,
+      ivl integer not null, factor integer not null, reps integer not null,
+      lapses integer not null, left integer not null, odue integer not null,
+      odid integer not null, flags integer not null, data text not null
+    );
+    CREATE TABLE revlog (
+      id integer primary key, cid integer not null, usn integer not null,
+      ease integer not null, ivl integer not null, lastIvl integer not null,
+      factor integer not null, time integer not null, type integer not null
+    );
+    CREATE TABLE graves (usn integer not null, oid integer not null, type integer not null);
+  `);
+
+  const nowMs = Date.now();
+  const nowSec = Math.floor(nowMs / 1000);
+  const collectionCreated = Math.floor((deck.createdAt || nowMs) / 1000);
+  const modelId = nowSec;
+  const deckId = nowSec + 1;
+
+  const models = {
+    [modelId]: {
+      id: modelId, name: 'Basic', type: 0, mod: nowSec, usn: -1, sortf: 0, did: deckId,
+      tmpls: [{
+        name: 'Card 1', ord: 0,
+        qfmt: '{{Front}}',
+        afmt: '{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}',
+        bqfmt: '', bafmt: '', did: null, bfont: '', bsize: 0,
+      }],
+      flds: [
+        { name: 'Front', ord: 0, sticky: false, rtl: false, font: 'Arial', size: 20, media: [] },
+        { name: 'Back',  ord: 1, sticky: false, rtl: false, font: 'Arial', size: 20, media: [] },
+      ],
+      css: '.card { font-family: arial; font-size: 20px; text-align: center; color: black; background-color: white; }',
+      latexPre: '\\documentclass[12pt]{article}\n\\special{papersize=3in,5in}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amssymb,amsmath}\n\\pagestyle{empty}\n\\setlength{\\parindent}{0in}\n\\begin{document}\n',
+      latexPost: '\\end{document}',
+      latexsvg: false,
+      req: [[0, 'any', [0]]],
+      tags: [], vers: [],
+    },
+  };
+
+  const decks = {
+    1: { id: 1, name: 'Default', conf: 1, extendNew: 10, extendRev: 50, usn: 0, collapsed: false, newToday: [0, 0], revToday: [0, 0], lrnToday: [0, 0], timeToday: [0, 0], dyn: 0, desc: '', mod: nowSec },
+    [deckId]: { id: deckId, name: deck.title, conf: 1, extendNew: 10, extendRev: 50, usn: 0, collapsed: false, newToday: [0, 0], revToday: [0, 0], lrnToday: [0, 0], timeToday: [0, 0], dyn: 0, desc: '', mod: nowSec },
+  };
+
+  const dconf = {
+    1: { id: 1, name: 'Default', replayq: true, timer: 0, maxTaken: 60, usn: 0, mod: 0, autoplay: true,
+      lapse: { delays: [10], mult: 0, minInt: 1, leechFails: 8, leechAction: 0 },
+      rev: { perDay: 100, ease4: 1.3, fuzz: 0.05, minSpace: 1, ivlFct: 1, maxIvl: 36500, bury: false, hardFactor: 1.2 },
+      new: { perDay: 20, delays: [1, 10], separate: true, ints: [1, 4, 7], initialFactor: 2500, bury: false, order: 1 },
+    },
+  };
+
+  const conf = { activeDecks: [deckId], curDeck: deckId, newSpread: 0, collapseTime: 1200, timeLim: 0, estTimes: true, dueCounts: true, curModel: String(modelId), nextPos: 1, sortType: 'noteFld', sortBackwards: false, addToCur: true, dayLearnFirst: false, schedVer: 2 };
+
+  db.run('INSERT INTO col VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', [
+    1, collectionCreated, nowSec, nowSec, 11, 0, -1, 0,
+    JSON.stringify(conf), JSON.stringify(models), JSON.stringify(decks), JSON.stringify(dconf), '{}',
+  ]);
+
+  for (let i = 0; i < deck.cards.length; i++) {
+    const card = deck.cards[i];
+    const noteId = nowMs + i * 2;
+    const cardId = nowMs + i * 2 + 1;
+
+    const frontMd = card.title;
+    let backMd = '';
+    if (card.type === 'standard') {
+      backMd = card.response;
+    } else {
+      backMd = card.options.map((o) => (o.correct ? `✓ ${o.text}` : `• ${o.text}`)).join('\n');
+    }
+
+    // Anki renders fields as HTML, so convert our Markdown to HTML
+    const front = markdownToHtml(frontMd);
+    const back = markdownToHtml(backMd);
+    const flds = front + FIELD_SEP + back;
+    const tags = (card.tags ?? []).join(' ');
+    const guid = noteId.toString(36);
+
+    db.run('INSERT INTO notes VALUES (?,?,?,?,?,?,?,?,?,?,?)', [
+      noteId, guid, modelId, nowSec, -1,
+      tags ? ` ${tags} ` : '',
+      flds, front, fieldChecksum(frontMd), 0, '',
+    ]);
+
+    const srsEntry = srsMap.get(card.id);
+    let type = 0, queue = 0, due = 0, ivl = 0, factor = 2500;
+    if (srsEntry && srsEntry.intervalDays > 0) {
+      type = 2; queue = 2;
+      ivl = srsEntry.intervalDays;
+      factor = Math.round(srsEntry.easeFactor * 1000);
+      due = Math.max(0, Math.round((srsEntry.dueAt / 1000 - collectionCreated) / 86400));
+    }
+
+    db.run('INSERT INTO cards VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [
+      cardId, noteId, deckId, 0, nowSec, -1, type, queue, due, ivl, factor, 0, 0, 0, 0, 0, 0, '',
+    ]);
+  }
+
+  const dbBytes = db.export();
+  db.close();
+
+  return zipSync({
+    'collection.anki2': dbBytes,
+    'media': new TextEncoder().encode('{}'),
+  });
 }

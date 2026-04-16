@@ -21,6 +21,7 @@ import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
 import { RunStartDialog } from "@/components/run-start-dialog";
 import { encodeDeck, MAX_SHARE_URL_LENGTH } from "@/lib/share";
+import { exportAsApkg } from "@/lib/apkg";
 import { Markdown } from "@/components/markdown";
 import type { Card, ChoiceOption, Complexity, Deck, DeckImportCard, RunMode, SessionGoal } from "@/types";
 import type { CardPerf } from "@/App";
@@ -106,6 +107,28 @@ export function DeckDetail({
   // Manage section dialog open states (for mobile overflow menu)
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [apkgExporting, setApkgExporting] = useState(false);
+
+  async function handleExportApkg() {
+    setApkgExporting(true);
+    try {
+      const srsMap = new Map(
+        [...cardPerf.entries()]
+          .filter(([, p]) => p.srs != null)
+          .map(([id, p]) => [id, p.srs!])
+      );
+      const bytes = await exportAsApkg(deck, srsMap);
+      const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/zip' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${deck.title}.apkg`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setApkgExporting(false);
+    }
+  }
 
   // Card editing state (for mobile "..." per card)
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
@@ -314,6 +337,9 @@ export function DeckDetail({
             trigger={<Button variant="outline" size="sm">Export JSON</Button>}
             deck={deck}
           />
+          <Button variant="outline" size="sm" disabled={apkgExporting} onClick={handleExportApkg}>
+            {apkgExporting ? "Exporting…" : "Export Anki"}
+          </Button>
           <ShareLinkButton deck={deck} />
         </div>
 
@@ -345,6 +371,12 @@ export function DeckDetail({
               onSelect={() => setExportOpen(true)}
             >
               Share &amp; Export
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              className={ITEM_CLASS}
+              onSelect={handleExportApkg}
+            >
+              Export Anki (.apkg)
             </DropdownMenu.Item>
           </OverflowMenu>
         </div>
