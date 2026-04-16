@@ -13,9 +13,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { DeckForm } from "@/components/deck-form";
 import { ImportDeckDialog } from "@/components/import-dialog";
+import { ImportApkgDialog } from "@/components/import-apkg-dialog";
 import { BackupDialog } from "@/components/backup-dialog";
 import { StudyHeatmap } from "@/components/study-heatmap";
-import type { Deck, DeckImport, RunRecord } from "@/types";
+import type { CardSRS, Deck, DeckImport, RunRecord } from "@/types";
 import { cn } from "@/lib/utils";
 
 const ITEM_CLASS =
@@ -62,6 +63,7 @@ interface DeckListProps {
   onSelectDeck: (id: string) => void;
   onAddDeck: (title: string, tags: string[], color?: string, emoji?: string) => void;
   onImportDeck: (data: DeckImport) => void;
+  onImportApkg: (decks: Deck[], srs: CardSRS[]) => void;
   onRestored: () => void;
   onViewGlobalStats: () => void;
 }
@@ -74,6 +76,7 @@ export function DeckList({
   onSelectDeck,
   onAddDeck,
   onImportDeck,
+  onImportApkg,
   onRestored,
   onViewGlobalStats,
 }: DeckListProps) {
@@ -84,6 +87,7 @@ export function DeckList({
   const [now] = useState(() => new Date());
   const [backupOpen, setBackupOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [apkgOpen, setApkgOpen] = useState(false);
 
   const streak = useMemo(() => computeStreak(allRuns, now), [allRuns, now]);
   const todayCount = useMemo(() => todayCards(allRuns, now), [allRuns, now]);
@@ -160,7 +164,13 @@ export function DeckList({
                   className={ITEM_CLASS}
                   onSelect={() => setImportOpen(true)}
                 >
-                  Import Deck
+                  Import Deck (JSON)
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  className={ITEM_CLASS}
+                  onSelect={() => setApkgOpen(true)}
+                >
+                  Import Anki Deck (.apkg)
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className={ITEM_CLASS}
@@ -179,6 +189,11 @@ export function DeckList({
         open={importOpen}
         onOpenChange={setImportOpen}
         onImport={onImportDeck}
+      />
+      <ImportApkgDialog
+        open={apkgOpen}
+        onOpenChange={setApkgOpen}
+        onImport={onImportApkg}
       />
       <BackupDialog
         open={backupOpen}

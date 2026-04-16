@@ -235,6 +235,10 @@ function App() {
           onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
           onAddDeck={(title, tags, color, emoji) => addDeck(title, tags, color, emoji)}
           onImportDeck={(data) => importDeck(data)}
+          onImportApkg={(newDecks, srsEntries) => {
+            for (const deck of newDecks) importDeckWithId(deck);
+            srs.importSRS(srsEntries);
+          }}
           onRestored={reloadFromStorage}
           onViewGlobalStats={() => setView({ kind: "globalStats" })}
         />
