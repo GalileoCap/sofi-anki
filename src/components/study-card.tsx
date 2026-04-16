@@ -74,7 +74,9 @@ export function StudyCard({
 
   function handleSubmitChoice() {
     setChoiceSubmitted(true);
-    setGrade(computeChoiceGrade(selectedOptions));
+    const result = computeChoiceGrade(selectedOptions);
+    setGrade(result);
+    if (result === "wrong") setRedoLater(true);
   }
 
   // Combined reveal for choice: reveals answer + submits choice
@@ -112,7 +114,7 @@ export function StudyCard({
           setHintVisible((v) => !v);
         }
       } else {
-        if (e.key === "1") setGrade("wrong");
+        if (e.key === "1") { setGrade("wrong"); setRedoLater(true); }
         else if (e.key === "2") setGrade("approximate");
         else if (e.key === "3") setGrade("correct");
         else if (e.key === "r") setRedoLater((v) => !v);
@@ -256,7 +258,7 @@ export function StudyCard({
               <button
                 key={g.value}
                 type="button"
-                onClick={() => setGrade(g.value)}
+                onClick={() => { setGrade(g.value); if (g.value === "wrong") setRedoLater(true); }}
                 className={cn(
                   "flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-all",
                   g.className,
