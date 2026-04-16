@@ -84,7 +84,7 @@ export function StudyHeatmap({ runs }: StudyHeatmapProps) {
         {/* Day labels */}
         <div className="flex flex-col gap-[3px] pr-1">
           {DAY_LABELS.map((label, i) => (
-            <div key={i} className="flex h-[14px] items-center justify-center text-[9px] text-muted-foreground">
+            <div key={i} className="flex h-[20px] items-center justify-center text-[9px] text-muted-foreground">
               {label}
             </div>
           ))}
@@ -98,14 +98,14 @@ export function StudyHeatmap({ runs }: StudyHeatmapProps) {
                 return (dow === 0 ? 6 : dow - 1) === di;
               });
               if (!day) {
-                return <div key={di} className="h-[14px]" />;
+                return <div key={di} className="h-[20px]" />;
               }
               const count = cardsByDate.get(day.key) ?? 0;
               const level = getLevel(count);
               return (
                 <div
                   key={di}
-                  className={cn("h-[14px] rounded-sm", level.className)}
+                  className={cn("h-[20px] rounded-sm", level.className)}
                   title={`${formatDateLabel(day.date)}: ${count} cards`}
                 />
               );

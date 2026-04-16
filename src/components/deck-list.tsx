@@ -330,7 +330,7 @@ export function DeckList({
               <Card className="h-full transition-colors hover:bg-muted/50 cursor-pointer overflow-hidden" size="sm">
                 {deck.color && (
                   <div
-                    className="flex h-12 items-center justify-center text-2xl"
+                    className="flex h-24 items-center justify-center text-4xl"
                     style={{ backgroundColor: deck.color }}
                   >
                     {deck.emoji ?? null}
