@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { Tooltip } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { StudyCard } from "@/components/study-card";
 import { RunSummary } from "@/components/run-summary";
@@ -383,11 +384,33 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
               </kbd>
             </Button>
             {/* Desktop: timer + hide toggle */}
-            {showTimer && (
-              <span className="hidden sm:inline font-mono text-sm text-muted-foreground">
-                {formatTime(elapsed)}
-              </span>
-            )}
+            {showTimer && (() => {
+              const cardsRemaining = remaining.length - currentIndex;
+              const avgMs = cardsCompleted > 0 ? elapsed / cardsCompleted : 0;
+              const estTotal = cardsCompleted > 0 ? elapsed + avgMs * cardsRemaining : 0;
+              return (
+                <Tooltip.Provider delayDuration={300}>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <span className="hidden sm:inline font-mono text-sm text-muted-foreground cursor-default select-none">
+                        {formatTime(elapsed)}
+                      </span>
+                    </Tooltip.Trigger>
+                    {estTotal > 0 && (
+                      <Tooltip.Portal>
+                        <Tooltip.Content
+                          sideOffset={6}
+                          className="z-50 rounded-md border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-sm"
+                        >
+                          ~{formatTime(estTotal)} estimated total
+                          <Tooltip.Arrow className="fill-popover" />
+                        </Tooltip.Content>
+                      </Tooltip.Portal>
+                    )}
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              );
+            })()}
             <Button
               variant="ghost"
               size="xs"
