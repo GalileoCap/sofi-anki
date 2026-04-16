@@ -241,7 +241,7 @@ export function StudyCard({
   const gradingSection = revealed ? (
     <>
       {card.type === "standard" && (
-        <div className="w-full rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">
+        <div className="w-full rounded-lg bg-muted/50 p-4 text-lg text-muted-foreground">
           <Markdown>{card.response}</Markdown>
         </div>
       )}
@@ -296,12 +296,12 @@ export function StudyCard({
   ) : null;
 
   return (
-    <div className="w-full max-w-lg mx-auto card-flip-container">
+    <div className="w-full mx-auto card-flip-container">
       <div className={cn("card-flip-inner", revealed && "flipped")}>
         {/* Front face */}
         <Card className="card-flip-front">
           <CardContent className="flex flex-col items-center gap-6 text-center">
-            <Markdown className="text-lg font-medium text-foreground">{card.title}</Markdown>
+            <Markdown className="text-2xl font-medium text-foreground">{card.title}</Markdown>
             {complexitySection}
             {choiceOptions}
             {actionButtons}
@@ -311,7 +311,7 @@ export function StudyCard({
         {/* Back face */}
         <Card className="card-flip-back">
           <CardContent className="flex flex-col items-center gap-6 text-center">
-            <Markdown className="text-lg font-medium text-foreground">{card.title}</Markdown>
+            <Markdown className="text-2xl font-medium text-foreground">{card.title}</Markdown>
             {complexitySection}
             {choiceOptions}
             {gradingSection}

@@ -146,7 +146,7 @@ function App() {
 
   if (view.kind === "study" && studyDeck && studyDeck.cards.length > 0) {
     return (
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">
+      <div className="mx-auto w-[80%] p-4 sm:p-8">
         <StudySession
           deck={studyDeck}
           goal={view.goal}

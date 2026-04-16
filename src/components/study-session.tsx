@@ -325,7 +325,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
   return (
     <div className="flex flex-col items-center gap-6">
       {/* Header bar */}
-      <div className="flex w-full max-w-lg flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         {/* Row 1: exit left, controls right */}
         <div className="flex items-center justify-between">
           {/* Exit / Confirm */}
@@ -400,7 +400,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
       </div>
 
       {/* Card progress bar */}
-      <div className="w-full max-w-lg">
+      <div className="w-full">
         <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
           <div
             className="h-full rounded-full bg-primary/60 transition-all duration-300"
@@ -411,7 +411,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
 
       {/* Goal progress */}
       {goal && (
-        <div className="w-full max-w-lg">
+        <div className="w-full">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
             <span>
               {goal.type === "cards"
@@ -436,7 +436,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
 
       {/* Goal reached banner */}
       {showGoalBanner && !paused && (
-        <div className="flex w-full max-w-lg items-center justify-between rounded-lg border border-green-300 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950">
+        <div className="flex w-full items-center justify-between rounded-lg border border-green-300 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950">
           <p className="text-sm font-medium text-green-700 dark:text-green-300">
             You reached your goal!
           </p>
