@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +12,68 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { DeckImport, DeckImportCard } from "@/types";
+
+const DECK_SCHEMA_PROMPT = `Generate flashcards in the following JSON format:
+
+{
+  "title": "Deck Title",
+  "tags": ["topic1", "topic2"],
+  "cards": [
+    {
+      "title": "Question or front of card",
+      "response": "Answer or back of card",
+      "hint": "Optional hint shown before revealing the answer",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"]
+    },
+    {
+      "type": "choice",
+      "title": "Multiple choice question",
+      "hint": "Optional hint shown before answer",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"],
+      "options": [
+        { "text": "Option A", "correct": true },
+        { "text": "Option B", "correct": false }
+      ]
+    }
+  ]
+}
+
+Standard cards have "title", "response", "complexity", optional "tags", and optional "hint".
+Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", and "options" (array of { "text", "correct" }).
+If multiple options are correct, it becomes a multi-select question.
+The deck and each card can have "tags" (array of strings) for categorization.
+Return only the JSON, no extra text.`;
+
+const CARDS_SCHEMA_PROMPT = `Generate flashcards in the following JSON format:
+
+{
+  "cards": [
+    {
+      "title": "Question or front of card",
+      "response": "Answer or back of card",
+      "hint": "Optional hint shown before revealing the answer",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"]
+    },
+    {
+      "type": "choice",
+      "title": "Multiple choice question",
+      "hint": "Optional hint shown before answer",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"],
+      "options": [
+        { "text": "Option A", "correct": true },
+        { "text": "Option B", "correct": false }
+      ]
+    }
+  ]
+}
+
+Standard cards have "title", "response", "complexity", optional "tags", and optional "hint".
+Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", and "options" (array of { "text", "correct" }).
+Return only the JSON, no extra text.`;
 
 function isValidCard(c: unknown): c is DeckImportCard {
   if (typeof c !== "object" || c === null) return false;
@@ -43,6 +106,7 @@ export function ImportDeckDialog({ trigger, open: controlledOpen, onOpenChange: 
   const open = controlledOpen ?? internalOpen;
   const [json, setJson] = useState("");
   const [error, setError] = useState("");
+  const [copiedSchema, setCopiedSchema] = useState(false);
 
   function handleOpenChange(next: boolean) {
     setInternalOpen(next);
@@ -71,10 +135,16 @@ export function ImportDeckDialog({ trigger, open: controlledOpen, onOpenChange: 
     }
   }
 
+  async function copySchema() {
+    await navigator.clipboard.writeText(DECK_SCHEMA_PROMPT);
+    setCopiedSchema(true);
+    setTimeout(() => setCopiedSchema(false), 2000);
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Import Deck</DialogTitle>
           <DialogDescription>
@@ -84,6 +154,21 @@ export function ImportDeckDialog({ trigger, open: controlledOpen, onOpenChange: 
             choice (with <code className="rounded bg-muted px-1 py-0.5 text-xs">options</code>).
           </DialogDescription>
         </DialogHeader>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">LLM Prompt Template</p>
+            <Button variant="outline" size="sm" onClick={copySchema}>
+              {copiedSchema ? "Copied!" : "Copy"}
+            </Button>
+          </div>
+          <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">
+            {DECK_SCHEMA_PROMPT}
+          </pre>
+        </div>
+
+        <Separator />
+
         <Textarea
           placeholder={'{\n  "title": "My Deck",\n  "cards": [\n    { "title": "Q1", "response": "A1" }\n  ]\n}'}
           value={json}
@@ -117,6 +202,7 @@ export function ImportCardsDialog({ trigger, open: controlledOpen, onOpenChange:
   const open = controlledOpen ?? internalOpen;
   const [json, setJson] = useState("");
   const [error, setError] = useState("");
+  const [copiedSchema, setCopiedSchema] = useState(false);
 
   function handleOpenChange(next: boolean) {
     setInternalOpen(next);
@@ -145,19 +231,41 @@ export function ImportCardsDialog({ trigger, open: controlledOpen, onOpenChange:
     }
   }
 
+  async function copySchema() {
+    await navigator.clipboard.writeText(CARDS_SCHEMA_PROMPT);
+    setCopiedSchema(true);
+    setTimeout(() => setCopiedSchema(false), 2000);
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Import Cards</DialogTitle>
           <DialogDescription>
-            Paste a JSON array of cards. Standard cards need <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code> and <code className="rounded bg-muted px-1 py-0.5 text-xs">response</code>.
+            Paste a JSON object with a <code className="rounded bg-muted px-1 py-0.5 text-xs">cards</code> array.
+            Standard cards need <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code> and <code className="rounded bg-muted px-1 py-0.5 text-xs">response</code>.
             Choice cards need <code className="rounded bg-muted px-1 py-0.5 text-xs">type: "choice"</code> and <code className="rounded bg-muted px-1 py-0.5 text-xs">options</code>.
           </DialogDescription>
         </DialogHeader>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">LLM Prompt Template</p>
+            <Button variant="outline" size="sm" onClick={copySchema}>
+              {copiedSchema ? "Copied!" : "Copy"}
+            </Button>
+          </div>
+          <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">
+            {CARDS_SCHEMA_PROMPT}
+          </pre>
+        </div>
+
+        <Separator />
+
         <Textarea
-          placeholder={'[\n  { "title": "Q1", "response": "A1" },\n  { "type": "choice", "title": "Q2", "options": [\n    { "text": "A", "correct": true },\n    { "text": "B", "correct": false }\n  ]}\n]'}
+          placeholder={'{\n  "cards": [\n    { "title": "Q1", "response": "A1" },\n    { "type": "choice", "title": "Q2", "options": [\n      { "text": "A", "correct": true },\n      { "text": "B", "correct": false }\n    ]}\n  ]\n}'}
           value={json}
           onChange={(e) => {
             setJson(e.target.value);

@@ -11,38 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import { encodeDeck, MAX_SHARE_URL_LENGTH } from "@/lib/share";
 import type { Deck } from "@/types";
 
-const SCHEMA_PROMPT = `Generate flashcards in the following JSON format:
-
-{
-  "title": "Deck Title",
-  "tags": ["topic1", "topic2"],
-  "cards": [
-    {
-      "title": "Question or front of card",
-      "response": "Answer or back of card",
-      "hint": "Optional hint shown before revealing the answer",
-      "complexity": "easy" | "medium" | "hard",
-      "tags": ["subtopic"]
-    },
-    {
-      "type": "choice",
-      "title": "Multiple choice question",
-      "hint": "Optional hint shown before answer",
-      "complexity": "easy" | "medium" | "hard",
-      "tags": ["subtopic"],
-      "options": [
-        { "text": "Option A", "correct": true },
-        { "text": "Option B", "correct": false }
-      ]
-    }
-  ]
-}
-
-Standard cards have "title", "response", "complexity", optional "tags", and optional "hint".
-Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", and "options" (array of { "text", "correct" }).
-If multiple options are correct, it becomes a multi-select question.
-The deck and each card can have "tags" (array of strings) for categorization.
-Return only the JSON, no extra text.`;
 
 interface ExportDialogProps {
   trigger?: React.ReactNode;
@@ -57,7 +25,6 @@ export function ExportDialog({ trigger, open: controlledOpen, onOpenChange: cont
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
 
-  const [copiedSchema, setCopiedSchema] = useState(false);
   const [copiedData, setCopiedData] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -153,24 +120,6 @@ export function ExportDialog({ trigger, open: controlledOpen, onOpenChange: cont
 
         <div className="flex min-w-0 flex-col gap-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">LLM Prompt Template</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => copyToClipboard(SCHEMA_PROMPT, setCopiedSchema)}
-            >
-              {copiedSchema ? "Copied!" : "Copy"}
-            </Button>
-          </div>
-          <pre className="max-h-40 min-w-0 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre">
-            {SCHEMA_PROMPT}
-          </pre>
-        </div>
-
-        <Separator />
-
-        <div className="flex min-w-0 flex-col gap-3">
-          <div className="flex items-center justify-between">
             <p className="text-sm font-medium">Deck Data</p>
             <Button
               variant="outline"
@@ -180,7 +129,7 @@ export function ExportDialog({ trigger, open: controlledOpen, onOpenChange: cont
               {copiedData ? "Copied!" : "Copy"}
             </Button>
           </div>
-          <pre className="max-h-60 min-w-0 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre">
+          <pre className="max-h-60 min-w-0 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">
             {deckJson}
           </pre>
         </div>

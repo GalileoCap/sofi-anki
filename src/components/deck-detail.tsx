@@ -269,7 +269,7 @@ export function DeckDetail({
               onClick={() => setRunDialog({ open: true, mode: "all", label: "All Cards" })}
               disabled={filteredCards.length === 0}
             >
-              All Cards{activeFilter ? ` (${filteredCards.length})` : ""}
+              All Cards ({activeFilter ? filteredCards.length : deck.cards.length})
             </Button>
             <Button
               variant="secondary"
@@ -466,6 +466,19 @@ export function DeckDetail({
                 Clear
               </Button>
             )}
+          </div>
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => {
+                const allIds = new Set(filteredCards.map((c) => c.id));
+                const allExpanded = filteredCards.every((c) => expandedCards.has(c.id));
+                setExpandedCards(allExpanded ? new Set() : allIds);
+              }}
+            >
+              {filteredCards.every((c) => expandedCards.has(c.id)) ? "Collapse all" : "Expand all"}
+            </Button>
           </div>
         </div>
       )}
