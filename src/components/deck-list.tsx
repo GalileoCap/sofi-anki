@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { DropdownMenu } from "radix-ui";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreVerticalIcon } from "@hugeicons/core-free-icons";
@@ -85,6 +86,7 @@ export function DeckList({
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState(String(dailyGoal));
   const [now] = useState(() => new Date());
+  const { t } = useLanguage();
   const [backupOpen, setBackupOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [apkgOpen, setApkgOpen] = useState(false);
@@ -140,7 +142,7 @@ export function DeckList({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-2xl font-medium text-foreground">Your Decks</h1>
+        <h1 className="text-2xl font-medium text-foreground">{t("deckList.title")}</h1>
         <div className="flex items-center gap-2">
           {allRuns.length > 0 && (
             <Button variant="ghost" size="sm" onClick={onViewGlobalStats}>

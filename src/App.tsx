@@ -10,6 +10,7 @@ import { GlobalStats } from "@/components/global-stats";
 import { StudySession } from "@/components/study-session";
 import { SharedDeckView } from "@/components/shared-deck-view";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 import { decodeDeck } from "@/lib/share";
 import type { AnswerResult, CardSRS, Complexity, Deck, RunMode, SessionGoal } from "@/types";
 
@@ -166,6 +167,7 @@ function App() {
       <div className="mx-auto w-[80%] p-4 sm:p-8">
         <div className="flex justify-end mb-4">
           <ThemeToggle />
+          <LanguageToggle />
         </div>
         <GlobalStats
           decks={decks}
@@ -184,6 +186,7 @@ function App() {
       <div className="mx-auto w-[80%] p-4 sm:p-8">
         <div className="flex justify-end mb-4">
           <ThemeToggle />
+          <LanguageToggle />
         </div>
         <DeckStats
           deck={currentDeck}
@@ -199,6 +202,7 @@ function App() {
     <div className="mx-auto w-[80%] p-4 sm:p-8">
       <div className="flex justify-end mb-4">
         <ThemeToggle />
+        <LanguageToggle />
       </div>
 
       {view.kind === "deck" && currentDeck ? (
