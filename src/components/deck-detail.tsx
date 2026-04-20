@@ -1,4 +1,6 @@
 import { useState, useMemo, useRef } from "react";
+import { useLanguage } from "@/contexts/language-context";
+import type { TranslationKey } from "@/lib/translations";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { DropdownMenu } from "radix-ui";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -37,10 +39,10 @@ function formatDue(dueAt: number, now: number): string {
 }
 
 const COMPLEXITIES: Complexity[] = ["easy", "medium", "hard"];
-const COMPLEXITY_LABELS: Record<Complexity, string> = {
-  easy: "Easy",
-  medium: "Medium",
-  hard: "Hard",
+const COMPLEXITY_KEYS: Record<Complexity, TranslationKey> = {
+  easy: "complexity.easy",
+  medium: "complexity.medium",
+  hard: "complexity.hard",
 };
 
 // Dropdown menu item styles
@@ -82,6 +84,7 @@ export function DeckDetail({
   onDeleteDeck,
   onImportCards,
 }: DeckDetailProps) {
+  const { t } = useLanguage();
   const [now] = useState(() => Date.now());
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
@@ -100,7 +103,7 @@ export function DeckDetail({
   const [runDialog, setRunDialog] = useState<{ open: boolean; mode: RunMode; label: string }>({
     open: false,
     mode: "all",
-    label: "All Cards",
+    label: "",
   });
   const [mobileStartOpen, setMobileStartOpen] = useState(false);
 
@@ -222,7 +225,7 @@ export function DeckDetail({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <Button variant="ghost" size="sm" onClick={onBack}>
-            Back
+            {t("common.back")}
           </Button>
           {deck.emoji && (
             <span className="text-2xl leading-none shrink-0">{deck.emoji}</span>
@@ -231,14 +234,14 @@ export function DeckDetail({
           {/* Desktop: inline Edit button */}
           <div className="hidden sm:block shrink-0">
             <DeckForm
-              trigger={<Button variant="ghost" size="xs">Edit</Button>}
+              trigger={<Button variant="ghost" size="xs">{t("common.edit")}</Button>}
               onSubmit={onEditDeck}
               initialTitle={deck.title}
               initialTags={deck.tags ?? []}
               initialColor={deck.color}
               initialEmoji={deck.emoji}
-              dialogTitle="Edit Deck"
-              submitLabel="Save"
+              dialogTitle={t("deckDetail.editDeck")}
+              submitLabel={t("common.save")}
             />
           </div>
         </div>
@@ -250,7 +253,7 @@ export function DeckDetail({
       {/* Study section */}
       <UiCard size="sm">
         <CardContent className="flex flex-col gap-4">
-          <p className="text-sm font-medium text-foreground">Study</p>
+          <p className="text-sm font-medium text-foreground">{t("deckDetail.study")}</p>
 
           {/* Mobile: single Start button */}
           <div className="sm:hidden">
@@ -259,43 +262,43 @@ export function DeckDetail({
               onClick={() => setMobileStartOpen(true)}
               disabled={deck.cards.length === 0}
             >
-              Start
+              {t("common.start")}
             </Button>
           </div>
 
           {/* Desktop: original four buttons */}
           <div className="hidden sm:flex flex-wrap gap-2">
             <Button
-              onClick={() => setRunDialog({ open: true, mode: "all", label: "All Cards" })}
+              onClick={() => setRunDialog({ open: true, mode: "all", label: t("runStart.allCards") })}
               disabled={filteredCards.length === 0}
             >
-              All Cards ({activeFilter ? filteredCards.length : deck.cards.length})
+              {t("deckDetail.allCards")} ({activeFilter ? filteredCards.length : deck.cards.length})
             </Button>
             <Button
               variant="secondary"
-              onClick={() => setRunDialog({ open: true, mode: "due", label: "Due Cards" })}
+              onClick={() => setRunDialog({ open: true, mode: "due", label: t("deckDetail.dueCards") })}
               disabled={dueCount === 0}
             >
-              Due
+              {t("common.due")}
               <Badge variant="outline" className="ml-1 text-xs">{dueCount}</Badge>
             </Button>
             <Button
               variant="secondary"
-              onClick={() => setRunDialog({ open: true, mode: "weak", label: "Weak Cards" })}
+              onClick={() => setRunDialog({ open: true, mode: "weak", label: t("deckDetail.weakCards") })}
               disabled={weakCount === 0}
             >
-              Weak
+              {t("common.weak")}
               <Badge variant="outline" className="ml-1 text-xs">{weakCount}</Badge>
             </Button>
             <Button variant="outline" onClick={onViewStats} disabled={!hasRuns}>
-              Stats
+              {t("common.stats")}
             </Button>
           </div>
 
           {/* Mobile Stats link */}
           {hasRuns && (
             <Button variant="ghost" size="sm" className="sm:hidden self-start -mt-2 -ml-2 text-muted-foreground" onClick={onViewStats}>
-              View Stats
+              {t("deckDetail.viewStats")}
             </Button>
           )}
         </CardContent>
@@ -323,22 +326,22 @@ export function DeckDetail({
       <div className="flex flex-wrap items-center gap-2">
         {/* Add Card — always visible */}
         <CardForm
-          trigger={<Button variant="outline" size="sm">Add Card</Button>}
+          trigger={<Button variant="outline" size="sm">{t("deckDetail.addCard")}</Button>}
           onSubmit={onAddCard}
         />
 
         {/* Desktop secondary actions */}
         <div className="hidden sm:flex items-center gap-2">
           <ImportCardsDialog
-            trigger={<Button variant="outline" size="sm">Import Cards</Button>}
+            trigger={<Button variant="outline" size="sm">{t("deckDetail.importCards")}</Button>}
             onImport={onImportCards}
           />
           <ExportDialog
-            trigger={<Button variant="outline" size="sm">Export JSON</Button>}
+            trigger={<Button variant="outline" size="sm">{t("deckDetail.exportJson")}</Button>}
             deck={deck}
           />
           <Button variant="outline" size="sm" disabled={apkgExporting} onClick={handleExportApkg}>
-            {apkgExporting ? "Exporting…" : "Export Anki"}
+            {apkgExporting ? t("deckDetail.exporting") : t("deckDetail.exportAnki")}
           </Button>
           <ShareLinkButton deck={deck} />
         </div>
@@ -349,7 +352,7 @@ export function DeckDetail({
             <DeckForm
               trigger={
                 <DropdownMenu.Item className={ITEM_CLASS} onSelect={(e) => e.preventDefault()}>
-                  Edit Deck
+                  {t("deckDetail.editDeck")}
                 </DropdownMenu.Item>
               }
               onSubmit={onEditDeck}
@@ -357,26 +360,26 @@ export function DeckDetail({
               initialTags={deck.tags ?? []}
               initialColor={deck.color}
               initialEmoji={deck.emoji}
-              dialogTitle="Edit Deck"
-              submitLabel="Save"
+              dialogTitle={t("deckDetail.editDeck")}
+              submitLabel={t("common.save")}
             />
             <DropdownMenu.Item
               className={ITEM_CLASS}
               onSelect={() => setImportOpen(true)}
             >
-              Import Cards
+              {t("deckDetail.importCards")}
             </DropdownMenu.Item>
             <DropdownMenu.Item
               className={ITEM_CLASS}
               onSelect={() => setExportOpen(true)}
             >
-              Share &amp; Export
+              {t("deckDetail.shareExport")}
             </DropdownMenu.Item>
             <DropdownMenu.Item
               className={ITEM_CLASS}
               onSelect={handleExportApkg}
             >
-              Export Anki (.apkg)
+              {t("deckDetail.exportApkg")}
             </DropdownMenu.Item>
           </OverflowMenu>
         </div>
@@ -397,15 +400,15 @@ export function DeckDetail({
         <div className="flex-1" />
         {!confirmDelete ? (
           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>
-            Delete Deck
+            {t("deckDetail.deleteDeck")}
           </Button>
         ) : (
           <div className="flex items-center gap-2">
             <Button variant="destructive" size="sm" onClick={onDeleteDeck}>
-              Confirm
+              {t("common.confirm")}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
           </div>
         )}
@@ -417,7 +420,7 @@ export function DeckDetail({
       {deck.cards.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <Input
-            placeholder="Search cards..."
+            placeholder={t("deckDetail.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-xs"
@@ -435,7 +438,7 @@ export function DeckDetail({
                     : "border-transparent text-muted-foreground hover:bg-muted"
                 )}
               >
-                {COMPLEXITY_LABELS[c]}
+                {t(COMPLEXITY_KEYS[c])}
                 <span className="font-mono text-muted-foreground">{complexityCounts[c]}</span>
               </button>
             ))}
@@ -463,7 +466,7 @@ export function DeckDetail({
                   setTagFilter(new Set());
                 }}
               >
-                Clear
+                {t("common.clear")}
               </Button>
             )}
           </div>
@@ -477,7 +480,7 @@ export function DeckDetail({
                 setExpandedCards(allExpanded ? new Set() : allIds);
               }}
             >
-              {filteredCards.every((c) => expandedCards.has(c.id)) ? "Collapse all" : "Expand all"}
+              {filteredCards.every((c) => expandedCards.has(c.id)) ? t("deckDetail.collapseAll") : t("deckDetail.expandAll")}
             </Button>
           </div>
         </div>
@@ -486,14 +489,14 @@ export function DeckDetail({
       {/* Card list */}
       {deck.cards.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <p className="text-lg text-muted-foreground">No cards yet</p>
+          <p className="text-lg text-muted-foreground">{t("deckDetail.noCards")}</p>
           <p className="text-sm text-muted-foreground">
-            Add cards manually or import them from JSON.
+            {t("deckDetail.noCardsHint")}
           </p>
         </div>
       ) : filteredCards.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <p className="text-sm text-muted-foreground">No cards match your filters.</p>
+          <p className="text-sm text-muted-foreground">{t("deckDetail.noMatch")}</p>
         </div>
       ) : (
         <div ref={listRef} style={{ position: 'relative', height: `${virtualizer.getTotalSize()}px` }}>
@@ -541,9 +544,9 @@ export function DeckDetail({
                     ))}
                     {/* Performance indicator */}
                     {isNew ? (
-                      <Badge variant="outline" className="text-xs text-muted-foreground">New</Badge>
+                      <Badge variant="outline" className="text-xs text-muted-foreground">{t("deckStats.new")}</Badge>
                     ) : isDue ? (
-                      <Badge variant="outline" className="text-xs border-amber-400/60 bg-amber-50 text-amber-700 dark:border-amber-700/60 dark:bg-amber-950 dark:text-amber-400">Due</Badge>
+                      <Badge variant="outline" className="text-xs border-amber-400/60 bg-amber-50 text-amber-700 dark:border-amber-700/60 dark:bg-amber-950 dark:text-amber-400">{t("common.due")}</Badge>
                     ) : perf?.lastResult === "correct" ? (
                       <span title={`${Math.round(perf.accuracy * 100)}% accuracy · ${perf.attempts} session${perf.attempts === 1 ? "" : "s"}`} className="flex h-2 w-2 rounded-full bg-green-500 shrink-0" />
                     ) : perf?.lastResult === "approximate" ? (
@@ -557,11 +560,11 @@ export function DeckDetail({
                   {/* Desktop: Edit + Delete */}
                   <div className="hidden sm:flex gap-1">
                     <CardForm
-                      trigger={<Button variant="ghost" size="xs">Edit</Button>}
+                      trigger={<Button variant="ghost" size="xs">{t("common.edit")}</Button>}
                       onSubmit={(updates) => onEditCard(card.id, updates)}
                       initial={card}
-                      dialogTitle="Edit Card"
-                      submitLabel="Save"
+                      dialogTitle={t("cardForm.editCard")}
+                      submitLabel={t("common.save")}
                     />
                     <Button
                       variant="ghost"
@@ -569,7 +572,7 @@ export function DeckDetail({
                       className="text-destructive hover:text-destructive"
                       onClick={() => onDeleteCard(card.id)}
                     >
-                      Delete
+                      {t("common.delete")}
                     </Button>
                   </div>
 
@@ -580,13 +583,13 @@ export function DeckDetail({
                         className={ITEM_CLASS}
                         onSelect={() => setEditingCardId(card.id)}
                       >
-                        Edit
+                        {t("common.edit")}
                       </DropdownMenu.Item>
                       <DropdownMenu.Item
                         className={cn(ITEM_CLASS, "text-destructive data-[highlighted]:text-destructive")}
                         onSelect={() => onDeleteCard(card.id)}
                       >
-                        Delete
+                        {t("common.delete")}
                       </DropdownMenu.Item>
                     </OverflowMenu>
                   </div>
@@ -599,14 +602,14 @@ export function DeckDetail({
                   {/* Answer / Options */}
                   {card.type === "standard" ? (
                     <div>
-                      <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">Answer</p>
+                      <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("common.answer")}</p>
                       <div className="rounded-lg bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
                         <Markdown>{card.response}</Markdown>
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">Options</p>
+                      <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("common.options")}</p>
                       <div className="flex flex-col gap-1">
                         {(card.options ?? []).map((opt: ChoiceOption) => (
                           <div key={opt.id} className={cn(
@@ -628,7 +631,7 @@ export function DeckDetail({
                   {/* Hint */}
                   {card.hint && (
                     <div>
-                      <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">Hint</p>
+                      <p className="mb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("common.hint")}</p>
                       <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
                         <Markdown>{card.hint}</Markdown>
                       </div>
@@ -639,11 +642,11 @@ export function DeckDetail({
                   {perf && (
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       {perf.attempts === 0 ? (
-                        <span>Never studied</span>
+                        <span>{t("deckDetail.neverStudied")}</span>
                       ) : (
                         <>
                           <span>
-                            Accuracy:{" "}
+                            {t("deckDetail.accuracy")}{" "}
                             <span className={cn(
                               "font-medium",
                               perf.accuracy >= 0.8 ? "text-green-600 dark:text-green-400" :
@@ -657,15 +660,15 @@ export function DeckDetail({
                           {perf.srs && (
                             <>
                               <span>
-                                Interval:{" "}
+                                {t("deckDetail.interval")}{" "}
                                 <span className="font-medium text-foreground">
                                   {perf.srs.intervalDays === 0
-                                    ? "Review"
+                                    ? t("deckDetail.review")
                                     : `${perf.srs.intervalDays}d`}
                                 </span>
                               </span>
                               <span>
-                                Due:{" "}
+                                {t("deckDetail.due")}{" "}
                                 <span className={cn(
                                   "font-medium",
                                   isDue ? "text-amber-600 dark:text-amber-400" : "text-foreground"
@@ -674,7 +677,7 @@ export function DeckDetail({
                                 </span>
                               </span>
                               <span>
-                                Ease:{" "}
+                                {t("deckDetail.ease")}{" "}
                                 <span className="font-medium text-foreground">
                                   {perf.srs.easeFactor.toFixed(1)}
                                 </span>
@@ -704,8 +707,8 @@ export function DeckDetail({
             setEditingCardId(null);
           }}
           initial={editingCard}
-          dialogTitle="Edit Card"
-          submitLabel="Save"
+          dialogTitle={t("cardForm.editCard")}
+          submitLabel={t("common.save")}
         />
       )}
     </div>
@@ -717,7 +720,7 @@ function OverflowMenu({ children }: { children: React.ReactNode }) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <Button variant="ghost" size="icon-xs" aria-label="More options">
+        <Button variant="ghost" size="icon-xs" aria-label="…">
           <HugeiconsIcon icon={MoreVerticalIcon} size={14} strokeWidth={2} />
         </Button>
       </DropdownMenu.Trigger>
@@ -732,6 +735,7 @@ function OverflowMenu({ children }: { children: React.ReactNode }) {
 
 /** Desktop-only Share Link button (copy URL to clipboard) */
 function ShareLinkButton({ deck }: { deck: Deck }) {
+  const { t } = useLanguage();
   const [shareStatus, setShareStatus] = useState<"idle" | "copying" | "copied" | "too-large">("idle");
 
   return (
@@ -757,7 +761,7 @@ function ShareLinkButton({ deck }: { deck: Deck }) {
         }
       }}
     >
-      {shareStatus === "copied" ? "Link Copied!" : shareStatus === "too-large" ? "Too Large" : "Share Link"}
+      {shareStatus === "copied" ? t("deckDetail.shareLinkCopied") : shareStatus === "too-large" ? t("deckDetail.shareLinkTooLarge") : t("deckDetail.shareLink")}
     </Button>
   );
 }

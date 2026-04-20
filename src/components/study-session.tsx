@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Tooltip } from "radix-ui";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import { StudyCard } from "@/components/study-card";
 import { RunSummary } from "@/components/run-summary";
@@ -38,6 +39,7 @@ interface StudySessionProps {
 }
 
 export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, onRunComplete }: StudySessionProps) {
+  const { t } = useLanguage();
   const [remaining, setRemaining] = useState<Card[]>(() => doShuffle ? shuffle(deck.cards) : [...deck.cards]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -342,7 +344,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
           <div className="flex items-center gap-1">
             {!confirmExit ? (
               <Button variant="ghost" size="sm" onClick={() => setConfirmExit(true)}>
-                Exit
+                {t("studySession.exit")}
                 <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
                   Esc
                 </kbd>
@@ -350,10 +352,10 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
             ) : (
               <div className="flex items-center gap-1">
                 <Button variant="destructive" size="sm" onClick={onExit}>
-                  Exit
+                  {t("studySession.exit")}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setConfirmExit(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               </div>
             )}
@@ -366,9 +368,9 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
               size="xs"
               disabled={undoStack.length === 0}
               onClick={handleUndo}
-              title="Undo last action (Ctrl+Z)"
+              title={t("studySession.undoTitle")}
             >
-              Undo
+              {t("common.undo")}
               <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
                 &#8984;Z
               </kbd>
@@ -378,7 +380,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
               size="xs"
               onClick={() => setPaused((v) => !v)}
             >
-              {paused ? "Resume" : "Pause"}
+              {paused ? t("common.resume") : t("common.pause")}
               <kbd className="ml-1 hidden sm:inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
                 P
               </kbd>
@@ -402,7 +404,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
                           sideOffset={6}
                           className="z-50 rounded-md border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-sm"
                         >
-                          ~{formatTime(estTotal)} estimated total
+                          ~{formatTime(estTotal)}{t("studySession.estimatedTotal")}
                           <Tooltip.Arrow className="fill-popover" />
                         </Tooltip.Content>
                       </Tooltip.Portal>
@@ -417,7 +419,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
               className="hidden sm:inline-flex"
               onClick={() => setShowTimer((v) => !v)}
             >
-              {showTimer ? "Hide" : "Show"}
+              {showTimer ? t("common.hide") : t("common.show")}
             </Button>
             <p className="text-sm text-muted-foreground">
               {currentIndex + 1} / {remaining.length}
@@ -454,17 +456,17 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <span className="inline-block h-2 w-2 rounded-full bg-primary/60 shrink-0" />
-                {doneCount} done
+                {doneCount}{t("studySession.done")}
               </span>
               {redoCount > 0 && (
                 <span className="flex items-center gap-1">
                   <span className="inline-block h-2 w-2 rounded-full bg-amber-400/80 dark:bg-amber-500/70 shrink-0" />
-                  {redoCount} redo later
+                  {redoCount}{t("studySession.redoLater")}
                 </span>
               )}
               <span className="flex items-center gap-1">
                 <span className="inline-block h-2 w-2 rounded-full bg-muted-foreground/30 shrink-0" />
-                {pendingCount} pending
+                {pendingCount}{t("studySession.pending")}
               </span>
             </div>
           </div>
@@ -480,7 +482,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
                 ? `${Math.min(cardsCompleted, goal.value)} / ${goal.value} cards`
                 : `${formatTime(Math.min(elapsed, goal.value * 60_000))} / ${formatTime(goal.value * 60_000)}`}
             </span>
-            {showGoalBanner && <span className="text-green-600 dark:text-green-400 font-medium">Goal reached!</span>}
+            {showGoalBanner && <span className="text-green-600 dark:text-green-400 font-medium">{t("studySession.goalReached")}</span>}
           </div>
           <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
             <div
@@ -500,14 +502,14 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
       {showGoalBanner && !paused && (
         <div className="flex w-full items-center justify-between rounded-lg border border-green-300 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950">
           <p className="text-sm font-medium text-green-700 dark:text-green-300">
-            You reached your goal!
+            {t("studySession.youReachedGoal")}
           </p>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={() => setGoalDismissed(true)}>
-              Continue
+              {t("common.continue")}
             </Button>
             <Button size="sm" onClick={handleFinishEarly}>
-              Finish
+              {t("common.finish")}
             </Button>
           </div>
         </div>
@@ -516,9 +518,9 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, on
       {/* Paused overlay */}
       {paused ? (
         <div className="flex flex-col items-center gap-4 py-16">
-          <p className="text-xl font-medium text-muted-foreground">Paused</p>
+          <p className="text-xl font-medium text-muted-foreground">{t("studySession.paused")}</p>
           <Button onClick={() => setPaused(false)}>
-            Resume
+            {t("common.resume")}
             <kbd className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded border border-current/20 bg-current/10 px-1 font-mono text-[10px] leading-none opacity-60">
               P
             </kbd>

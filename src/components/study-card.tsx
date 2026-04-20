@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/language-context";
+import type { TranslationKey } from "@/lib/translations";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,10 +9,10 @@ import { Markdown } from "@/components/markdown";
 import type { AnswerResult, Card as CardType } from "@/types";
 import { cn } from "@/lib/utils";
 
-const GRADES: { value: AnswerResult; label: string; shortcut: string; className: string }[] = [
-  { value: "wrong", label: "Wrong", shortcut: "1", className: "border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900" },
-  { value: "approximate", label: "Approximate", shortcut: "2", className: "border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-400 dark:hover:bg-yellow-900" },
-  { value: "correct", label: "Correct", shortcut: "3", className: "border-green-300 bg-green-50 text-green-700 hover:bg-green-100 dark:border-green-800 dark:bg-green-950 dark:text-green-400 dark:hover:bg-green-900" },
+const GRADES: { value: AnswerResult; key: TranslationKey; shortcut: string; className: string }[] = [
+  { value: "wrong", key: "common.wrong", shortcut: "1", className: "border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900" },
+  { value: "approximate", key: "common.approximate", shortcut: "2", className: "border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-400 dark:hover:bg-yellow-900" },
+  { value: "correct", key: "common.correct", shortcut: "3", className: "border-green-300 bg-green-50 text-green-700 hover:bg-green-100 dark:border-green-800 dark:bg-green-950 dark:text-green-400 dark:hover:bg-green-900" },
 ];
 
 interface StudyCardProps {
@@ -36,6 +38,7 @@ export function StudyCard({
   onSaveForLater,
   onGraded,
 }: StudyCardProps) {
+  const { t } = useLanguage();
   const [grade, setGrade] = useState<AnswerResult | null>(null);
   const [redoLater, setRedoLater] = useState(false);
   const [hintVisible, setHintVisible] = useState(false);
@@ -132,10 +135,10 @@ export function StudyCard({
     <div className="flex flex-col gap-2 w-full">
       <div className="flex items-center justify-center gap-2">
         <Badge variant="outline" className="text-xs">
-          {card.multiSelect ? "Multi-select" : "Single-select"}
+          {card.multiSelect ? t("studyCard.multiSelect") : t("studyCard.singleSelect")}
         </Badge>
         <span className="text-xs text-muted-foreground">
-          {card.multiSelect ? "Check all correct answers" : "Pick one answer"}
+          {card.multiSelect ? t("studyCard.checkAllCorrect") : t("studyCard.pickOne")}
         </span>
       </div>
       {(card.options ?? []).map((opt) => {
@@ -188,7 +191,7 @@ export function StudyCard({
       className="cursor-pointer bg-muted/50 text-muted-foreground hover:bg-muted"
       onClick={onRevealComplexity}
     >
-      Show Complexity
+      {t("deckDetail.showComplexity")}
       <Kbd>C</Kbd>
     </Badge>
   );
@@ -206,7 +209,7 @@ export function StudyCard({
             onClick={() => setHintVisible(true)}
             className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
           >
-            Show Hint
+            {t("studyCard.showHint")}
             <Kbd className="ml-1">H</Kbd>
           </button>
         )
@@ -217,21 +220,21 @@ export function StudyCard({
             onClick={handleRevealOrSubmitChoice}
             disabled={selectedOptions.size === 0}
           >
-            Submit &amp; Reveal
+            {t("studyCard.submitReveal")}
             <Kbd>Space</Kbd>
           </Button>
         ) : (
           <Button onClick={onReveal}>
-            Reveal Answer
+            {t("studyCard.revealAnswer")}
             <Kbd>Space</Kbd>
           </Button>
         )}
         <Button variant="outline" onClick={onSkip}>
-          Skip
+          {t("common.skip")}
           <Kbd>S</Kbd>
         </Button>
         <Button variant="secondary" onClick={onSaveForLater}>
-          Save For Later
+          {t("studyCard.saveForLater")}
           <Kbd>L</Kbd>
         </Button>
       </div>
@@ -250,8 +253,8 @@ export function StudyCard({
         <div className="flex flex-col gap-1.5 w-full">
           <p className="text-sm text-muted-foreground">
             {isChoice && choiceSubmitted
-              ? "Auto-graded \u2014 override if needed:"
-              : "How did you do?"}
+              ? t("studyCard.autoGraded")
+              : t("studyCard.howDidYouDo")}
           </p>
           <div className="flex gap-2 justify-center">
             {GRADES.map((g) => (
@@ -265,7 +268,7 @@ export function StudyCard({
                   grade === g.value && "ring-2 ring-ring ring-offset-2"
                 )}
               >
-                {g.label}
+                {t(g.key)}
                 <Kbd className="ml-1">{g.shortcut}</Kbd>
               </button>
             ))}
@@ -279,7 +282,7 @@ export function StudyCard({
             onChange={(e) => setRedoLater(e.target.checked)}
             className="rounded"
           />
-          Redo Later
+          {t("studyCard.redoLater")}
           <Kbd>R</Kbd>
         </label>
 
@@ -288,7 +291,7 @@ export function StudyCard({
           disabled={grade === null}
           className="w-full max-w-xs"
         >
-          Next
+          {t("common.next")}
           <Kbd>Enter</Kbd>
         </Button>
       </div>

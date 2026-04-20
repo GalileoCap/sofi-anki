@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,9 +32,12 @@ export function DeckForm({
   initialTags = [],
   initialColor,
   initialEmoji,
-  dialogTitle = "New Deck",
-  submitLabel = "Create",
+  dialogTitle,
+  submitLabel,
 }: DeckFormProps) {
+  const { t } = useLanguage();
+  const resolvedTitle = dialogTitle ?? t("deckList.newDeck");
+  const resolvedSubmit = submitLabel ?? t("common.create");
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [tags, setTags] = useState<string[]>(initialTags);
@@ -67,23 +71,23 @@ export function DeckForm({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
+          <DialogTitle>{resolvedTitle}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
-            placeholder="Deck title"
+            placeholder={t("deckForm.titlePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             autoFocus
           />
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">Tags</label>
-            <TagInput tags={tags} onChange={setTags} placeholder="Add tags..." />
+            <label className="text-sm text-muted-foreground">{t("common.tags")}</label>
+            <TagInput tags={tags} onChange={setTags} placeholder={t("deckForm.tagsPlaceholder")} />
           </div>
 
           {/* Color palette */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">Cover Color</label>
+            <label className="text-sm text-muted-foreground">{t("deckForm.coverColor")}</label>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -92,7 +96,7 @@ export function DeckForm({
                   "h-7 w-7 rounded-full border-2 bg-muted transition-all",
                   !color ? "border-foreground scale-110" : "border-transparent hover:scale-105"
                 )}
-                title="No color"
+                title={t("deckForm.noColor")}
               />
               {DECK_COLORS.map((c) => (
                 <button
@@ -112,7 +116,7 @@ export function DeckForm({
 
           {/* Emoji */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">Emoji (optional)</label>
+            <label className="text-sm text-muted-foreground">{t("deckForm.emoji")}</label>
             <div className="flex items-center gap-2">
               {emoji && (
                 <span className="flex h-9 w-9 items-center justify-center rounded-md border bg-muted text-xl">
@@ -120,7 +124,7 @@ export function DeckForm({
                 </span>
               )}
               <Input
-                placeholder="e.g. 🌟"
+                placeholder={t("deckForm.emojiPlaceholder")}
                 value={emoji}
                 onChange={(e) => setEmoji(e.target.value)}
                 className="w-32"
@@ -130,7 +134,7 @@ export function DeckForm({
 
           <DialogFooter>
             <Button type="submit" disabled={!title.trim()}>
-              {submitLabel}
+              {resolvedSubmit}
             </Button>
           </DialogFooter>
         </form>

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {
   Card as UiCard,
@@ -53,6 +54,7 @@ interface GlobalStatsProps {
 
 export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: GlobalStatsProps) {
   const [now] = useState(() => Date.now());
+  const { t } = useLanguage();
 
   const totals = useMemo(() => {
     const totalCards = decks.reduce((s, d) => s + d.cards.length, 0);
@@ -138,19 +140,19 @@ export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: Globa
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={onBack}>
-          Back
+          {t("common.back")}
         </Button>
-        <h1 className="text-2xl font-medium text-foreground">Overall Stats</h1>
+        <h1 className="text-2xl font-medium text-foreground">{t("globalStats.title")}</h1>
       </div>
 
       {/* Top-line numbers */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <StatTile label="Decks" value={String(totals.decks)} />
-        <StatTile label="Cards" value={String(totals.cards)} />
-        <StatTile label="Sessions" value={String(totals.runs)} />
-        <StatTile label="Total Time" value={totals.totalTime > 0 ? formatTime(totals.totalTime) : "—"} />
+        <StatTile label={t("globalStats.decks")} value={String(totals.decks)} />
+        <StatTile label={t("globalStats.cards")} value={String(totals.cards)} />
+        <StatTile label={t("globalStats.sessions")} value={String(totals.runs)} />
+        <StatTile label={t("globalStats.totalTime")} value={totals.totalTime > 0 ? formatTime(totals.totalTime) : "—"} />
         <StatTile
-          label="Accuracy"
+          label={t("globalStats.accuracy")}
           value={globalAccuracy !== null ? `${globalAccuracy}%` : "—"}
           valueClass={
             globalAccuracy === null ? undefined
@@ -160,7 +162,7 @@ export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: Globa
           }
         />
         <StatTile
-          label="Streak"
+          label={t("globalStats.streak")}
           value={totals.streak > 0 ? `${totals.streak}d` : "—"}
           valueClass={totals.streak >= 7 ? "text-green-700 dark:text-green-400" : undefined}
         />
@@ -171,7 +173,7 @@ export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: Globa
         <div className={cn("grid gap-3", sortedRuns.length > 1 ? "grid-cols-1 lg:grid-cols-[1fr_auto]" : "grid-cols-1")}>
           <UiCard size="sm">
             <CardHeader>
-              <CardTitle>Study Activity</CardTitle>
+              <CardTitle>{t("globalStats.studyActivity")}</CardTitle>
             </CardHeader>
             <CardContent>
               <StudyHeatmap runs={allRuns} />
@@ -181,7 +183,7 @@ export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: Globa
           {sortedRuns.length > 1 && (
             <UiCard size="sm" className="lg:w-64">
               <CardHeader>
-                <CardTitle>Accuracy Trend</CardTitle>
+                <CardTitle>{t("globalStats.accuracyTrend")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <GlobalAccuracyTrend runs={sortedRuns} />
@@ -194,11 +196,11 @@ export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: Globa
       {/* Per-deck table */}
       <UiCard size="sm">
         <CardHeader>
-          <CardTitle>Decks</CardTitle>
+          <CardTitle>{t("globalStats.decks")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-0.5">
           {deckRows.length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">No decks yet.</p>
+            <p className="py-4 text-center text-sm text-muted-foreground">{t("deckList.noDecks")}</p>
           ) : (
             deckRows.map(({ deck, runs, lastRun, accuracy, dueCount }) => (
               <button
@@ -229,7 +231,7 @@ export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: Globa
                   </span>
                 )}
                 <span className="shrink-0 text-xs text-muted-foreground">
-                  {runs === 0 ? "Never studied"
+                  {runs === 0 ? t("globalStats.neverStudied")
                     : lastRun !== null ? relativeDate(lastRun, now)
                     : `${runs} run${runs !== 1 ? "s" : ""}`}
                 </span>
@@ -264,6 +266,7 @@ function StatTile({ label, value, valueClass }: { label: string; value: string; 
 }
 
 function GlobalAccuracyTrend({ runs }: { runs: RunRecord[] }) {
+  const { t } = useLanguage();
   const display = runs.slice(0, 20).reverse();
 
   return (
@@ -300,9 +303,9 @@ function GlobalAccuracyTrend({ runs }: { runs: RunRecord[] }) {
         })}
       </div>
       <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-green-400 dark:bg-green-600" /> Correct</span>
-        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-yellow-400 dark:bg-yellow-600" /> Approx</span>
-        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-red-400 dark:bg-red-600" /> Wrong</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-green-400 dark:bg-green-600" /> {t("common.correct")}</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-yellow-400 dark:bg-yellow-600" /> {t("globalStats.approx")}</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-red-400 dark:bg-red-600" /> {t("common.wrong")}</span>
       </div>
     </div>
   );

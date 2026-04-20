@@ -146,17 +146,17 @@ export function DeckList({
         <div className="flex items-center gap-2">
           {allRuns.length > 0 && (
             <Button variant="ghost" size="sm" onClick={onViewGlobalStats}>
-              Stats
+              {t("common.stats")}
             </Button>
           )}
           <DeckForm
-            trigger={<Button size="sm">New Deck</Button>}
+            trigger={<Button size="sm">{t("deckList.newDeck")}</Button>}
             onSubmit={(title, tags, color, emoji) => onAddDeck(title, tags, color, emoji)}
           />
           {/* "..." menu for secondary actions */}
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="More options">
+              <Button variant="ghost" size="icon-sm" aria-label={t("deckList.moreOptions")}>
                 <HugeiconsIcon icon={MoreVerticalIcon} size={16} strokeWidth={2} />
               </Button>
             </DropdownMenu.Trigger>
@@ -166,19 +166,19 @@ export function DeckList({
                   className={ITEM_CLASS}
                   onSelect={() => setImportOpen(true)}
                 >
-                  Import Deck (JSON)
+                  {t("deckList.importJson")}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className={ITEM_CLASS}
                   onSelect={() => setApkgOpen(true)}
                 >
-                  Import Anki Deck (.apkg)
+                  {t("deckList.importApkg")}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className={ITEM_CLASS}
                   onSelect={() => setBackupOpen(true)}
                 >
-                  Backup &amp; Restore
+                  {t("deckList.backupRestore")}
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Portal>
@@ -209,13 +209,13 @@ export function DeckList({
           <CardHeader>
             <div className="flex flex-wrap items-center gap-4 text-sm">
               <div className="flex items-center gap-1.5">
-                <span className="text-muted-foreground">Streak:</span>
+                <span className="text-muted-foreground">{t("deckList.streak")}</span>
                 <span className="font-mono font-medium text-foreground">
                   {streak} {streak === 1 ? "day" : "days"}
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-muted-foreground">Today:</span>
+                <span className="text-muted-foreground">{t("deckList.today")}</span>
                 <span className={cn(
                   "font-mono font-medium",
                   dailyGoal > 0 && todayCount >= dailyGoal
@@ -278,7 +278,7 @@ export function DeckList({
       {decks.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <Input
-            placeholder="Search decks and cards..."
+            placeholder={t("deckList.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-xs"
@@ -302,7 +302,7 @@ export function DeckList({
               ))}
               {tagFilter.size > 0 && (
                 <Button variant="ghost" size="xs" onClick={() => setTagFilter(new Set())}>
-                  Clear
+                  {t("common.clear")}
                 </Button>
               )}
             </div>
@@ -312,14 +312,14 @@ export function DeckList({
 
       {decks.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <p className="text-muted-foreground">No decks yet.</p>
+          <p className="text-muted-foreground">{t("deckList.noDecks")}</p>
           <p className="text-sm text-muted-foreground">
-            Create a new deck or import one from JSON.
+            {t("deckList.noDecksHint")}
           </p>
         </div>
       ) : filteredDecks.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <p className="text-sm text-muted-foreground">No decks match your search.</p>
+          <p className="text-sm text-muted-foreground">{t("deckList.noMatch")}</p>
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

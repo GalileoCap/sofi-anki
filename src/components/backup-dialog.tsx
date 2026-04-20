@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,6 +26,8 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
   const [confirmReplace, setConfirmReplace] = useState(false);
   const [pendingJson, setPendingJson] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const { t } = useLanguage();
 
   function handleOpenChange(next: boolean) {
     setInternalOpen(next);
@@ -57,7 +60,7 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
         JSON.parse(json); // validate
         setPendingJson(json);
       } catch {
-        setError("Invalid JSON file.");
+        setError(t("backup.invalidJson"));
       }
     };
     reader.readAsText(file);
@@ -67,13 +70,13 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
     if (!pendingJson) return;
     try {
       importAllData(pendingJson, mode);
-      setSuccess(mode === "replace" ? "Data replaced successfully." : "Data merged successfully.");
+      setSuccess(mode === "replace" ? t("backup.replacedSuccess") : t("backup.mergedSuccess"));
       setPendingJson(null);
       setConfirmReplace(false);
       if (fileRef.current) fileRef.current.value = "";
       onRestored();
     } catch {
-      setError("Failed to restore data. The file may be corrupted.");
+      setError(t("backup.restoreFailed"));
     }
   }
 
@@ -82,15 +85,15 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Backup &amp; Restore</DialogTitle>
+          <DialogTitle>{t("backup.title")}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
-            Export all your decks, run history, SRS data, and settings.
+            {t("backup.exportDesc")}
           </p>
           <Button variant="outline" onClick={handleExport}>
-            Download Backup
+            {t("backup.downloadBackup")}
           </Button>
         </div>
 
@@ -98,7 +101,7 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
 
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
-            Restore from a backup file.
+            {t("backup.restoreDesc")}
           </p>
           <input
             ref={fileRef}
@@ -111,10 +114,10 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
           {pendingJson && !confirmReplace && (
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => doRestore("merge")}>
-                Merge (keep existing)
+                {t("backup.mergeKeep")}
               </Button>
               <Button size="sm" variant="destructive" onClick={() => setConfirmReplace(true)}>
-                Replace All
+                {t("backup.replaceAll")}
               </Button>
             </div>
           )}
@@ -122,14 +125,14 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
           {confirmReplace && (
             <div className="flex flex-col gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
               <p className="text-sm text-destructive">
-                This will replace all current data. Are you sure?
+                {t("backup.confirmReplace")}
               </p>
               <div className="flex gap-2">
                 <Button size="sm" variant="destructive" onClick={() => doRestore("replace")}>
-                  Yes, Replace
+                  {t("backup.yesReplace")}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setConfirmReplace(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               </div>
             </div>

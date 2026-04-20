@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,6 +35,7 @@ export function RunStartDialog({
   onStart,
 }: RunStartDialogProps) {
   const [selectedMode, setSelectedMode] = useState<RunMode>("all");
+  const { t } = useLanguage();
   const [shuffle, setShuffle] = useState(false);
   const [useGoal, setUseGoal] = useState(false);
   const [goalType, setGoalType] = useState<"cards" | "minutes">("cards");
@@ -49,7 +51,7 @@ export function RunStartDialog({
   }
 
   const title = showModePicker
-    ? "Start Study Session"
+    ? t("runStart.title")
     : `Start Run — ${label ?? ""}`;
 
   return (
@@ -61,13 +63,13 @@ export function RunStartDialog({
         <div className="flex flex-col gap-4">
           {showModePicker && (
             <div className="flex flex-col gap-2">
-              <p className="text-sm text-muted-foreground">Study mode</p>
+              <p className="text-sm text-muted-foreground">{t("runStart.studyMode")}</p>
               <div className="flex flex-col gap-1.5">
                 {(
                   [
-                    { mode: "all" as RunMode, label: "All Cards", count: null },
-                    { mode: "due" as RunMode, label: "Due", count: dueCount },
-                    { mode: "weak" as RunMode, label: "Weak", count: weakCount },
+                    { mode: "all" as RunMode, label: t("runStart.allCards"), count: null },
+                    { mode: "due" as RunMode, label: t("common.due"), count: dueCount },
+                    { mode: "weak" as RunMode, label: t("common.weak"), count: weakCount },
                   ] as const
                 ).map(({ mode, label: mLabel, count }) => (
                   <button
@@ -99,7 +101,7 @@ export function RunStartDialog({
               onChange={(e) => setShuffle(e.target.checked)}
               className="rounded"
             />
-            Shuffle cards
+            {t("runStart.shuffleCards")}
           </label>
 
           <label className="flex items-center gap-2 text-sm">
@@ -109,7 +111,7 @@ export function RunStartDialog({
               onChange={(e) => setUseGoal(e.target.checked)}
               className="rounded"
             />
-            Set a session goal
+            {t("runStart.sessionGoal")}
           </label>
 
           {useGoal && (
@@ -125,7 +127,7 @@ export function RunStartDialog({
                       : "border-border text-muted-foreground hover:bg-muted/50"
                   )}
                 >
-                  Cards
+                  {t("runStart.cards")}
                 </button>
                 <button
                   type="button"
@@ -137,7 +139,7 @@ export function RunStartDialog({
                       : "border-border text-muted-foreground hover:bg-muted/50"
                   )}
                 >
-                  Minutes
+                  {t("runStart.minutes")}
                 </button>
               </div>
               <div className="flex items-center gap-2">
@@ -149,7 +151,7 @@ export function RunStartDialog({
                   className="w-24"
                 />
                 <span className="text-sm text-muted-foreground">
-                  {goalType === "cards" ? "cards" : "minutes"}
+                  {goalType === "cards" ? t("runStart.cards") : t("runStart.minutes")}
                 </span>
               </div>
             </div>
@@ -160,7 +162,7 @@ export function RunStartDialog({
             onClick={handleStart}
             disabled={showModePicker && selectedMode === "due" && dueCount === 0}
           >
-            Start
+            {t("common.start")}
           </Button>
         </DialogFooter>
       </DialogContent>

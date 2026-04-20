@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useLanguage } from "@/contexts/language-context";
+import type { TranslationKey } from "@/lib/translations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,15 +17,15 @@ import { Markdown } from "@/components/markdown";
 import type { Card, CardType, Complexity } from "@/types";
 import { cn } from "@/lib/utils";
 
-const COMPLEXITIES: { value: Complexity; label: string }[] = [
-  { value: "easy", label: "Easy" },
-  { value: "medium", label: "Medium" },
-  { value: "hard", label: "Hard" },
+const COMPLEXITIES: { value: Complexity; key: TranslationKey }[] = [
+  { value: "easy", key: "complexity.easy" },
+  { value: "medium", key: "complexity.medium" },
+  { value: "hard", key: "complexity.hard" },
 ];
 
-const CARD_TYPES: { value: CardType; label: string }[] = [
-  { value: "standard", label: "Standard" },
-  { value: "choice", label: "Choice" },
+const CARD_TYPES: { value: CardType; key: TranslationKey }[] = [
+  { value: "standard", key: "cardType.standard" },
+  { value: "choice", key: "cardType.choice" },
 ];
 
 interface CardFormProps {
@@ -52,9 +54,12 @@ export function CardForm({
   onOpenChange: controlledOnOpenChange,
   onSubmit,
   initial,
-  dialogTitle = "New Card",
-  submitLabel = "Add",
+  dialogTitle,
+  submitLabel,
 }: CardFormProps) {
+  const { t } = useLanguage();
+  const resolvedTitle = dialogTitle ?? t("cardForm.newCard");
+  const resolvedSubmit = submitLabel ?? t("common.add");
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const [title, setTitle] = useState(initial?.title ?? "");
@@ -160,30 +165,30 @@ export function CardForm({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
+          <DialogTitle>{resolvedTitle}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Card type selector */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">Type</label>
+            <label className="text-sm text-muted-foreground">{t("common.type")}</label>
             <div className="flex gap-1.5">
-              {CARD_TYPES.map((t) => (
+              {CARD_TYPES.map((ct) => (
                 <Button
-                  key={t.value}
+                  key={ct.value}
                   type="button"
-                  variant={cardType === t.value ? "default" : "outline"}
+                  variant={cardType === ct.value ? "default" : "outline"}
                   size="sm"
                   className="flex-1"
-                  onClick={() => setCardType(t.value)}
+                  onClick={() => setCardType(ct.value)}
                 >
-                  {t.label}
+                  {t(ct.key)}
                 </Button>
               ))}
             </div>
           </div>
 
           <Input
-            placeholder="Question / front of card"
+            placeholder={t("cardForm.questionPlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             autoFocus
@@ -192,7 +197,7 @@ export function CardForm({
           {cardType === "standard" ? (
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-sm text-muted-foreground">Answer</label>
+                <label className="text-sm text-muted-foreground">{t("common.answer")}</label>
                 <button
                   type="button"
                   onClick={() => setPreviewResponse((v) => !v)}
@@ -203,7 +208,7 @@ export function CardForm({
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  {previewResponse ? "Edit" : "Preview"}
+                  {previewResponse ? t("common.edit") : t("common.preview")}
                 </button>
               </div>
               {previewResponse ? (
@@ -211,12 +216,12 @@ export function CardForm({
                   {response.trim() ? (
                     <Markdown>{response}</Markdown>
                   ) : (
-                    <span className="italic opacity-50">Nothing to preview</span>
+                    <span className="italic opacity-50">{t("cardForm.nothingToPreview")}</span>
                   )}
                 </div>
               ) : (
                 <Textarea
-                  placeholder="Answer / back of card — supports **markdown**"
+                  placeholder={t("cardForm.answerPlaceholder")}
                   value={response}
                   onChange={(e) => setResponse(e.target.value)}
                   rows={4}
@@ -226,7 +231,7 @@ export function CardForm({
           ) : (
             <div className="flex flex-col gap-2">
               <label className="text-sm text-muted-foreground">
-                Options (check the correct ones)
+                {t("cardForm.optionsLabel")}
               </label>
               {options.map((opt, i) => (
                 <div key={opt.id} className="flex items-center gap-2">
@@ -261,13 +266,13 @@ export function CardForm({
                 size="sm"
                 onClick={addOption}
               >
-                Add Option
+                {t("cardForm.addOption")}
               </Button>
               {options.some((o) => o.correct) && (
                 <p className="text-xs text-muted-foreground">
                   {options.filter((o) => o.correct).length > 1
-                    ? "Multiple correct — will be multi-select during study"
-                    : "Single correct — will be single-select during study"}
+                    ? t("cardForm.multipleCorrect")
+                    : t("cardForm.singleCorrect")}
                 </p>
               )}
             </div>
@@ -277,17 +282,17 @@ export function CardForm({
           {showHintInput ? (
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-sm text-muted-foreground">Hint</label>
+                <label className="text-sm text-muted-foreground">{t("common.hint")}</label>
                 <button
                   type="button"
                   onClick={() => { setShowHintInput(false); setHint(""); }}
                   className="text-xs text-muted-foreground hover:text-foreground"
                 >
-                  Remove
+                  {t("common.remove")}
                 </button>
               </div>
               <Textarea
-                placeholder="Optional hint shown before revealing the answer..."
+                placeholder={t("cardForm.hintPlaceholder")}
                 value={hint}
                 onChange={(e) => setHint(e.target.value)}
                 rows={2}
@@ -299,12 +304,12 @@ export function CardForm({
               onClick={() => setShowHintInput(true)}
               className="self-start text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
             >
-              + Add hint
+              {t("cardForm.addHint")}
             </button>
           )}
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">Complexity</label>
+            <label className="text-sm text-muted-foreground">{t("common.complexity")}</label>
             <div className="flex gap-1.5">
               {COMPLEXITIES.map((c) => (
                 <Button
@@ -315,18 +320,18 @@ export function CardForm({
                   className={cn("flex-1")}
                   onClick={() => setComplexity(c.value)}
                 >
-                  {c.label}
+                  {t(c.key)}
                 </Button>
               ))}
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">Tags</label>
-            <TagInput tags={tags} onChange={setTags} placeholder="Add tags..." />
+            <label className="text-sm text-muted-foreground">{t("common.tags")}</label>
+            <TagInput tags={tags} onChange={setTags} placeholder={t("deckForm.tagsPlaceholder")} />
           </div>
           <DialogFooter>
             <Button type="submit" disabled={!isValid}>
-              {submitLabel}
+              {resolvedSubmit}
             </Button>
           </DialogFooter>
         </form>

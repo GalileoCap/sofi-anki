@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useLanguage } from "@/contexts/language-context";
+import type { TranslationKey } from "@/lib/translations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,14 +27,14 @@ function formatDuration(ms: number): string {
 
 const CATEGORIES: {
   key: CardDisposition;
-  label: string;
+  translationKey: TranslationKey;
   className: string;
 }[] = [
-  { key: "correct", label: "Correct", className: "text-green-700 dark:text-green-400" },
-  { key: "approximate", label: "Approximate", className: "text-yellow-700 dark:text-yellow-400" },
-  { key: "wrong", label: "Wrong", className: "text-red-700 dark:text-red-400" },
-  { key: "skip", label: "Skipped", className: "text-muted-foreground" },
-  { key: "save_for_later", label: "Saved For Later", className: "text-muted-foreground" },
+  { key: "correct", translationKey: "common.correct", className: "text-green-700 dark:text-green-400" },
+  { key: "approximate", translationKey: "common.approximate", className: "text-yellow-700 dark:text-yellow-400" },
+  { key: "wrong", translationKey: "common.wrong", className: "text-red-700 dark:text-red-400" },
+  { key: "skip", translationKey: "common.skipped", className: "text-muted-foreground" },
+  { key: "save_for_later", translationKey: "runSummary.savedForLater", className: "text-muted-foreground" },
 ];
 
 const RESULT_BADGE_STYLES: Record<CardDisposition, string> = {
@@ -43,12 +45,12 @@ const RESULT_BADGE_STYLES: Record<CardDisposition, string> = {
   save_for_later: "bg-muted text-muted-foreground",
 };
 
-const RESULT_LABELS: Record<CardDisposition, string> = {
-  correct: "Correct",
-  approximate: "Approximate",
-  wrong: "Wrong",
-  skip: "Skipped",
-  save_for_later: "Saved",
+const RESULT_LABEL_KEYS: Record<CardDisposition, TranslationKey> = {
+  correct: "common.correct",
+  approximate: "common.approximate",
+  wrong: "common.wrong",
+  skip: "common.skipped",
+  save_for_later: "common.saved",
 };
 
 interface RunSummaryProps {
@@ -60,6 +62,7 @@ interface RunSummaryProps {
 
 export function RunSummary({ results, totalTimeMs, onRestart, onExit }: RunSummaryProps) {
   const [expandedCategory, setExpandedCategory] = useState<CardDisposition | null>(null);
+  const { t } = useLanguage();
 
   const isPerfect = useMemo(() => {
     if (results.length === 0) return false;
@@ -80,7 +83,7 @@ export function RunSummary({ results, totalTimeMs, onRestart, onExit }: RunSumma
       {isPerfect && <Confetti />}
       <div className="text-center">
         <h2 className="text-2xl font-medium text-foreground">
-          {isPerfect ? "Perfect Run!" : "Run Complete!"}
+          {isPerfect ? t("runSummary.perfectRun") : t("runSummary.runComplete")}
         </h2>
         <p className="mt-2 font-mono text-lg text-muted-foreground">
           {formatTime(totalTimeMs)}
@@ -89,7 +92,7 @@ export function RunSummary({ results, totalTimeMs, onRestart, onExit }: RunSumma
 
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle>First Attempt Results</CardTitle>
+          <CardTitle>{t("runSummary.firstAttemptResults")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {CATEGORIES.map((cat) => {
@@ -104,7 +107,7 @@ export function RunSummary({ results, totalTimeMs, onRestart, onExit }: RunSumma
                   className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted/50"
                 >
                   <span className={cn("font-medium", cat.className)}>
-                    {cat.label}
+                    {t(cat.translationKey)}
                   </span>
                   <span className="font-mono text-muted-foreground">
                     {items.length}
@@ -125,9 +128,9 @@ export function RunSummary({ results, totalTimeMs, onRestart, onExit }: RunSumma
       </Card>
 
       <div className="flex gap-3">
-        <Button onClick={onRestart}>Restart</Button>
+        <Button onClick={onRestart}>{t("common.restart")}</Button>
         <Button variant="outline" onClick={onExit}>
-          Back to Deck
+          {t("runSummary.backToDeck")}
         </Button>
       </div>
     </div>
@@ -136,6 +139,7 @@ export function RunSummary({ results, totalTimeMs, onRestart, onExit }: RunSumma
 
 function CardResultRow({ result }: { result: CardRunResult }) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useLanguage();
   const hasRetries = result.attempts.length > 1;
   const isChoice = result.card.type === "choice";
 
@@ -181,7 +185,7 @@ function CardResultRow({ result }: { result: CardRunResult }) {
                   <div className="flex items-center gap-2 px-2 py-1 text-xs">
                     <span className="text-muted-foreground">#{i + 1}</span>
                     <Badge variant="outline" className={cn("text-xs", RESULT_BADGE_STYLES[attempt.result])}>
-                      {RESULT_LABELS[attempt.result]}
+                      {t(RESULT_LABEL_KEYS[attempt.result])}
                     </Badge>
                     <span className="font-mono text-muted-foreground">
                       {formatDuration(attempt.durationMs)}

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -34,6 +35,7 @@ export function ImportApkgDialog({
   const open = controlledOpen ?? internalOpen;
   const [state, setState] = useState<State>({ kind: "idle" });
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
 
   function handleOpenChange(next: boolean) {
     setInternalOpen(next);
@@ -86,7 +88,7 @@ export function ImportApkgDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import Anki Deck</DialogTitle>
+          <DialogTitle>{t("importApkg.title")}</DialogTitle>
           <DialogDescription>
             Select an Anki export file (<code className="rounded bg-muted px-1 py-0.5 text-xs">.apkg</code>).
             Standard and basic-reversed cards are imported; cloze cards are skipped. SRS history is preserved.
@@ -101,7 +103,7 @@ export function ImportApkgDialog({
             onDrop={handleDrop}
           >
             {state.kind === "loading" ? (
-              <p className="text-sm text-muted-foreground">Parsing…</p>
+              <p className="text-sm text-muted-foreground">{t("importApkg.parsing")}</p>
             ) : (
               <>
                 <p className="text-sm text-muted-foreground">
@@ -112,7 +114,7 @@ export function ImportApkgDialog({
                   size="sm"
                   onClick={() => inputRef.current?.click()}
                 >
-                  Browse file
+                  {t("importApkg.browseFile")}
                 </Button>
                 <input
                   ref={inputRef}
@@ -157,7 +159,7 @@ export function ImportApkgDialog({
                   if (inputRef.current) inputRef.current.value = "";
                 }}
               >
-                Choose another file
+                {t("importApkg.chooseAnother")}
               </Button>
               <Button size="sm" onClick={handleImport}>
                 Import {state.result.decks.length === 1 ? "deck" : "all decks"}

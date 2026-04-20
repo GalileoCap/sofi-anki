@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import type { RunRecord } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,7 @@ interface StudyHeatmapProps {
 
 export function StudyHeatmap({ runs }: StudyHeatmapProps) {
   const [now] = useState(() => new Date());
+  const { t } = useLanguage();
 
   const { days, cardsByDate } = useMemo(() => {
     // Build date → card count map
@@ -115,11 +117,11 @@ export function StudyHeatmap({ runs }: StudyHeatmapProps) {
       </div>
       {/* Legend */}
       <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-        <span>Less</span>
+        <span>{t("heatmap.less")}</span>
         {LEVELS.map((l, i) => (
           <div key={i} className={cn("h-3 w-3 rounded-sm", l.className)} />
         ))}
-        <span>More</span>
+        <span>{t("heatmap.more")}</span>
       </div>
     </div>
   );

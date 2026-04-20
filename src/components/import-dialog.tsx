@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
@@ -107,6 +108,7 @@ export function ImportDeckDialog({ trigger, open: controlledOpen, onOpenChange: 
   const [json, setJson] = useState("");
   const [error, setError] = useState("");
   const [copiedSchema, setCopiedSchema] = useState(false);
+  const { t } = useLanguage();
 
   function handleOpenChange(next: boolean) {
     setInternalOpen(next);
@@ -146,7 +148,7 @@ export function ImportDeckDialog({ trigger, open: controlledOpen, onOpenChange: 
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Import Deck</DialogTitle>
+          <DialogTitle>{t("importDialog.importDeckTitle")}</DialogTitle>
           <DialogDescription>
             Paste a JSON object with a <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code> and
             an array of <code className="rounded bg-muted px-1 py-0.5 text-xs">cards</code>. Cards can be
@@ -157,9 +159,9 @@ export function ImportDeckDialog({ trigger, open: controlledOpen, onOpenChange: 
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">LLM Prompt Template</p>
+            <p className="text-sm font-medium">{t("importDialog.llmPromptTemplate")}</p>
             <Button variant="outline" size="sm" onClick={copySchema}>
-              {copiedSchema ? "Copied!" : "Copy"}
+              {copiedSchema ? t("common.copied") : t("common.copy")}
             </Button>
           </div>
           <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">
@@ -182,7 +184,7 @@ export function ImportDeckDialog({ trigger, open: controlledOpen, onOpenChange: 
         {error && <p className="text-sm text-destructive">{error}</p>}
         <DialogFooter>
           <Button onClick={handleImport} disabled={!json.trim()}>
-            Import
+            {t("common.import")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -203,6 +205,7 @@ export function ImportCardsDialog({ trigger, open: controlledOpen, onOpenChange:
   const [json, setJson] = useState("");
   const [error, setError] = useState("");
   const [copiedSchema, setCopiedSchema] = useState(false);
+  const { t } = useLanguage();
 
   function handleOpenChange(next: boolean) {
     setInternalOpen(next);
@@ -242,7 +245,7 @@ export function ImportCardsDialog({ trigger, open: controlledOpen, onOpenChange:
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Import Cards</DialogTitle>
+          <DialogTitle>{t("importDialog.importCardsTitle")}</DialogTitle>
           <DialogDescription>
             Paste a JSON object with a <code className="rounded bg-muted px-1 py-0.5 text-xs">cards</code> array.
             Standard cards need <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code> and <code className="rounded bg-muted px-1 py-0.5 text-xs">response</code>.
@@ -252,9 +255,9 @@ export function ImportCardsDialog({ trigger, open: controlledOpen, onOpenChange:
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">LLM Prompt Template</p>
+            <p className="text-sm font-medium">{t("importDialog.llmPromptTemplate")}</p>
             <Button variant="outline" size="sm" onClick={copySchema}>
-              {copiedSchema ? "Copied!" : "Copy"}
+              {copiedSchema ? t("common.copied") : t("common.copy")}
             </Button>
           </div>
           <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">
@@ -277,7 +280,7 @@ export function ImportCardsDialog({ trigger, open: controlledOpen, onOpenChange:
         {error && <p className="text-sm text-destructive">{error}</p>}
         <DialogFooter>
           <Button onClick={handleImport} disabled={!json.trim()}>
-            Import
+            {t("common.import")}
           </Button>
         </DialogFooter>
       </DialogContent>

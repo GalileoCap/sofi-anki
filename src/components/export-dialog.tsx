@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,6 +29,7 @@ export function ExportDialog({ trigger, open: controlledOpen, onOpenChange: cont
   const [copiedData, setCopiedData] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const { t } = useLanguage();
 
   function handleOpenChange(next: boolean) {
     setInternalOpen(next);
@@ -90,15 +92,15 @@ export function ExportDialog({ trigger, open: controlledOpen, onOpenChange: cont
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-h-[85vh] overflow-y-auto overflow-x-hidden sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Export &amp; Share</DialogTitle>
+          <DialogTitle>{t("exportDialog.title")}</DialogTitle>
         </DialogHeader>
 
         {includeShareUrl && (
           <>
             <div className="flex min-w-0 flex-col gap-2">
-              <p className="text-sm font-medium">Share Link</p>
+              <p className="text-sm font-medium">{t("exportDialog.shareLink")}</p>
               {shareUrl === null && open ? (
-                <p className="text-xs text-muted-foreground">Computing link…</p>
+                <p className="text-xs text-muted-foreground">{t("exportDialog.computingLink")}</p>
               ) : shareUrl ? (
                 <div className="flex items-center gap-2">
                   <p className="flex-1 truncate rounded bg-muted px-2 py-1 font-mono text-xs">{shareUrl}</p>
@@ -107,11 +109,11 @@ export function ExportDialog({ trigger, open: controlledOpen, onOpenChange: cont
                     size="sm"
                     onClick={() => copyToClipboard(shareUrl, setCopiedUrl)}
                   >
-                    {copiedUrl ? "Copied!" : "Copy"}
+                    {copiedUrl ? t("common.copied") : t("common.copy")}
                   </Button>
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground">Deck is too large to share via URL.</p>
+                <p className="text-xs text-muted-foreground">{t("exportDialog.tooLarge")}</p>
               )}
             </div>
             <Separator />
@@ -120,13 +122,13 @@ export function ExportDialog({ trigger, open: controlledOpen, onOpenChange: cont
 
         <div className="flex min-w-0 flex-col gap-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Deck Data</p>
+            <p className="text-sm font-medium">{t("exportDialog.deckData")}</p>
             <Button
               variant="outline"
               size="sm"
               onClick={() => copyToClipboard(deckJson, setCopiedData)}
             >
-              {copiedData ? "Copied!" : "Copy"}
+              {copiedData ? t("common.copied") : t("common.copy")}
             </Button>
           </div>
           <pre className="max-h-60 min-w-0 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">

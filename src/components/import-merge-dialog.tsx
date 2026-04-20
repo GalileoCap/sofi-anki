@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/language-context";
 import {
   Dialog,
   DialogContent,
@@ -27,12 +28,13 @@ export function ImportMergeDialog({
 }: ImportMergeDialogProps) {
   const existingCardIds = new Set(existingDeck.cards.map((c) => c.id));
   const newCardCount = incomingDeck.cards.filter((c) => !existingCardIds.has(c.id)).length;
+  const { t } = useLanguage();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Deck Already Exists</DialogTitle>
+          <DialogTitle>{t("importMerge.title")}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3 text-sm">
           <p className="text-muted-foreground">
@@ -48,20 +50,20 @@ export function ImportMergeDialog({
         </div>
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant="secondary"
             onClick={() => { onMerge(); onOpenChange(false); }}
             disabled={newCardCount === 0}
           >
-            Merge ({newCardCount} new)
+            {t("common.merge")} ({newCardCount} new)
           </Button>
           <Button
             variant="destructive"
             onClick={() => { onOverwrite(); onOpenChange(false); }}
           >
-            Overwrite
+            {t("common.overwrite")}
           </Button>
         </DialogFooter>
       </DialogContent>

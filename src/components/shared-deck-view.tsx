@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {
   Card as UiCard,
@@ -29,6 +30,7 @@ export function SharedDeckView({
 }: SharedDeckViewProps) {
   const [mergeOpen, setMergeOpen] = useState(false);
   const [imported, setImported] = useState(false);
+  const { t } = useLanguage();
 
   function handleImport() {
     if (existingDeck) {
@@ -54,21 +56,21 @@ export function SharedDeckView({
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Shared Deck</p>
+            <p className="text-sm text-muted-foreground">{t("sharedDeck.label")}</p>
             <h1 className="text-2xl font-medium text-foreground">{deck.title}</h1>
           </div>
           <div className="flex gap-2">
             {!imported ? (
-              <Button onClick={handleImport}>Import Deck</Button>
+              <Button onClick={handleImport}>{t("sharedDeck.importDeck")}</Button>
             ) : (
-              <Button onClick={onGoHome}>Go to Decks</Button>
+              <Button onClick={onGoHome}>{t("sharedDeck.goToDecks")}</Button>
             )}
           </div>
         </div>
 
         {imported && (
           <div className="rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300">
-            Deck imported successfully!
+            {t("sharedDeck.importedSuccess")}
           </div>
         )}
 

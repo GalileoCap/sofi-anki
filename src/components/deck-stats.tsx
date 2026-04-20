@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {
   Card as UiCard,
@@ -70,6 +71,7 @@ interface CardStat {
 
 export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
   const [now] = useState(() => Date.now());
+  const { t } = useLanguage();
 
   const sortedRuns = useMemo(
     () => [...runs].sort((a, b) => b.completedAt - a.completedAt),
@@ -190,7 +192,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={onBack}>
-          Back
+          {t("common.back")}
         </Button>
         <h1 className="text-2xl font-medium text-foreground">
           {deck.title} — Stats
@@ -199,35 +201,35 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
 
       {/* Overview */}
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-5">
-        <StatCard label="Total Runs" value={String(overview.totalRuns)} />
-        <StatCard label="Total Time" value={formatTime(overview.totalTime)} />
-        <StatCard label="Cards Studied" value={String(overview.totalCards)} />
-        <StatCard label="Due" value={String(dueCount)} />
-        <StatCard label="Weak" value={String(weakCount)} />
+        <StatCard label={t("deckStats.totalRuns")} value={String(overview.totalRuns)} />
+        <StatCard label={t("deckStats.totalTime")} value={formatTime(overview.totalTime)} />
+        <StatCard label={t("deckStats.cardsStudied")} value={String(overview.totalCards)} />
+        <StatCard label={t("common.due")} value={String(dueCount)} />
+        <StatCard label={t("common.weak")} value={String(weakCount)} />
       </div>
 
       {/* Timing */}
       {timing && (
         <UiCard size="sm">
           <CardHeader>
-            <CardTitle>Timing</CardTitle>
+            <CardTitle>{t("deckStats.timing")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
               <div>
-                <p className="text-muted-foreground">Avg Run</p>
+                <p className="text-muted-foreground">{t("deckStats.avgRun")}</p>
                 <p className="font-mono font-medium">{formatTime(timing.avg)}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Fastest</p>
+                <p className="text-muted-foreground">{t("deckStats.fastest")}</p>
                 <p className="font-mono font-medium">{formatTime(timing.fastest)}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Slowest</p>
+                <p className="text-muted-foreground">{t("deckStats.slowest")}</p>
                 <p className="font-mono font-medium">{formatTime(timing.slowest)}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Avg / Card</p>
+                <p className="text-muted-foreground">{t("deckStats.avgPerCard")}</p>
                 <p className="font-mono font-medium">{formatDuration(timing.avgPerCard)}</p>
               </div>
             </div>
@@ -239,7 +241,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
       <div className={cn("grid gap-3", sortedRuns.length > 1 ? "grid-cols-1 lg:grid-cols-[1fr_auto]" : "grid-cols-1")}>
         <UiCard size="sm">
           <CardHeader>
-            <CardTitle>Study Activity</CardTitle>
+            <CardTitle>{t("deckStats.studyActivity")}</CardTitle>
           </CardHeader>
           <CardContent>
             <StudyHeatmap runs={runs} />
@@ -249,7 +251,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
         {sortedRuns.length > 1 && (
           <UiCard size="sm" className="lg:w-64">
             <CardHeader>
-              <CardTitle>Accuracy Trend</CardTitle>
+              <CardTitle>{t("deckStats.accuracyTrend")}</CardTitle>
             </CardHeader>
             <CardContent>
               <AccuracyTrend runs={sortedRuns} />
@@ -261,7 +263,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
       {/* Run History */}
       <UiCard size="sm">
         <CardHeader>
-          <CardTitle>Run History</CardTitle>
+          <CardTitle>{t("deckStats.runHistory")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           {sortedRuns.map((run) => (
@@ -273,7 +275,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
       {/* Card Performance */}
       <UiCard size="sm">
         <CardHeader>
-          <CardTitle>Card Performance</CardTitle>
+          <CardTitle>{t("deckStats.cardPerformance")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           {cardStats.map((stat) => (
@@ -298,6 +300,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 function RunRow({ run }: { run: RunRecord }) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useLanguage();
 
   const counts = useMemo(() => {
     const c: Record<CardDisposition, number> = {
@@ -330,16 +333,16 @@ function RunRow({ run }: { run: RunRecord }) {
         <span className="flex-1" />
         <span className="flex items-center gap-2 text-xs">
           {counts.correct > 0 && (
-            <span className={RESULT_COLORS.correct}>{counts.correct} correct</span>
+            <span className={RESULT_COLORS.correct}>{counts.correct} {t("common.correct").toLowerCase()}</span>
           )}
           {counts.approximate > 0 && (
-            <span className={RESULT_COLORS.approximate}>{counts.approximate} approx</span>
+            <span className={RESULT_COLORS.approximate}>{counts.approximate} {t("deckStats.approx").toLowerCase()}</span>
           )}
           {counts.wrong > 0 && (
-            <span className={RESULT_COLORS.wrong}>{counts.wrong} wrong</span>
+            <span className={RESULT_COLORS.wrong}>{counts.wrong} {t("common.wrong").toLowerCase()}</span>
           )}
           {counts.skip > 0 && (
-            <span className={RESULT_COLORS.skip}>{counts.skip} skipped</span>
+            <span className={RESULT_COLORS.skip}>{counts.skip} {t("common.skipped").toLowerCase()}</span>
           )}
         </span>
       </button>
@@ -395,10 +398,11 @@ const RESULT_SHORT: Record<CardDisposition, string> = {
 };
 
 function SRSBadge({ srsInfo, now }: { srsInfo: CardSRS | undefined; now: number }) {
+  const { t } = useLanguage();
   if (!srsInfo) {
     return (
       <Badge variant="outline" className="text-xs text-muted-foreground">
-        New
+        {t("deckStats.new")}
       </Badge>
     );
   }
@@ -408,7 +412,7 @@ function SRSBadge({ srsInfo, now }: { srsInfo: CardSRS | undefined; now: number 
   if (isDue) {
     return (
       <Badge variant="outline" className="text-xs text-yellow-700 dark:text-yellow-400">
-        Due now
+        {t("deckStats.dueNow")}
       </Badge>
     );
   }
@@ -422,7 +426,7 @@ function SRSBadge({ srsInfo, now }: { srsInfo: CardSRS | undefined; now: number 
 }
 
 function AccuracyTrend({ runs }: { runs: RunRecord[] }) {
-  // Show last 20 runs, oldest first (runs are already sorted newest-first)
+  const { t } = useLanguage();
   const display = runs.slice(0, 20).reverse();
 
   return (
@@ -460,9 +464,9 @@ function AccuracyTrend({ runs }: { runs: RunRecord[] }) {
         })}
       </div>
       <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-green-400 dark:bg-green-600" /> Correct</span>
-        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-yellow-400 dark:bg-yellow-600" /> Approx</span>
-        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-red-400 dark:bg-red-600" /> Wrong</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-green-400 dark:bg-green-600" /> {t("common.correct")}</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-yellow-400 dark:bg-yellow-600" /> {t("deckStats.approx")}</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-red-400 dark:bg-red-600" /> {t("common.wrong")}</span>
       </div>
     </div>
   );
@@ -470,6 +474,7 @@ function AccuracyTrend({ runs }: { runs: RunRecord[] }) {
 
 function CardStatRow({ stat, runs, now }: { stat: CardStat; runs: RunRecord[]; now: number }) {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useLanguage();
 
   // Build SRS timeline from runs
   const timeline = useMemo(() => {
@@ -525,7 +530,7 @@ function CardStatRow({ stat, runs, now }: { stat: CardStat; runs: RunRecord[]; n
         <ComplexityBadge complexity={stat.complexity as "easy" | "medium" | "hard"} />
         {stat.timesStudied === 0 ? (
           <Badge variant="outline" className="text-xs text-muted-foreground">
-            Not studied
+            {t("deckStats.notStudied")}
           </Badge>
         ) : (
           <>
