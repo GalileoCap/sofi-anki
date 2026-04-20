@@ -30,7 +30,7 @@ export function SharedDeckView({
 }: SharedDeckViewProps) {
   const [mergeOpen, setMergeOpen] = useState(false);
   const [imported, setImported] = useState(false);
-  const { t } = useLanguage();
+  const { t, tp } = useLanguage();
 
   function handleImport() {
     if (existingDeck) {
@@ -76,7 +76,7 @@ export function SharedDeckView({
 
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary">
-            {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
+            {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
           </Badge>
           {(deck.tags ?? []).map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">

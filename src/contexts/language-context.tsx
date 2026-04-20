@@ -6,6 +6,7 @@ interface LanguageContextValue {
   lang: Lang;
   setLang: (lang: Lang) => void;
   t: (key: TranslationKey) => string;
+  tp: (n: number, oneKey: TranslationKey, otherKey: TranslationKey) => string;
 }
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
@@ -13,8 +14,10 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState<Lang>("en");
   const t = (key: TranslationKey) => translate(lang, key);
+  const tp = (n: number, oneKey: TranslationKey, otherKey: TranslationKey) =>
+    translate(lang, n === 1 ? oneKey : otherKey);
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, tp }}>
       {children}
     </LanguageContext.Provider>
   );

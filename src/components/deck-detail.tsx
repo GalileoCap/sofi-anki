@@ -84,7 +84,7 @@ export function DeckDetail({
   onDeleteDeck,
   onImportCards,
 }: DeckDetailProps) {
-  const { t } = useLanguage();
+  const { t, tp } = useLanguage();
   const [now] = useState(() => Date.now());
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
@@ -246,7 +246,7 @@ export function DeckDetail({
           </div>
         </div>
         <Badge variant="secondary" className="text-sm shrink-0">
-          {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
+          {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
         </Badge>
       </div>
 
@@ -655,7 +655,7 @@ export function DeckDetail({
                             )}>
                               {Math.round(perf.accuracy * 100)}%
                             </span>
-                            {" "}({perf.attempts} session{perf.attempts === 1 ? "" : "s"})
+                            {" "}({perf.attempts} {tp(perf.attempts, "common.session", "common.sessions")})
                           </span>
                           {perf.srs && (
                             <>

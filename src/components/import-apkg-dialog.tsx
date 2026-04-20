@@ -35,7 +35,7 @@ export function ImportApkgDialog({
   const open = controlledOpen ?? internalOpen;
   const [state, setState] = useState<State>({ kind: "idle" });
   const inputRef = useRef<HTMLInputElement>(null);
-  const { t } = useLanguage();
+  const { t, tp } = useLanguage();
 
   function handleOpenChange(next: boolean) {
     setInternalOpen(next);
@@ -136,8 +136,8 @@ export function ImportApkgDialog({
           <div className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">
               Found <strong>{state.result.decks.length}</strong>{" "}
-              {state.result.decks.length === 1 ? "deck" : "decks"} with{" "}
-              <strong>{totalCards}</strong> cards total in{" "}
+              {tp(state.result.decks.length, "common.deck", "common.decks")} with{" "}
+              <strong>{totalCards}</strong> {t("common.cards")} total in{" "}
               <span className="font-mono text-xs">{state.fileName}</span>
             </p>
             <ul className="flex flex-col gap-1 rounded-md border bg-muted/40 p-3">
@@ -145,7 +145,7 @@ export function ImportApkgDialog({
                 <li key={d.id} className="flex items-center justify-between gap-2 text-sm">
                   <span className="truncate font-medium">{d.title}</span>
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {d.cards.length} {d.cards.length === 1 ? "card" : "cards"}
+                    {d.cards.length} {tp(d.cards.length, "common.card", "common.cards")}
                   </span>
                 </li>
               ))}

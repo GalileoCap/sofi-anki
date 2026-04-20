@@ -86,7 +86,7 @@ export function DeckList({
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState(String(dailyGoal));
   const [now] = useState(() => new Date());
-  const { t } = useLanguage();
+  const { t, tp } = useLanguage();
   const [backupOpen, setBackupOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [apkgOpen, setApkgOpen] = useState(false);
@@ -211,7 +211,7 @@ export function DeckList({
               <div className="flex items-center gap-1.5">
                 <span className="text-muted-foreground">{t("deckList.streak")}</span>
                 <span className="font-mono font-medium text-foreground">
-                  {streak} {streak === 1 ? "day" : "days"}
+                  {streak} {tp(streak, "common.day", "common.days")}
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -238,7 +238,7 @@ export function DeckList({
                           className="w-14 rounded border bg-transparent px-1.5 py-0.5 text-center font-mono text-sm"
                           autoFocus
                         />
-                        <span className="text-muted-foreground">cards</span>
+                        <span className="text-muted-foreground">{t("common.cards")}</span>
                       </span>
                     ) : (
                       <button
@@ -250,7 +250,7 @@ export function DeckList({
                         className="inline-flex items-center gap-1 rounded border border-dashed border-muted-foreground/30 px-1.5 py-0.5 font-mono font-medium text-foreground transition-colors hover:border-foreground/50 hover:bg-muted/50"
                         title="Click to edit daily goal"
                       >
-                        {dailyGoal} cards
+                        {dailyGoal} {t("common.cards")}
                         <span className="text-[10px] text-muted-foreground">&#9998;</span>
                       </button>
                     )}
@@ -345,7 +345,7 @@ export function DeckList({
                   <CardTitle>{deck.title}</CardTitle>
                   <CardDescription className="flex flex-wrap items-center gap-1.5">
                     <Badge variant="secondary">
-                      {deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}
+                      {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
                     </Badge>
                     {(deck.tags ?? []).map((tag) => (
                       <Badge key={tag} variant="outline" className="text-xs">

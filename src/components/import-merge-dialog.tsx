@@ -28,7 +28,7 @@ export function ImportMergeDialog({
 }: ImportMergeDialogProps) {
   const existingCardIds = new Set(existingDeck.cards.map((c) => c.id));
   const newCardCount = incomingDeck.cards.filter((c) => !existingCardIds.has(c.id)).length;
-  const { t } = useLanguage();
+  const { t, tp } = useLanguage();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -44,7 +44,7 @@ export function ImportMergeDialog({
           </p>
           {newCardCount > 0 && (
             <p className="text-muted-foreground">
-              Merge would add {newCardCount} new {newCardCount === 1 ? "card" : "cards"}.
+              Merge would add {newCardCount} new {tp(newCardCount, "common.card", "common.cards")}.
             </p>
           )}
         </div>
