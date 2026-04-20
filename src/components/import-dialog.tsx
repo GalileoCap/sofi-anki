@@ -127,13 +127,13 @@ export function ImportDeckDialog({ trigger, open: controlledOpen, onOpenChange: 
         !Array.isArray(parsed.cards) ||
         parsed.cards.some((c: unknown) => !isValidCard(c))
       ) {
-        setError('Invalid format. Each card needs "title" + "response", or "type": "choice" + "options".');
+        setError(t("importDialog.invalidFormat"));
         return;
       }
       onImport(parsed as DeckImport);
       handleOpenChange(false);
     } catch {
-      setError("Invalid JSON. Please check the format and try again.");
+      setError(t("importDialog.invalidJson"));
     }
   }
 
@@ -224,13 +224,13 @@ export function ImportCardsDialog({ trigger, open: controlledOpen, onOpenChange:
         !Array.isArray(cards) ||
         cards.some((c: unknown) => !isValidCard(c))
       ) {
-        setError('Invalid format. Each card needs "title" + "response", or "type": "choice" + "options".');
+        setError(t("importDialog.invalidFormat"));
         return;
       }
       onImport(cards as DeckImportCard[]);
       handleOpenChange(false);
     } catch {
-      setError("Invalid JSON. Please check the format and try again.");
+      setError(t("importDialog.invalidJson"));
     }
   }
 

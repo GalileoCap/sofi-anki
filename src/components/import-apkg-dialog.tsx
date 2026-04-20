@@ -51,14 +51,14 @@ export function ImportApkgDialog({
     try {
       const result = await parseApkg(file);
       if (result.decks.length === 0) {
-        setState({ kind: "error", message: "No importable cards found in this file." });
+        setState({ kind: "error", message: t("importApkg.noCards") });
         return;
       }
       setState({ kind: "parsed", result, fileName: file.name });
     } catch (e) {
       setState({
         kind: "error",
-        message: e instanceof Error ? e.message : "Failed to parse the .apkg file.",
+        message: e instanceof Error ? e.message : t("importApkg.parseFailed"),
       });
     }
   }
@@ -107,7 +107,7 @@ export function ImportApkgDialog({
             ) : (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Drag &amp; drop an <strong>.apkg</strong> file here, or
+                  {t("importApkg.dropZone")}
                 </p>
                 <Button
                   variant="outline"
@@ -162,7 +162,7 @@ export function ImportApkgDialog({
                 {t("importApkg.chooseAnother")}
               </Button>
               <Button size="sm" onClick={handleImport}>
-                Import {state.result.decks.length === 1 ? "deck" : "all decks"}
+                {state.result.decks.length === 1 ? t("importApkg.importDeck") : t("importApkg.importAllDecks")}
               </Button>
             </div>
           </div>

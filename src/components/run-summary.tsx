@@ -165,7 +165,7 @@ function CardResultRow({ result }: { result: CardRunResult }) {
         </span>
         {hasRetries && (
           <Badge variant="outline" className="shrink-0 text-xs">
-            {result.attempts.length} tries
+            {result.attempts.length}{t("runSummary.tries")}
           </Badge>
         )}
       </button>
@@ -205,6 +205,7 @@ function CardResultRow({ result }: { result: CardRunResult }) {
 }
 
 function ChoiceAttemptDetail({ card, attempt }: { card: CardRunResult["card"]; attempt: CardAttempt }) {
+  const { t } = useLanguage();
   if (card.type !== "choice" || !attempt.selectedOptionIds) return null;
   const selectedSet = new Set(attempt.selectedOptionIds);
 
@@ -230,7 +231,7 @@ function ChoiceAttemptDetail({ card, attempt }: { card: CardRunResult["card"]; a
               {opt.text}
             </span>
             {opt.correct && !wasSelected && (
-              <span className="text-yellow-600 dark:text-yellow-400">(missed)</span>
+              <span className="text-yellow-600 dark:text-yellow-400">{t("runSummary.missed")}</span>
             )}
           </div>
         );

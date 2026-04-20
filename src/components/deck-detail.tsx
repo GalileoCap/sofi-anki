@@ -534,7 +534,7 @@ export function DeckDetail({
                     <ComplexityBadge complexity={card.complexity} />
                     {card.type === "choice" && (
                       <Badge variant="outline" className="text-xs">
-                        {card.multiSelect ? "Multi" : "Single"}
+                        {card.multiSelect ? t("deckDetail.multi") : t("deckDetail.single")}
                       </Badge>
                     )}
                     {(card.tags ?? []).map((tag) => (
