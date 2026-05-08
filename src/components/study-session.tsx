@@ -34,12 +34,11 @@ interface StudySessionProps {
   deck: Deck;
   goal?: SessionGoal;
   shuffle?: boolean;
-  newCardIds?: Set<string>;
   onExit: () => void;
   onRunComplete: (totalTimeMs: number, results: CardRunResult[]) => void;
 }
 
-export function StudySession({ deck, goal, shuffle: doShuffle = true, newCardIds, onExit, onRunComplete }: StudySessionProps) {
+export function StudySession({ deck, goal, shuffle: doShuffle = true, onExit, onRunComplete }: StudySessionProps) {
   const { t } = useLanguage();
   const [remaining, setRemaining] = useState<Card[]>(() => doShuffle ? shuffle(deck.cards) : [...deck.cards]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -451,9 +450,6 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, newCardIds
         const doneCount = currentIndex;
         const redoCount = redoLaterIds.size;
         const pendingCount = total - doneCount - redoCount;
-        const newCount = newCardIds
-          ? remaining.slice(currentIndex).filter((c) => newCardIds.has(c.id)).length
-          : 0;
         const donePercent = total > 0 ? (doneCount / total) * 100 : 0;
         const redoPercent = total > 0 ? (redoCount / total) * 100 : 0;
         return (
@@ -483,12 +479,6 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, newCardIds
                 <span className="inline-block h-2 w-2 rounded-full bg-muted-foreground/30 shrink-0" />
                 {pendingCount}{t("studySession.pending")}
               </span>
-              {newCount > 0 && (
-                <span className="flex items-center gap-1">
-                  <span className="inline-block h-2 w-2 rounded-full bg-blue-400/80 dark:bg-blue-500/70 shrink-0" />
-                  {newCount}{t("studySession.new")}
-                </span>
-              )}
             </div>
           </div>
         );

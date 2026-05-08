@@ -106,6 +106,10 @@ function App() {
     return result;
   }, [currentDeck, srs, getRunsForDeck]);
 
+  const newCount = currentDeck
+    ? currentDeck.cards.filter((c) => (deckCardPerf.get(c.id)?.attempts ?? 0) === 0).length
+    : 0;
+
   // Build a filtered deck for study sessions
   const studyDeck = useMemo((): Deck | undefined => {
     if (view.kind !== "study" || !currentDeck) return undefined;
@@ -116,6 +120,8 @@ function App() {
       cards = srs.getDueCards(currentDeck);
     } else if (view.runMode === "weak") {
       cards = srs.getWeakCards(currentDeck);
+    } else if (view.runMode === "new") {
+      cards = cards.filter((c) => (deckCardPerf.get(c.id)?.attempts ?? 0) === 0);
     }
 
     if (view.complexityFilter) {
@@ -124,7 +130,7 @@ function App() {
     }
 
     return { ...currentDeck, cards };
-  }, [view, currentDeck, srs]);
+  }, [view, currentDeck, srs, deckCardPerf]);
 
   function goHome() {
     window.location.hash = "";
@@ -152,7 +158,6 @@ function App() {
           deck={studyDeck}
           goal={view.goal}
           shuffle={view.shuffle ?? false}
-          newCardIds={new Set(studyDeck.cards.filter((c) => (deckCardPerf.get(c.id)?.attempts ?? 0) === 0).map((c) => c.id))}
           onExit={() => setView({ kind: "deck", deckId: studyDeck.id })}
           onRunComplete={(totalTimeMs, results) => {
             addRun(studyDeck.id, totalTimeMs, results);
@@ -212,6 +217,7 @@ function App() {
           hasRuns={getRunsForDeck(currentDeck.id).length > 0}
           dueCount={srs.getDueCards(currentDeck).length}
           weakCount={srs.getWeakCards(currentDeck).length}
+          newCount={newCount}
           cardPerf={deckCardPerf}
           onBack={() => setView({ kind: "home" })}
           onStartStudy={(runMode, complexityFilter, goal, shuffle) =>
