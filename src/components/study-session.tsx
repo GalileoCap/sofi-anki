@@ -101,6 +101,17 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, newCardIds
     }
   }, [isFinished, onRunComplete, results]);
 
+  function handleExit() {
+    const graded = Array.from(results.values()).filter((r) =>
+      r.attempts.some((a) => a.result === "correct" || a.result === "approximate" || a.result === "wrong")
+    );
+    if (graded.length > 0) {
+      const finalElapsed = Date.now() - sessionStartRef.current - sessionPausedMsRef.current;
+      onRunComplete(finalElapsed, graded);
+    }
+    onExit();
+  }
+
   function pushSnapshot() {
     const snap: UndoSnapshot = {
       remaining,
@@ -352,7 +363,7 @@ export function StudySession({ deck, goal, shuffle: doShuffle = true, newCardIds
               </Button>
             ) : (
               <div className="flex items-center gap-1">
-                <Button variant="destructive" size="sm" onClick={onExit}>
+                <Button variant="destructive" size="sm" onClick={handleExit}>
                   {t("studySession.exit")}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setConfirmExit(false)}>
