@@ -123,9 +123,12 @@ const en_translations = {
   "cardForm.nothingToPreview": "Nothing to preview",
   "cardForm.optionsLabel": "Options (check the correct ones)",
   "cardForm.addOption": "Add Option",
-  "cardForm.multipleCorrect": "Multiple correct — will be multi-select during study",
-  "cardForm.singleCorrect": "Single correct — will be single-select during study",
-  "cardForm.hintPlaceholder": "Optional hint shown before revealing the answer...",
+  "cardForm.multipleCorrect":
+    "Multiple correct — will be multi-select during study",
+  "cardForm.singleCorrect":
+    "Single correct — will be single-select during study",
+  "cardForm.hintPlaceholder":
+    "Optional hint shown before revealing the answer...",
   "cardForm.addHint": "+ Add hint",
   "cardForm.newCard": "New Card",
   "cardForm.editCard": "Edit Card",
@@ -206,8 +209,10 @@ const en_translations = {
   "importDialog.importDeckTitle": "Import Deck",
   "importDialog.importCardsTitle": "Import Cards",
   "importDialog.llmPromptTemplate": "LLM Prompt Template",
-  "importDialog.invalidFormat": "Invalid format. Each card needs \"title\" + \"response\", or \"type\": \"choice\" + \"options\".",
-  "importDialog.invalidJson": "Invalid JSON. Please check the format and try again.",
+  "importDialog.invalidFormat":
+    'Invalid format. Each card needs "title" + "response", or "type": "choice" + "options".',
+  "importDialog.invalidJson":
+    "Invalid JSON. Please check the format and try again.",
   // Import .apkg dialog
   "importApkg.title": "Import Anki Deck",
   "importApkg.parsing": "Parsing…",
@@ -220,7 +225,8 @@ const en_translations = {
   "importApkg.importAllDecks": "Import all decks",
   // Backup dialog
   "backup.title": "Backup & Restore",
-  "backup.exportDesc": "Export all your decks, run history, SRS data, and settings.",
+  "backup.exportDesc":
+    "Export all your decks, run history, SRS data, and settings.",
   "backup.downloadBackup": "Download Backup",
   "backup.restoreDesc": "Restore from a backup file.",
   "backup.mergeKeep": "Merge (keep existing)",
@@ -241,6 +247,67 @@ const en_translations = {
   // Study heatmap
   "heatmap.less": "Less",
   "heatmap.more": "More",
+  // Deck schema prompt
+  "import.deck.schemaPrompt": `Generate flashcards in the following JSON format:
+
+{
+  "title": "Deck Title",
+  "tags": ["topic1", "topic2"],
+  "cards": [
+    {
+      "title": "Question or front of card",
+      "response": "Answer or back of card",
+      "hint": "Optional hint shown before revealing the answer",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"]
+    },
+    {
+      "type": "choice",
+      "title": "Multiple choice question",
+      "hint": "Optional hint shown before answer",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"],
+      "options": [
+        { "text": "Option A", "correct": true },
+        { "text": "Option B", "correct": false }
+      ]
+    }
+  ]
+}
+
+Standard cards have "title", "response", "complexity", optional "tags", and optional "hint".
+Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", and "options" (array of { "text", "correct" }).
+If multiple options are correct, it becomes a multi-select question.
+The deck and each card can have "tags" (array of strings) for categorization.
+Return only the JSON, no extra text.`,
+  "import.cards.schemaPrompt": `Generate flashcards in the following JSON format:
+
+{
+  "cards": [
+    {
+      "title": "Question or front of card",
+      "response": "Answer or back of card",
+      "hint": "Optional hint shown before revealing the answer",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"]
+    },
+    {
+      "type": "choice",
+      "title": "Multiple choice question",
+      "hint": "Optional hint shown before answer",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"],
+      "options": [
+        { "text": "Option A", "correct": true },
+        { "text": "Option B", "correct": false }
+      ]
+    }
+  ]
+}
+
+Standard cards have "title", "response", "complexity", optional "tags", and optional "hint".
+Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", and "options" (array of { "text", "correct" }).
+Return only the JSON, no extra text.`,
 };
 
 export type Translation = typeof en_translations;
@@ -335,7 +402,8 @@ const translations: Record<Lang, Translation> = {
     "deckDetail.collapseAll": "Colapsar todo",
     "deckDetail.expandAll": "Expandir todo",
     "deckDetail.noCards": "Sin cartas aún",
-    "deckDetail.noCardsHint": "Añade cartas manualmente o impórtalas desde JSON.",
+    "deckDetail.noCardsHint":
+      "Añade cartas manualmente o impórtalas desde JSON.",
     "deckDetail.noMatch": "Ninguna carta coincide con tus filtros.",
     "deckDetail.neverStudied": "Nunca estudiado",
     "deckDetail.accuracy": "Precisión:",
@@ -358,13 +426,17 @@ const translations: Record<Lang, Translation> = {
     "deckForm.emoji": "Emoji (opcional)",
     "deckForm.emojiPlaceholder": "p.ej. 🌟",
     "cardForm.questionPlaceholder": "Pregunta / frente de carta",
-    "cardForm.answerPlaceholder": "Respuesta / dorso de carta — admite **markdown**",
+    "cardForm.answerPlaceholder":
+      "Respuesta / dorso de carta — admite **markdown**",
     "cardForm.nothingToPreview": "Sin vista previa",
     "cardForm.optionsLabel": "Opciones (marca las correctas)",
     "cardForm.addOption": "Añadir opción",
-    "cardForm.multipleCorrect": "Varias correctas — selección múltiple durante el estudio",
-    "cardForm.singleCorrect": "Una correcta — selección única durante el estudio",
-    "cardForm.hintPlaceholder": "Pista opcional mostrada antes de revelar la respuesta...",
+    "cardForm.multipleCorrect":
+      "Varias correctas — selección múltiple durante el estudio",
+    "cardForm.singleCorrect":
+      "Una correcta — selección única durante el estudio",
+    "cardForm.hintPlaceholder":
+      "Pista opcional mostrada antes de revelar la respuesta...",
     "cardForm.addHint": "+ Añadir pista",
     "cardForm.newCard": "Nueva carta",
     "cardForm.editCard": "Editar carta",
@@ -432,34 +504,41 @@ const translations: Record<Lang, Translation> = {
     "exportDialog.title": "Exportar y compartir",
     "exportDialog.shareLink": "Enlace para compartir",
     "exportDialog.computingLink": "Calculando enlace…",
-    "exportDialog.tooLarge": "El mazo es demasiado grande para compartir por URL.",
+    "exportDialog.tooLarge":
+      "El mazo es demasiado grande para compartir por URL.",
     "exportDialog.deckData": "Datos del mazo",
     "importDialog.importDeckTitle": "Importar mazo",
     "importDialog.importCardsTitle": "Importar cartas",
     "importDialog.llmPromptTemplate": "Plantilla de prompt LLM",
-    "importDialog.invalidFormat": "Formato inválido. Cada carta necesita \"title\" + \"response\", o \"type\": \"choice\" + \"options\".",
-    "importDialog.invalidJson": "JSON inválido. Comprueba el formato e inténtalo de nuevo.",
+    "importDialog.invalidFormat":
+      'Formato inválido. Cada carta necesita "title" + "response", o "type": "choice" + "options".',
+    "importDialog.invalidJson":
+      "JSON inválido. Comprueba el formato e inténtalo de nuevo.",
     "importApkg.title": "Importar mazo Anki",
     "importApkg.parsing": "Procesando…",
     "importApkg.browseFile": "Buscar archivo",
     "importApkg.chooseAnother": "Elegir otro archivo",
     "importApkg.dropZone": "Arrastra un archivo .apkg aquí, o",
-    "importApkg.noCards": "No se encontraron cartas importables en este archivo.",
+    "importApkg.noCards":
+      "No se encontraron cartas importables en este archivo.",
     "importApkg.parseFailed": "Error al procesar el archivo .apkg.",
     "importApkg.importDeck": "Importar mazo",
     "importApkg.importAllDecks": "Importar todos los mazos",
     "backup.title": "Copia de seguridad y restaurar",
-    "backup.exportDesc": "Exporta todos tus mazos, historial de sesiones, datos SRS y configuración.",
+    "backup.exportDesc":
+      "Exporta todos tus mazos, historial de sesiones, datos SRS y configuración.",
     "backup.downloadBackup": "Descargar copia de seguridad",
     "backup.restoreDesc": "Restaurar desde un archivo de copia de seguridad.",
     "backup.mergeKeep": "Combinar (conservar existente)",
     "backup.replaceAll": "Reemplazar todo",
-    "backup.confirmReplace": "Esto reemplazará todos los datos actuales. ¿Estás seguro?",
+    "backup.confirmReplace":
+      "Esto reemplazará todos los datos actuales. ¿Estás seguro?",
     "backup.yesReplace": "Sí, reemplazar",
     "backup.invalidJson": "Archivo JSON inválido.",
     "backup.replacedSuccess": "Datos reemplazados con éxito.",
     "backup.mergedSuccess": "Datos combinados con éxito.",
-    "backup.restoreFailed": "Error al restaurar datos. El archivo puede estar dañado.",
+    "backup.restoreFailed":
+      "Error al restaurar datos. El archivo puede estar dañado.",
     "sharedDeck.label": "Mazo compartido",
     "sharedDeck.importDeck": "Importar mazo",
     "sharedDeck.goToDecks": "Ir a los mazos",
@@ -467,9 +546,72 @@ const translations: Record<Lang, Translation> = {
     "importMerge.title": "El mazo ya existe",
     "heatmap.less": "Menos",
     "heatmap.more": "Más",
+    "import.deck.schemaPrompt": `Generá un mazo de 50 tarjetas tipo anki sobre "" en el siguiente formato JSON:
+
+
+{
+  "title": "Título del mazo",
+  "tags": ["tema1", "tema2"],
+  "cards": [
+    {
+      "title": "Pregunta o anverso de la tarjeta",
+      "response": "Respuesta o reverso de la tarjeta",
+      "hint": "Pista opcional que se muestra antes de revelar la respuesta",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtema"]
+    },
+    {
+      "type": "choice",
+      "title": "Pregunta de opción múltiple",
+      "hint": "Pista opcional que se muestra antes de la respuesta",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtema"],
+      "options": [
+        { "text": "Opción A", "correct": true },
+        { "text": "Opción B", "correct": false }
+      ]
+    }
+  ]
+}
+
+Todas las cartas tienen "title", "response", "complexity", opcional "tags", y opcional "hint".
+Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", y "options" (array de { "text", "correct" }).
+Devolvé solo el el JSON, sin texto extra.`,
+    "import.cards.schemaPrompt": `Generá 50 tarjetas tipo anki sobre "" en el siguiente formato JSON:
+
+
+{
+  "cards": [
+    {
+      "title": "Pregunta o anverso de la tarjeta",
+      "response": "Respuesta o reverso de la tarjeta",
+      "hint": "Pista opcional que se muestra antes de revelar la respuesta",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtema"]
+    },
+    {
+      "type": "choice",
+      "title": "Pregunta de opción múltiple",
+      "hint": "Pista opcional que se muestra antes de la respuesta",
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtema"],
+      "options": [
+        { "text": "Opción A", "correct": true },
+        { "text": "Opción B", "correct": false }
+      ]
+    }
+  ]
+}
+
+Todas las cartas tienen "title", "response", "complexity", opcional "tags", y opcional "hint".
+Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", y "options" (array de { "text", "correct" }).
+Devolvé solo el el JSON, sin texto extra.`,
   },
 } satisfies Record<Lang, Translation>;
 
-export function translate<K extends TranslationKey>(lang: Lang, key: K): Translation[K] {
+export function translate<K extends TranslationKey>(
+  lang: Lang,
+  key: K,
+): Translation[K] {
   return translations[lang][key];
 }
