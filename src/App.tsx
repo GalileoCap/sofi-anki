@@ -152,6 +152,7 @@ function App() {
           deck={studyDeck}
           goal={view.goal}
           shuffle={view.shuffle ?? false}
+          newCardIds={new Set(studyDeck.cards.filter((c) => (deckCardPerf.get(c.id)?.attempts ?? 0) === 0).map((c) => c.id))}
           onExit={() => setView({ kind: "deck", deckId: studyDeck.id })}
           onRunComplete={(totalTimeMs, results) => {
             addRun(studyDeck.id, totalTimeMs, results);
