@@ -56,6 +56,7 @@ interface DeckDetailProps {
   hasRuns: boolean;
   dueCount: number;
   weakCount: number;
+  newCount: number;
   cardPerf: Map<string, CardPerf>;
   onBack: () => void;
   onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null, goal?: SessionGoal, shuffle?: boolean) => void;
@@ -73,6 +74,7 @@ export function DeckDetail({
   hasRuns,
   dueCount,
   weakCount,
+  newCount,
   cardPerf,
   onBack,
   onStartStudy,
@@ -290,6 +292,14 @@ export function DeckDetail({
               {t("common.weak")}
               <Badge variant="outline" className="ml-1 text-xs">{weakCount}</Badge>
             </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setRunDialog({ open: true, mode: "new", label: t("common.new") })}
+              disabled={newCount === 0}
+            >
+              {t("common.new")}
+              <Badge variant="outline" className="ml-1 text-xs">{newCount}</Badge>
+            </Button>
             <Button variant="outline" onClick={onViewStats} disabled={!hasRuns}>
               {t("common.stats")}
             </Button>
@@ -311,6 +321,7 @@ export function DeckDetail({
         showModePicker
         dueCount={dueCount}
         weakCount={weakCount}
+        newCount={newCount}
         onStart={handleRunStart}
       />
 

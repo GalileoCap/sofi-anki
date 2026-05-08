@@ -92,7 +92,7 @@ export interface CardSRS {
   lastResult: AnswerResult | null;
 }
 
-export type RunMode = "all" | "due" | "weak";
+export type RunMode = "all" | "due" | "weak" | "new";
 
 export interface SessionGoal {
   type: "cards" | "minutes";

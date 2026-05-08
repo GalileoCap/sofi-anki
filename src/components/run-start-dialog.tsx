@@ -22,6 +22,7 @@ interface RunStartDialogProps {
   showModePicker?: boolean;
   dueCount?: number;
   weakCount?: number;
+  newCount?: number;
   onStart: (mode: RunMode, goal?: SessionGoal, shuffle?: boolean) => void;
 }
 
@@ -32,6 +33,7 @@ export function RunStartDialog({
   showModePicker,
   dueCount = 0,
   weakCount = 0,
+  newCount = 0,
   onStart,
 }: RunStartDialogProps) {
   const [selectedMode, setSelectedMode] = useState<RunMode>("all");
@@ -70,6 +72,7 @@ export function RunStartDialog({
                     { mode: "all" as RunMode, label: t("runStart.allCards"), count: null },
                     { mode: "due" as RunMode, label: t("common.due"), count: dueCount },
                     { mode: "weak" as RunMode, label: t("common.weak"), count: weakCount },
+                    { mode: "new" as RunMode, label: t("common.new"), count: newCount },
                   ] as const
                 ).map(({ mode, label: mLabel, count }) => (
                   <button
@@ -160,7 +163,13 @@ export function RunStartDialog({
         <DialogFooter>
           <Button
             onClick={handleStart}
-            disabled={showModePicker && selectedMode === "due" && dueCount === 0}
+            disabled={
+              showModePicker && (
+                (selectedMode === "due" && dueCount === 0) ||
+                (selectedMode === "weak" && weakCount === 0) ||
+                (selectedMode === "new" && newCount === 0)
+              )
+            }
           >
             {t("common.start")}
           </Button>
