@@ -18,6 +18,8 @@ interface RunStartDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Pre-selected label shown in title (desktop mode). Omit when showModePicker=true. */
   label?: string;
+  /** The run mode for desktop (non-picker) dialogs. */
+  mode?: RunMode;
   /** When true, show a mode picker before goal selection (used on mobile "Start" button). */
   showModePicker?: boolean;
   dueCount?: number;
@@ -31,6 +33,7 @@ export function RunStartDialog({
   onOpenChange,
   label,
   showModePicker,
+  mode: modeProp,
   dueCount = 0,
   weakCount = 0,
   newCount = 0,
@@ -44,7 +47,7 @@ export function RunStartDialog({
   const [goalValue, setGoalValue] = useState(20);
 
   function handleStart() {
-    const mode = showModePicker ? selectedMode : (label ? modeFromLabel(label) : "all");
+    const mode = showModePicker ? selectedMode : (modeProp ?? "all");
     onStart(mode, useGoal ? { type: goalType, value: goalValue } : undefined, shuffle);
     onOpenChange(false);
     setUseGoal(false);
@@ -177,10 +180,4 @@ export function RunStartDialog({
       </DialogContent>
     </Dialog>
   );
-}
-
-function modeFromLabel(label: string): RunMode {
-  if (label.toLowerCase().includes("due")) return "due";
-  if (label.toLowerCase().includes("weak")) return "weak";
-  return "all";
 }

@@ -330,6 +330,7 @@ export function DeckDetail({
         open={runDialog.open}
         onOpenChange={(open) => setRunDialog((prev) => ({ ...prev, open }))}
         label={runDialog.label}
+        mode={runDialog.mode}
         onStart={(mode, goal, shuffle) => handleRunStart(mode, goal, shuffle)}
       />
 
