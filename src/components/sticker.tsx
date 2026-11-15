@@ -200,3 +200,34 @@ export function ComesBack({ days }: { days: number }) {
             : t("comes.inDays").replace("{n}", String(days));
   return <Chip urgent={days <= 0}>{text}</Chip>;
 }
+
+type SegmentedProps<T extends string> = {
+  /** What the choice is, for a screen reader. */
+  label: string;
+  options: readonly { value: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+  className?: string;
+};
+
+/** One of a few values, as pills in a row, the chosen one in ink. */
+export function Segmented<T extends string>({ label, options, value, onChange, className }: SegmentedProps<T>) {
+  return (
+    <div role="group" aria-label={label} className={cn("inline-flex gap-1 self-start rounded-full border-2 border-border p-1", className)}>
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          aria-pressed={value === option.value}
+          onClick={() => onChange(option.value)}
+          className={cn(
+            "min-h-9 flex-1 cursor-pointer rounded-full px-3.5 text-sm font-bold whitespace-nowrap transition-colors",
+            value === option.value ? looks.ink : "text-muted-foreground hover:bg-muted",
+          )}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}

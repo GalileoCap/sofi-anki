@@ -1,14 +1,8 @@
 import { useRef, useState } from "react";
-import { useLanguage } from "@/contexts/language-context";
+
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useLanguage } from "@/contexts/language-context";
 import type { CardSchedule, Deck } from "@/core/model";
 import { now } from "@/effects/clock";
 import { readFileBytes } from "@/effects/files";
@@ -16,12 +10,11 @@ import { looks } from "@/lib/ui-looks";
 
 type ParsedApkg = { decks: Deck[]; schedules: CardSchedule[] };
 
-interface ImportApkgDialogProps {
-  trigger?: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+type ImportApkgDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onImport: (parsed: ParsedApkg) => void;
-}
+};
 
 type State =
   | { kind: "idle" }
@@ -29,28 +22,18 @@ type State =
   | { kind: "parsed"; result: ParsedApkg; fileName: string }
   | { kind: "error"; message: string };
 
-export function ImportApkgDialog({
-  trigger,
-  open: controlledOpen,
-  onOpenChange: controlledOnOpenChange,
-  onImport,
-}: ImportApkgDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const open = controlledOpen ?? internalOpen;
+/** Decks from an Anki export, dropped or chosen, listed before they come in. */
+export function ImportApkgDialog({ open, onOpenChange, onImport }: ImportApkgDialogProps) {
+  const { t, tp } = useLanguage();
   const [state, setState] = useState<State>({ kind: "idle" });
   const inputRef = useRef<HTMLInputElement>(null);
-  const { t, tp } = useLanguage();
 
-  function handleOpenChange(next: boolean) {
-    setInternalOpen(next);
-    controlledOnOpenChange?.(next);
-    if (next) {
-      setState({ kind: "idle" });
-      if (inputRef.current) inputRef.current.value = "";
-    }
+  function changeOpen(next: boolean) {
+    onOpenChange(next);
+    if (next) setState({ kind: "idle" });
   }
 
-  async function handleFile(file: File) {
+  async function readFile(file: File) {
     setState({ kind: "loading" });
     const { readApkg } = await import("@/effects/anki-file");
     await readFileBytes(file)
@@ -58,118 +41,88 @@ export function ImportApkgDialog({
       .andThen((bytes) => readApkg(bytes, now()).mapErr(() => t("importApkg.parseFailed")))
       .match(
         (result) =>
-          setState(
-            result.decks.length === 0
-              ? { kind: "error", message: t("importApkg.noCards") }
-              : { kind: "parsed", result, fileName: file.name },
-          ),
+          setState(result.decks.length === 0 ? { kind: "error", message: t("importApkg.noCards") } : { kind: "parsed", result, fileName: file.name }),
         (message) => setState({ kind: "error", message }),
       );
   }
 
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function pick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    e.target.value = "";
+    if (file) readFile(file);
   }
 
-  function handleDrop(e: React.DragEvent) {
+  function drop(e: React.DragEvent) {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    if (file) readFile(file);
   }
 
-  function handleImport() {
+  function bringIn() {
     if (state.kind !== "parsed") return;
     onImport(state.result);
-    handleOpenChange(false);
+    changeOpen(false);
   }
 
-  const totalCards =
-    state.kind === "parsed" ? state.result.decks.reduce((s, d) => s + d.cards.length, 0) : 0;
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent>
+    <Dialog open={open} onOpenChange={changeOpen}>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{t("importApkg.title")}</DialogTitle>
-          <DialogDescription>
-            Select an Anki export file (<code className="rounded bg-muted px-1 py-0.5 text-xs">.apkg</code>).
-            Standard and basic-reversed cards are imported; cloze cards are skipped. SRS history is preserved.
-          </DialogDescription>
+          <DialogDescription>{t("importApkg.description")}</DialogDescription>
         </DialogHeader>
+        <input ref={inputRef} type="file" accept=".apkg,.zip" className="hidden" aria-hidden="true" tabIndex={-1} onChange={pick} />
 
-        {/* Drop zone */}
-        {state.kind !== "parsed" && (
+        {state.kind === "parsed" ? (
+          <div>
+            <p className={looks.muted}>{t("importApkg.found").replace("{file}", state.fileName)}</p>
+            <div className={looks.list}>
+              {state.result.decks.map((deck) => (
+                <div key={deck.id} className={looks.listRow}>
+                  <span className="min-w-0 truncate font-bold">{deck.title}</span>
+                  <span className={looks.fineFigure}>
+                    {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
           <div
-            className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-border p-8 text-center transition-colors hover:border-muted-foreground/50"
+            className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-6 text-center"
             onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDrop}
+            onDrop={drop}
           >
             {state.kind === "loading" ? (
               <p className={looks.muted}>{t("importApkg.parsing")}</p>
             ) : (
               <>
-                <p className={looks.muted}>
-                  {t("importApkg.dropZone")}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => inputRef.current?.click()}
-                >
+                <p className="font-bold">{t("importApkg.dropZone")}</p>
+                <Button variant="outline" onClick={() => inputRef.current?.click()}>
                   {t("importApkg.browseFile")}
                 </Button>
-                <input
-                  ref={inputRef}
-                  type="file"
-                  accept=".apkg,.zip"
-                  className="hidden"
-                  onChange={handleInputChange}
-                />
               </>
             )}
           </div>
         )}
 
         {state.kind === "error" && (
-          <p className={looks.error}>{state.message}</p>
+          <p role="alert" className={looks.error}>
+            {state.message}
+          </p>
         )}
 
         {state.kind === "parsed" && (
-          <div className={looks.stack}>
-            <p className={looks.muted}>
-              Found <strong>{state.result.decks.length}</strong>{" "}
-              {tp(state.result.decks.length, "common.deck", "common.decks")} with{" "}
-              <strong>{totalCards}</strong> {t("common.cards")} total in{" "}
-              <span className={looks.code}>{state.fileName}</span>
-            </p>
-            <ul className="flex flex-col gap-1 rounded-md border bg-muted/40 p-3">
-              {state.result.decks.map((d) => (
-                <li key={d.id} className="flex items-center justify-between gap-2 text-sm">
-                  <span className="truncate font-medium">{d.title}</span>
-                  <span className={looks.fineAside}>
-                    {d.cards.length} {tp(d.cards.length, "common.card", "common.cards")}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <div className={looks.row}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setState({ kind: "idle" });
-                  if (inputRef.current) inputRef.current.value = "";
-                }}
-              >
-                {t("importApkg.chooseAnother")}
-              </Button>
-              <Button size="sm" onClick={handleImport}>
-                {state.result.decks.length === 1 ? t("importApkg.importDeck") : t("importApkg.importAllDecks")}
-              </Button>
-            </div>
-          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => inputRef.current?.click()}>
+              {t("importApkg.chooseAnother")}
+            </Button>
+            <Button onClick={bringIn}>
+              {state.result.decks.length === 1
+                ? t("importApkg.importDeck")
+                : t("importApkg.importAllDecks").replace("{n}", String(state.result.decks.length))}
+            </Button>
+          </DialogFooter>
         )}
       </DialogContent>
     </Dialog>

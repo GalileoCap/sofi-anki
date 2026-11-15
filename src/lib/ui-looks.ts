@@ -20,6 +20,8 @@ export const looks = {
   chips: "flex flex-wrap items-center gap-1.5",
   /** A search box with its filters, stacked on a phone. */
   filters: "flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4",
+  /** A checkbox, in ink when ticked. */
+  checkbox: "size-5 shrink-0 accent-primary",
   /** A checkbox with its label. */
   check: "flex items-center gap-2 text-sm",
   /** A dialog wide enough for JSON. */

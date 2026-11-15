@@ -1,7 +1,8 @@
 import { useState } from "react";
 
 import { Markdown } from "@/components/markdown";
-import { EmojiSticker, GradeMark, Key } from "@/components/sticker";
+import { CardFace, UnderRule } from "@/components/card-face";
+import { GradeMark, Key } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import type { AnswerResult, Card, CardSchedule, Deck, Millis } from "@/core/model";
@@ -70,21 +71,16 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div className="flex flex-1 flex-col gap-2.5 rounded-xl bg-card p-4.5 shadow-md">
-        {deck && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <EmojiSticker deck={deck} />
-            {deck.title}
-          </div>
-        )}
-        <Markdown className="text-xl leading-snug font-extrabold">{card.title}</Markdown>
+      <CardFace deck={deck} title={card.title} className="flex-1">
         {card.type === "choice" && <ChoiceOptions card={card} selected={selected} revealed={revealed} onPick={pick} />}
         {!revealed && card.hint && (
           <div className="mt-auto">
             {hintShown ? (
-              <div className="border-t-2 border-dashed border-border pt-2.5">
-                <strong>{t("common.hint")}.</strong> <Markdown inline>{card.hint}</Markdown>
-              </div>
+              <UnderRule>
+                <p>
+                  <strong>{t("common.hint")}.</strong> <Markdown inline>{card.hint}</Markdown>
+                </p>
+              </UnderRule>
             ) : (
               <Button variant="ghost" className="-ml-3 text-muted-foreground" onClick={() => setHintShown(true)}>
                 {t("study.showHint")}
@@ -94,11 +90,11 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
           </div>
         )}
         {revealed && card.type === "standard" && (
-          <div className="flex flex-col gap-2.5 border-t-2 border-dashed border-border pt-2.5">
+          <UnderRule>
             <Markdown>{card.response}</Markdown>
-          </div>
+          </UnderRule>
         )}
-      </div>
+      </CardFace>
 
       {revealed ? (
         <div className="grid grid-cols-3 justify-items-center gap-2.5">

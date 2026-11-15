@@ -1,28 +1,22 @@
 import type { ReactNode } from "react";
 
-import { looks } from "@/lib/ui-looks";
+/** A field's label over its control. */
+const fieldLook = "flex flex-col gap-1.5 text-sm font-bold";
 
-type FieldProps = {
-  label: string;
-  /** A small control beside the label, such as a preview toggle. */
-  action?: ReactNode;
-  children: ReactNode;
-};
-
-/** A form's field: its label above what it names. */
-export function Field({ label, action, children }: FieldProps) {
-  const labelText = <label className={looks.muted}>{label}</label>;
+/** A form's field: its bold label over the control it names. A group of buttons takes the label as its name instead. */
+export function Field({ label, group, children }: { label: string; group?: boolean; children: ReactNode }) {
+  if (group) {
+    return (
+      <div role="group" aria-label={label} className={fieldLook}>
+        <span aria-hidden="true">{label}</span>
+        {children}
+      </div>
+    );
+  }
   return (
-    <div className="flex flex-col gap-1.5">
-      {action ? (
-        <div className={looks.spread}>
-          {labelText}
-          {action}
-        </div>
-      ) : (
-        labelText
-      )}
+    <label className={fieldLook}>
+      {label}
       {children}
-    </div>
+    </label>
   );
 }

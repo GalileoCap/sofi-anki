@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/contexts/language-context";
 
 interface TagInputProps {
   tags: string[];
@@ -7,7 +7,9 @@ interface TagInputProps {
   placeholder?: string;
 }
 
-export function TagInput({ tags, onChange, placeholder = "Add tag..." }: TagInputProps) {
+/** Tags typed one at a time, each ended by Enter or a comma, each shown as a chip that removes it. */
+export function TagInput({ tags, onChange, placeholder }: TagInputProps) {
+  const { t } = useLanguage();
   const [input, setInput] = useState("");
 
   function addTag(raw: string) {
@@ -45,18 +47,17 @@ export function TagInput({ tags, onChange, placeholder = "Add tag..." }: TagInpu
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-input bg-transparent px-3 py-2 text-sm">
+    <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border-2 border-input bg-card px-3 py-1.5 text-base font-normal focus-within:border-primary">
       {tags.map((tag) => (
-        <Badge key={tag} variant="secondary" className="gap-1 text-xs">
-          {tag}
-          <button
-            type="button"
-            onClick={() => removeTag(tag)}
-            className="ml-0.5 opacity-60 hover:opacity-100"
-          >
-            &times;
-          </button>
-        </Badge>
+        <button
+          key={tag}
+          type="button"
+          onClick={() => removeTag(tag)}
+          aria-label={t("deckForm.removeTag").replace("{tag}", tag)}
+          className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-bold text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {tag} <span aria-hidden="true">×</span>
+        </button>
       ))}
       <input
         type="text"
@@ -70,7 +71,7 @@ export function TagInput({ tags, onChange, placeholder = "Add tag..." }: TagInpu
           }
         }}
         placeholder={tags.length === 0 ? placeholder : ""}
-        className="min-w-20 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        className="min-w-20 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
       />
     </div>
   );

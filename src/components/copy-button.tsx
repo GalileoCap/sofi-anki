@@ -22,7 +22,7 @@ export function CopyButton({ text }: { text: string }) {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={copyNow}>
+    <Button variant="outline" onClick={copyNow}>
       {t(labels[copy])}
     </Button>
   );

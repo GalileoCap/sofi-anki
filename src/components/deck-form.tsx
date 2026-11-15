@@ -16,9 +16,9 @@ import { DECK_COLORS } from "@/lib/deck-colors";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
-/** A colour to pick for the deck's cover, ringed and larger when picked. */
+/** A colour to pick for the deck's spine, ringed in ink when picked. */
 const swatch = (picked: boolean): string =>
-  cn("h-7 w-7 rounded-full border-2 transition-[border-color,scale]", picked ? "border-foreground scale-110" : "border-transparent hover:scale-105");
+  cn("size-10 cursor-pointer rounded-full border-[3px] transition-colors", picked ? "border-foreground" : "border-card hover:border-border");
 
 interface DeckFormProps {
   trigger: React.ReactNode;
@@ -42,7 +42,7 @@ export function DeckForm({
   submitLabel,
 }: DeckFormProps) {
   const { t } = useLanguage();
-  const resolvedTitle = dialogTitle ?? t("deckList.newDeck");
+  const resolvedTitle = dialogTitle ?? t("deckForm.newDeck");
   const resolvedSubmit = submitLabel ?? t("common.create");
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(initialTitle);
@@ -80,22 +80,21 @@ export function DeckForm({
           <DialogTitle>{resolvedTitle}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className={looks.form}>
-          <Input
-            placeholder={t("deckForm.titlePlaceholder")}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            autoFocus
-          />
+          <Field label={t("deckForm.title")}>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} autoFocus />
+          </Field>
           <Field label={t("common.tags")}>
             <TagInput tags={tags} onChange={setTags} placeholder={t("deckForm.tagsPlaceholder")} />
           </Field>
-          <Field label={t("deckForm.coverColor")}>
+          <Field label={t("deckForm.coverColor")} group>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setColor(undefined)}
                 className={cn("bg-muted", swatch(!color))}
                 title={t("deckForm.noColor")}
+                aria-label={t("deckForm.noColor")}
+                aria-pressed={!color}
               />
               {DECK_COLORS.map((c) => (
                 <button
@@ -105,27 +104,20 @@ export function DeckForm({
                   className={swatch(color === c)}
                   style={{ backgroundColor: c }}
                   title={c}
+                  aria-label={c}
+                  aria-pressed={color === c}
                 />
               ))}
             </div>
           </Field>
           <Field label={t("deckForm.emoji")}>
-            <div className={looks.row}>
-              {emoji && (
-                <span className="flex h-9 w-9 items-center justify-center rounded-md border bg-muted text-xl">
-                  {emoji}
-                </span>
-              )}
-              <Input
-                placeholder={t("deckForm.emojiPlaceholder")}
-                value={emoji}
-                onChange={(e) => setEmoji(e.target.value)}
-                className="w-32"
-              />
-            </div>
+            <Input value={emoji} onChange={(e) => setEmoji(e.target.value)} className="w-32" />
           </Field>
 
           <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>
+              {t("common.cancel")}
+            </Button>
             <Button type="submit" disabled={!title.trim()}>
               {resolvedSubmit}
             </Button>

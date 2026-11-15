@@ -1,55 +1,38 @@
-import { useState, useRef } from "react";
-import { useLanguage } from "@/contexts/language-context";
+import { useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useLanguage } from "@/contexts/language-context";
 import { type Backup, type RestoreMode, readBackup, restore, writeBackup } from "@/core/backup";
-import { dayKey } from "@/core/stats";
 import type { Store } from "@/core/model";
+import { dayKey } from "@/core/stats";
 import { now } from "@/effects/clock";
 import { download, readFileText } from "@/effects/files";
 import { looks } from "@/lib/ui-looks";
+import { cn } from "@/lib/utils";
 
-interface BackupDialogProps {
-  trigger?: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+type BackupDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   store: Store;
   onRestore: (store: Store) => void;
-}
+};
 
-export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange, store, onRestore }: BackupDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const open = controlledOpen ?? internalOpen;
+/** Downloading everything as one file, and restoring a file, added to what is here or in its place after asking. */
+export function BackupDialog({ open, onOpenChange, store, onRestore }: BackupDialogProps) {
+  const { t } = useLanguage();
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [done, setDone] = useState("");
   const [confirmReplace, setConfirmReplace] = useState(false);
   const [pending, setPending] = useState<Backup | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const { t } = useLanguage();
-
-  function handleOpenChange(next: boolean) {
-    setInternalOpen(next);
-    controlledOnOpenChange?.(next);
-  }
-
-  function handleExport() {
-    const at = now();
-    download(`anki-backup-${dayKey(at)}.json`, writeBackup(store, at), "application/json");
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function readFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
     setError("");
-    setSuccess("");
+    setDone("");
     setConfirmReplace(false);
     readFileText(file).match(
       (text) => readBackup(text).match(setPending, () => setError(t("backup.restoreFailed"))),
@@ -60,73 +43,90 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
   function doRestore(mode: RestoreMode) {
     if (!pending) return;
     onRestore(restore(store, pending, mode));
-    setSuccess(mode === "replace" ? t("backup.replacedSuccess") : t("backup.mergedSuccess"));
+    setDone(mode === "replace" ? t("backup.replacedSuccess") : t("backup.mergedSuccess"));
     setPending(null);
     setConfirmReplace(false);
-    if (fileRef.current) fileRef.current.value = "";
   }
 
+  const part = (title: string, body: string, action: React.ReactNode) => (
+    <div className="flex flex-wrap items-center gap-3.5">
+      <div className="min-w-48 flex-1">
+        <p className="font-bold">{title}</p>
+        <p className={looks.muted}>{body}</p>
+      </div>
+      {action}
+    </div>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{t("backup.title")}</DialogTitle>
         </DialogHeader>
 
-        <div className={looks.stack}>
-          <p className={looks.muted}>
-            {t("backup.exportDesc")}
-          </p>
-          <Button variant="outline" onClick={handleExport}>
+        {part(
+          t("backup.downloadTitle"),
+          t("backup.exportDesc"),
+          <Button
+            onClick={() => {
+              const at = now();
+              download(`anki-backup-${dayKey(at)}.json`, writeBackup(store, at), "application/json");
+            }}
+          >
             {t("backup.downloadBackup")}
-          </Button>
-        </div>
+          </Button>,
+        )}
 
-        <Separator />
+        <div className="border-t-2 border-dashed border-border" />
 
-        <div className={looks.stack}>
-          <p className={looks.muted}>
-            {t("backup.restoreDesc")}
-          </p>
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".json"
-            onChange={handleFileChange}
-            className="text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground hover:file:bg-secondary/80"
-          />
+        {part(
+          t("backup.restoreTitle"),
+          t("backup.restoreDesc"),
+          <Button variant="outline" onClick={() => fileRef.current?.click()}>
+            {t("backup.chooseFile")}
+          </Button>,
+        )}
+        <input ref={fileRef} type="file" accept=".json" onChange={readFile} className="hidden" aria-hidden="true" tabIndex={-1} />
 
-          {pending && !confirmReplace && (
-            <div className={looks.buttons}>
-              <Button size="sm" variant="outline" onClick={() => doRestore("merge")}>
+        {pending && !confirmReplace && (
+          <div className={looks.stack}>
+            <p className="font-bold">{t("backup.how")}</p>
+            <div className={cn(looks.buttons, "flex-wrap")}>
+              <Button variant="outline" onClick={() => doRestore("merge")}>
                 {t("backup.mergeKeep")}
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => setConfirmReplace(true)}>
+              <Button variant="destructive" onClick={() => setConfirmReplace(true)}>
                 {t("backup.replaceAll")}
               </Button>
             </div>
-          )}
+          </div>
+        )}
 
-          {confirmReplace && (
-            <div className="flex flex-col gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-              <p className={looks.error}>
-                {t("backup.confirmReplace")}
-              </p>
-              <div className={looks.buttons}>
-                <Button size="sm" variant="destructive" onClick={() => doRestore("replace")}>
-                  {t("backup.yesReplace")}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setConfirmReplace(false)}>
-                  {t("common.cancel")}
-                </Button>
-              </div>
+        {confirmReplace && (
+          <div className={looks.stack}>
+            <p className={looks.error}>{t("backup.confirmReplace")}</p>
+            <div className={looks.buttons}>
+              <Button variant="ghost" onClick={() => setConfirmReplace(false)}>
+                {t("common.cancel")}
+              </Button>
+              <Button variant="destructive" onClick={() => doRestore("replace")}>
+                {t("backup.yesReplace")}
+              </Button>
             </div>
-          )}
+          </div>
+        )}
 
-          {error && <p className={looks.error}>{error}</p>}
-          {success && <p className="text-sm text-positive">{success}</p>}
-        </div>
+        {error && (
+          <p role="alert" className={looks.error}>
+            {error}
+          </p>
+        )}
+        {done && (
+          <p role="status" className={looks.good}>
+            {done}
+          </p>
+        )}
       </DialogContent>
     </Dialog>
   );

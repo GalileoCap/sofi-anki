@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
+import { Field } from "@/components/field";
+import { Chip, Segmented } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -12,31 +13,23 @@ import { cn } from "@/lib/utils";
 /** The goal a run is offered before anyone changes it. */
 const DEFAULT_GOAL: SessionGoal = { type: "cards", value: 20 };
 
-const choice = (chosen: boolean) =>
-  cn(
-    "rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
-    chosen ? looks.chosen : "border-border text-muted-foreground hover:bg-muted/50",
-  );
+/** A checkbox with its label, tall enough to tap. */
+const checkLook = "flex min-h-11 cursor-pointer items-center gap-2.5 text-sm";
 
 type RunStartDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /**
-   * The mode chosen already, named by `label`, or `null` for the dialog to offer every mode
-   * with the count of cards in each.
-   */
-  mode: { mode: RunMode; label: string } | null;
   counts: Record<Exclude<RunMode, "all">, number>;
   onStart: (mode: RunMode, goal: SessionGoal | undefined, shuffle: boolean) => void;
 };
 
-/** Before a run: its mode when not chosen yet, whether to shuffle, and an optional goal. */
-export function RunStartDialog({ open, onOpenChange, mode, counts, onStart }: RunStartDialogProps) {
+/** Choosing the cards to study: which of the deck's, whether shuffled, and an optional goal. */
+export function RunStartDialog({ open, onOpenChange, counts, onStart }: RunStartDialogProps) {
   const { t } = useLanguage();
   const [picked, setPicked] = useState<RunMode>("all");
   const [shuffle, setShuffle] = useState(false);
   const [goal, setGoal] = useState<SessionGoal | null>(null);
-  const chosen = mode?.mode ?? picked;
+  const chosen = picked;
   const empty = chosen !== "all" && counts[chosen] === 0;
 
   function start() {
@@ -64,67 +57,63 @@ export function RunStartDialog({ open, onOpenChange, mode, counts, onStart }: Ru
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{mode ? `${t("runStart.titleFor")}: ${mode.label}` : t("runStart.title")}</DialogTitle>
+          <DialogTitle>{t("deck.chooseCards")}</DialogTitle>
         </DialogHeader>
-        <div className={looks.form}>
-          {mode === null && (
-            <div className={looks.column}>
-              <p className={looks.muted}>{t("runStart.studyMode")}</p>
-              <div className={looks.wide}>
-                {modes.map((m) => (
-                  <button
-                    key={m.mode}
-                    type="button"
-                    disabled={m.count === 0}
-                    onClick={() => setPicked(m.mode)}
-                    className={cn(choice(picked === m.mode), "flex items-center justify-between py-2.5 disabled:opacity-40")}
-                  >
-                    <span>{m.label}</span>
-                    {m.count !== null && (
-                      <Badge variant="outline" className="text-xs">
-                        {m.count}
-                      </Badge>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <label className={looks.check}>
-            <input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} className="rounded" />
+        <Field label={t("runStart.which")} group>
+          {modes.map((m) => (
+            <button
+              key={m.mode}
+              type="button"
+              aria-pressed={picked === m.mode}
+              disabled={m.count === 0}
+              onClick={() => setPicked(m.mode)}
+              className={cn(
+                "flex min-h-11 cursor-pointer items-center justify-between rounded-lg border-2 bg-card px-3.5 text-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40",
+                picked === m.mode ? "border-primary" : "border-border",
+              )}
+            >
+              {m.label}
+              {m.count !== null && <Chip>{m.count}</Chip>}
+            </button>
+          ))}
+        </Field>
+        <div>
+          <label className={checkLook}>
+            <input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} className={looks.checkbox} />
             {t("runStart.shuffleCards")}
           </label>
-
-          <label className={looks.check}>
-            <input
-              type="checkbox"
-              checked={goal !== null}
-              onChange={(e) => setGoal(e.target.checked ? DEFAULT_GOAL : null)}
-              className="rounded"
-            />
+          <label className={checkLook}>
+            <input type="checkbox" checked={goal !== null} onChange={(e) => setGoal(e.target.checked ? DEFAULT_GOAL : null)} className={looks.checkbox} />
             {t("runStart.sessionGoal")}
           </label>
-
           {goal && (
-            <div className="flex flex-col gap-3 rounded-lg border p-3">
-              <div className={looks.buttons}>
-                {(["cards", "minutes"] as const).map((type) => (
-                  <button key={type} type="button" onClick={() => setGoal({ ...goal, type })} className={cn(choice(goal.type === type), "flex-1")}>
-                    {t(type === "cards" ? "runStart.cards" : "runStart.minutes")}
-                  </button>
-                ))}
-              </div>
-              <div className={looks.row}>
-                <Input type="number" min={1} value={goal.value} onChange={(e) => setGoalValue(e.target.value)} className="w-24" />
-                <span className={looks.muted}>{t(goal.type === "cards" ? "runStart.cards" : "runStart.minutes")}</span>
-              </div>
+            <div className="mt-1 flex flex-wrap items-center gap-3 pl-7.5">
+              <Input
+                type="number"
+                min={1}
+                value={goal.value}
+                onChange={(e) => setGoalValue(e.target.value)}
+                aria-label={t("runStart.sessionGoal")}
+                className="w-24"
+              />
+              <Segmented
+                label={t("runStart.sessionGoal")}
+                options={[
+                  { value: "cards", label: t("runStart.cards") },
+                  { value: "minutes", label: t("runStart.minutes") },
+                ]}
+                value={goal.type}
+                onChange={(type) => setGoal({ ...goal, type })}
+              />
             </div>
           )}
         </div>
         <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            {t("common.cancel")}
+          </Button>
           <Button onClick={start} disabled={empty}>
-            {t("common.start")}
+            {t("runStart.study")}
           </Button>
         </DialogFooter>
       </DialogContent>

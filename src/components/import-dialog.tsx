@@ -4,7 +4,6 @@ import { useState } from "react";
 import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/language-context";
 import type { DecodeError } from "@/core/decode";
@@ -76,8 +75,6 @@ function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description,
           <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{t(prompt)}</pre>
         </div>
 
-        <Separator />
-
         <Textarea
           placeholder={example}
           value={json}
@@ -88,10 +85,14 @@ function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description,
           rows={8}
           className={looks.code}
         />
-        {error && <p className={looks.error}>{t(decodeMessage[error.kind])}</p>}
+        {error && (
+          <p role="alert" className={looks.error}>
+            {t(decodeMessage[error.kind])}
+          </p>
+        )}
         <DialogFooter>
           <Button onClick={importJson} disabled={!json.trim()}>
-            {t("common.import")}
+            {t("importDialog.bringIn")}
           </Button>
         </DialogFooter>
       </DialogContent>

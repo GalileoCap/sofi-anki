@@ -1,41 +1,24 @@
 import { useState } from "react";
-import { useLanguage } from "@/contexts/language-context";
-import type { TranslationKey } from "@/lib/translations";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { TagInput } from "@/components/tag-input";
+
+import { CardFace, UnderRule } from "@/components/card-face";
 import { Field } from "@/components/field";
 import { Markdown } from "@/components/markdown";
+import { Key, Segmented } from "@/components/sticker";
+import { TagInput } from "@/components/tag-input";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useLanguage } from "@/contexts/language-context";
 import type { CardDraft } from "@/core/decks";
-import type { Card, CardType, Complexity } from "@/core/model";
+import type { Card, CardType, Complexity, Deck } from "@/core/model";
 import { newId } from "@/effects/clock";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
-/** Buttons that pick one of a few values, sharing a line. */
-const segments = "flex gap-1.5";
-
-const COMPLEXITIES: { value: Complexity; key: TranslationKey }[] = [
-  { value: "easy", key: "complexity.easy" },
-  { value: "medium", key: "complexity.medium" },
-  { value: "hard", key: "complexity.hard" },
-];
-
-const CARD_TYPES: { value: CardType; key: TranslationKey }[] = [
-  { value: "standard", key: "cardType.standard" },
-  { value: "choice", key: "cardType.choice" },
-];
-
-interface CardFormProps {
+type CardFormProps = {
+  /** The deck the card is in, shown on the card as it will study. */
+  deck: Deck | undefined;
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -43,300 +26,168 @@ interface CardFormProps {
   initial?: Card;
   dialogTitle?: string;
   submitLabel?: string;
-}
+};
 
-interface OptionRow {
-  id: string;
-  text: string;
-  correct: boolean;
-}
+type OptionRow = { id: string; text: string; correct: boolean };
 
-function newOption(): OptionRow {
-  return { id: newId(), text: "", correct: false };
-}
+const newOption = (): OptionRow => ({ id: newId(), text: "", correct: false });
 
-export function CardForm({
-  trigger,
-  open: controlledOpen,
-  onOpenChange: controlledOnOpenChange,
-  onSubmit,
-  initial,
-  dialogTitle,
-  submitLabel,
-}: CardFormProps) {
+const optionsOf = (card: Card | undefined): OptionRow[] =>
+  card?.type === "choice" ? card.options.map(({ id, text, correct }) => ({ id, text, correct })) : [newOption(), newOption()];
+
+/** Writing a card: its fields on the left and, beside them on a laptop, the card as it will study. ⌘ Enter saves. */
+export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, onSubmit, initial, dialogTitle, submitLabel }: CardFormProps) {
   const { t } = useLanguage();
-  const resolvedTitle = dialogTitle ?? t("cardForm.newCard");
-  const resolvedSubmit = submitLabel ?? t("common.add");
-  const [internalOpen, setInternalOpen] = useState(false);
-  const open = controlledOpen ?? internalOpen;
+  const [ownOpen, setOwnOpen] = useState(false);
+  const open = controlledOpen ?? ownOpen;
   const [title, setTitle] = useState(initial?.title ?? "");
   const [complexity, setComplexity] = useState<Complexity>(initial?.complexity ?? "medium");
   const [cardType, setCardType] = useState<CardType>(initial?.type ?? "standard");
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [hint, setHint] = useState(initial?.hint ?? "");
-  const [showHintInput, setShowHintInput] = useState(!!(initial?.hint));
-  const [previewResponse, setPreviewResponse] = useState(false);
+  const [response, setResponse] = useState(initial?.type === "standard" ? initial.response : "");
+  const [options, setOptions] = useState<OptionRow[]>(() => optionsOf(initial));
 
-  // Standard fields
-  const [response, setResponse] = useState(
-    initial?.type === "standard" ? initial.response : ""
-  );
-
-  // Choice fields
-  const [options, setOptions] = useState<OptionRow[]>(() => {
-    if (initial?.type === "choice") {
-      return initial.options.map((o) => ({ id: o.id, text: o.text, correct: o.correct }));
-    }
-    return [newOption(), newOption()];
-  });
-
-  function handleOpenChange(next: boolean) {
-    setInternalOpen(next);
-    controlledOnOpenChange?.(next);
+  function changeOpen(next: boolean) {
+    setOwnOpen(next);
+    onOpenChange?.(next);
     if (next) {
       setTitle(initial?.title ?? "");
       setComplexity(initial?.complexity ?? "medium");
       setCardType(initial?.type ?? "standard");
       setTags(initial?.tags ?? []);
       setHint(initial?.hint ?? "");
-      setShowHintInput(!!(initial?.hint));
-      setPreviewResponse(false);
       setResponse(initial?.type === "standard" ? initial.response : "");
-      setOptions(
-        initial?.type === "choice"
-          ? initial.options.map((o) => ({ id: o.id, text: o.text, correct: o.correct }))
-          : [newOption(), newOption()]
-      );
+      setOptions(optionsOf(initial));
     }
   }
 
-  function addOption() {
-    setOptions((prev) => [...prev, newOption()]);
-  }
+  const setOption = (id: string, change: Partial<OptionRow>) => setOptions(options.map((o) => (o.id === id ? { ...o, ...change } : o)));
 
-  function removeOption(id: string) {
-    setOptions((prev) => prev.filter((o) => o.id !== id));
-  }
+  const isValid =
+    title.trim() !== "" &&
+    (cardType === "standard" ? response.trim() !== "" : options.length >= 2 && options.every((o) => o.text.trim()) && options.some((o) => o.correct));
 
-  function updateOptionText(id: string, text: string) {
-    setOptions((prev) => prev.map((o) => (o.id === id ? { ...o, text } : o)));
-  }
-
-  function toggleOptionCorrect(id: string) {
-    setOptions((prev) => prev.map((o) => (o.id === id ? { ...o, correct: !o.correct } : o)));
-  }
-
-  const isValidStandard = title.trim() && response.trim();
-  const isValidChoice =
-    title.trim() &&
-    options.length >= 2 &&
-    options.every((o) => o.text.trim()) &&
-    options.some((o) => o.correct);
-  const isValid = cardType === "standard" ? isValidStandard : isValidChoice;
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function save() {
     if (!isValid) return;
-
-    const hintValue = hint.trim() || undefined;
-    if (cardType === "standard") {
-      onSubmit({
-        type: "standard",
-        title: title.trim(),
-        response: response.trim(),
-        complexity,
-        tags,
-        ...(hintValue ? { hint: hintValue } : {}),
-      });
-    } else {
-      const correctCount = options.filter((o) => o.correct).length;
-      onSubmit({
-        type: "choice",
-        title: title.trim(),
-        complexity,
-        tags,
-        ...(hintValue ? { hint: hintValue } : {}),
-        multiSelect: correctCount > 1,
-        options: options.map((o) => ({
-          id: o.id,
-          text: o.text.trim(),
-          correct: o.correct,
-        })),
-      });
-    }
-    handleOpenChange(false);
+    const common = { title: title.trim(), complexity, tags, ...(hint.trim() ? { hint: hint.trim() } : {}) };
+    onSubmit(
+      cardType === "standard"
+        ? { ...common, type: "standard", response: response.trim() }
+        : {
+            ...common,
+            type: "choice",
+            multiSelect: options.filter((o) => o.correct).length > 1,
+            options: options.map((o) => ({ id: o.id, text: o.text.trim(), correct: o.correct })),
+          },
+    );
+    changeOpen(false);
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={changeOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
         <DialogHeader>
-          <DialogTitle>{resolvedTitle}</DialogTitle>
+          <DialogTitle>{dialogTitle ?? t("cardForm.newCard")}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className={looks.form}>
-          <Field label={t("common.type")}>
-            <div className={segments}>
-              {CARD_TYPES.map((ct) => (
-                <Button
-                  key={ct.value}
-                  type="button"
-                  variant={cardType === ct.value ? "default" : "outline"}
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => setCardType(ct.value)}
-                >
-                  {t(ct.key)}
+        <form
+          onSubmit={(e) => (e.preventDefault(), save())}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              save();
+            }
+          }}
+          className="grid gap-x-8 gap-y-4 lg:grid-cols-2"
+        >
+          <div className={looks.form}>
+            <Segmented
+              label={t("cardForm.kind")}
+              options={[
+                { value: "standard", label: t("cardType.standard") },
+                { value: "choice", label: t("cardType.choice") },
+              ]}
+              value={cardType}
+              onChange={setCardType}
+            />
+            <Field label={t("cardForm.question")}>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} autoFocus />
+            </Field>
+            {cardType === "standard" ? (
+              <Field label={t("cardForm.answer")}>
+                <Textarea value={response} onChange={(e) => setResponse(e.target.value)} className="min-h-56 font-mono text-sm" />
+              </Field>
+            ) : (
+              <Field label={t("cardForm.options")} group>
+                {options.map((option, i) => (
+                  <div key={option.id} className={looks.row}>
+                    <input
+                      type="checkbox"
+                      checked={option.correct}
+                      onChange={() => setOption(option.id, { correct: !option.correct })}
+                      aria-label={t("cardForm.optionRight").replace("{n}", String(i + 1))}
+                      className={looks.checkbox}
+                    />
+                    <Input
+                      aria-label={t("cardForm.option").replace("{n}", String(i + 1))}
+                      value={option.text}
+                      onChange={(e) => setOption(option.id, { text: e.target.value })}
+                    />
+                    {options.length > 2 && (
+                      <Button type="button" variant="ghost" onClick={() => setOptions(options.filter((o) => o.id !== option.id))}>
+                        {t("common.remove")}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button type="button" variant="outline" className="self-start" onClick={() => setOptions([...options, newOption()])}>
+                  {t("cardForm.addOption")}
                 </Button>
-              ))}
-            </div>
-          </Field>
-
-          <Input
-            placeholder={t("cardForm.questionPlaceholder")}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            autoFocus
-          />
-
-          {cardType === "standard" ? (
-            <Field
-              label={t("common.answer")}
-              action={
-                <button
-                  type="button"
-                  onClick={() => setPreviewResponse((v) => !v)}
-                  className={cn(
-                    "text-xs underline underline-offset-2",
-                    previewResponse
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {previewResponse ? t("common.edit") : t("common.preview")}
-                </button>
-              }
-            >
-              {previewResponse ? (
-                <div className="min-h-[96px] rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-                  {response.trim() ? (
-                    <Markdown>{response}</Markdown>
-                  ) : (
-                    <span className="italic opacity-50">{t("cardForm.nothingToPreview")}</span>
-                  )}
-                </div>
-              ) : (
-                <Textarea
-                  placeholder={t("cardForm.answerPlaceholder")}
-                  value={response}
-                  onChange={(e) => setResponse(e.target.value)}
-                  rows={4}
+              </Field>
+            )}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={t("cardForm.hint")}>
+                <Input value={hint} onChange={(e) => setHint(e.target.value)} />
+              </Field>
+              <Field label={t("cardForm.difficulty")} group>
+                <Segmented
+                  label={t("cardForm.difficulty")}
+                  options={(["easy", "medium", "hard"] as const).map((value) => ({ value, label: t(`complexity.${value}`) }))}
+                  value={complexity}
+                  onChange={setComplexity}
                 />
-              )}
-            </Field>
-          ) : (
-            <div className={looks.column}>
-              <label className={looks.muted}>
-                {t("cardForm.optionsLabel")}
-              </label>
-              {options.map((opt, i) => (
-                <div key={opt.id} className={looks.row}>
-                  <input
-                    type="checkbox"
-                    checked={opt.correct}
-                    onChange={() => toggleOptionCorrect(opt.id)}
-                    className="rounded shrink-0"
-                  />
-                  <Input
-                    placeholder={`Option ${i + 1}`}
-                    value={opt.text}
-                    onChange={(e) => updateOptionText(opt.id, e.target.value)}
-                    className="flex-1"
-                  />
-                  {options.length > 2 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => removeOption(opt.id)}
-                      className="text-destructive hover:text-destructive shrink-0"
-                    >
-                      &times;
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addOption}
-              >
-                {t("cardForm.addOption")}
-              </Button>
-              {options.some((o) => o.correct) && (
-                <p className={looks.fine}>
-                  {options.filter((o) => o.correct).length > 1
-                    ? t("cardForm.multipleCorrect")
-                    : t("cardForm.singleCorrect")}
-                </p>
-              )}
+              </Field>
             </div>
-          )}
-
-          {/* The hint, which folds away */}
-          {showHintInput ? (
-            <Field
-              label={t("common.hint")}
-              action={
-                <button
-                  type="button"
-                  onClick={() => { setShowHintInput(false); setHint(""); }}
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  {t("common.remove")}
-                </button>
-              }
-            >
-              <Textarea
-                placeholder={t("cardForm.hintPlaceholder")}
-                value={hint}
-                onChange={(e) => setHint(e.target.value)}
-                rows={2}
-              />
+            <Field label={t("common.tags")}>
+              <TagInput tags={tags} onChange={setTags} placeholder={t("deckForm.tagsPlaceholder")} />
             </Field>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowHintInput(true)}
-              className="self-start text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-            >
-              {t("cardForm.addHint")}
-            </button>
-          )}
+          </div>
 
-          <Field label={t("common.complexity")}>
-            <div className={segments}>
-              {COMPLEXITIES.map((c) => (
-                <Button
-                  key={c.value}
-                  type="button"
-                  variant={complexity === c.value ? "default" : "outline"}
-                  size="sm"
-                  className={cn("flex-1")}
-                  onClick={() => setComplexity(c.value)}
-                >
-                  {t(c.key)}
-                </Button>
-              ))}
-            </div>
-          </Field>
-          <Field label={t("common.tags")}>
-            <TagInput tags={tags} onChange={setTags} placeholder={t("deckForm.tagsPlaceholder")} />
-          </Field>
-          <DialogFooter>
+          <div className="flex flex-col gap-1.5">
+            <p className={cn(looks.muted, "font-bold")}>{t("cardForm.asItStudies")}</p>
+            <CardFace deck={deck} title={title || " "}>
+              {cardType === "standard"
+                ? response.trim() && (
+                    <UnderRule>
+                      <Markdown>{response}</Markdown>
+                    </UnderRule>
+                  )
+                : options.map((option) => (
+                    <p key={option.id} className={option.correct ? "font-bold" : looks.muted}>
+                      <Markdown inline>{option.text || " "}</Markdown>
+                    </p>
+                  ))}
+            </CardFace>
+          </div>
+
+          <DialogFooter className="lg:col-span-2">
+            <Button type="button" variant="ghost" onClick={() => changeOpen(false)}>
+              {t("common.cancel")}
+            </Button>
             <Button type="submit" disabled={!isValid}>
-              {resolvedSubmit}
+              {submitLabel ?? t("common.add")}
+              <Key>⌘ Enter</Key>
             </Button>
           </DialogFooter>
         </form>

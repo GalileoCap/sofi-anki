@@ -9,7 +9,7 @@ import { OverflowMenu } from "@/components/overflow-menu";
 import { Chip, ComesBack, GradeChip } from "@/components/sticker";
 import { useLanguage } from "@/contexts/language-context";
 import type { CardDraft } from "@/core/decks";
-import type { Card, Millis } from "@/core/model";
+import type { Card, Deck, Millis } from "@/core/model";
 import { dueTime } from "@/core/scheduler";
 import { type CardPerformance, daysUntil } from "@/core/stats";
 import { looks } from "@/lib/ui-looks";
@@ -22,6 +22,7 @@ const columnsLook = "grid grid-cols-[minmax(0,1fr)_auto_2.75rem] items-center ga
 const plain = (text: string) => text.replace(/[`*_#>]/g, "");
 
 type CardListProps = {
+  deck: Deck;
   cards: readonly Card[];
   performance: ReadonlyMap<string, CardPerformance>;
   now: Millis;
@@ -30,7 +31,7 @@ type CardListProps = {
 };
 
 /** A deck's cards as a table, drawn as the window scrolls to them, each opening to its answer. */
-export function CardList({ cards, performance, now, onEdit, onDelete }: CardListProps) {
+export function CardList({ deck, cards, performance, now, onEdit, onDelete }: CardListProps) {
   // The virtualizer changes inside one object, which the React Compiler would memoize past.
   "use no memo";
   const { t } = useLanguage();
@@ -82,6 +83,7 @@ export function CardList({ cards, performance, now, onEdit, onDelete }: CardList
       </div>
       {editing && (
         <CardForm
+          deck={deck}
           open
           onOpenChange={(next) => !next && setEditingId(null)}
           onSubmit={(draft) => {

@@ -7,7 +7,7 @@ import { DeckForm } from "@/components/deck-form";
 import { EmptyState, NoMatch } from "@/components/empty-state";
 import { ExportDialog } from "@/components/export-dialog";
 import { ImportCardsDialog } from "@/components/import-dialog";
-import { DeckRow, Key } from "@/components/sticker";
+import { DeckRow, Key, Segmented } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/language-context";
@@ -94,7 +94,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
   }
 
   const addCard = (trigger: ReactNode) => (
-    <CardForm trigger={trigger} onSubmit={(draft) => change((d) => addCards(d, deck.id, [draftCard(draft, newId())]))} />
+    <CardForm deck={deck} trigger={trigger} onSubmit={(draft) => change((d) => addCards(d, deck.id, [draftCard(draft, newId())]))} />
   );
 
   useKeys((event) => {
@@ -174,22 +174,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
         {deck.cards.length > 0 && (
           <div className={looks.filters}>
             <Input placeholder={t("deckDetail.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} className="sm:flex-1" />
-            <div role="group" aria-label={t("deck.filter")} className="inline-flex gap-1 self-start rounded-full border-2 border-border p-1">
-              {runModes.map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  aria-pressed={filter === mode}
-                  onClick={() => setFilter(mode)}
-                  className={cn(
-                    "min-h-9 cursor-pointer rounded-full px-3.5 text-sm font-bold transition-colors",
-                    filter === mode ? looks.ink : "text-muted-foreground hover:bg-muted",
-                  )}
-                >
-                  {t(filterWords[mode])}
-                </button>
-              ))}
-            </div>
+            <Segmented label={t("deck.filter")} options={runModes.map((mode) => ({ value: mode, label: t(filterWords[mode]) }))} value={filter} onChange={setFilter} />
           </div>
         )}
         {deck.cards.length === 0 ? (
@@ -198,6 +183,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
           <NoMatch message={t("deckDetail.noMatch")} />
         ) : (
           <CardList
+            deck={deck}
             cards={shown}
             performance={performance}
             now={now}
@@ -210,7 +196,6 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
       <RunStartDialog
         open={dialog === "choose"}
         onOpenChange={(open) => setDialog(open ? "choose" : null)}
-        mode={null}
         counts={{ due: byMode.due.length, weak: byMode.weak.length, new: byMode.new.length }}
         onStart={(mode, goal, shuffle) => onStudy({ mode, complexities: null }, goal, shuffle)}
       />
@@ -219,7 +204,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
         onOpenChange={(open) => setDialog(open ? "import" : null)}
         onImport={(cards) => change((d) => addCards(d, deck.id, cards.map((card) => cardFromJson(card, newId))))}
       />
-      <ExportDialog open={dialog === "export"} onOpenChange={(open) => setDialog(open ? "export" : null)} deck={deck} includeShareUrl />
+      <ExportDialog open={dialog === "export"} onOpenChange={(open) => setDialog(open ? "export" : null)} deck={deck} />
       <ConfirmDialog
         open={dialog === "delete"}
         onOpenChange={(open) => setDialog(open ? "delete" : null)}
