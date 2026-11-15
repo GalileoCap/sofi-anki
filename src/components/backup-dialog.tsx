@@ -18,8 +18,19 @@ type BackupDialogProps = {
   onRestore: (store: Store) => void;
 };
 
-/** Downloading everything as one file, and restoring a file, added to what is here or in its place after asking. */
+/** Downloading everything as one file, and restoring a file, added to what is here or in its place after asking. Each opening starts afresh. */
 export function BackupDialog({ open, onOpenChange, store, onRestore }: BackupDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <BackupBody store={store} onRestore={onRestore} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** The dialog's inside, whose file, question and outcome go when the dialog closes. */
+function BackupBody({ store, onRestore }: Pick<BackupDialogProps, "store" | "onRestore">) {
   const { t } = useLanguage();
   const [error, setError] = useState("");
   const [done, setDone] = useState("");
@@ -59,75 +70,73 @@ export function BackupDialog({ open, onOpenChange, store, onRestore }: BackupDia
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>{t("backup.title")}</DialogTitle>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>{t("backup.title")}</DialogTitle>
+      </DialogHeader>
 
-        {part(
-          t("backup.downloadTitle"),
-          t("backup.exportDesc"),
-          <Button
-            onClick={() => {
-              const at = now();
-              download(`anki-backup-${dayKey(at)}.json`, writeBackup(store, at), "application/json");
-            }}
-          >
-            {t("backup.downloadBackup")}
-          </Button>,
-        )}
+      {part(
+        t("backup.downloadTitle"),
+        t("backup.exportDesc"),
+        <Button
+          onClick={() => {
+            const at = now();
+            download(`anki-backup-${dayKey(at)}.json`, writeBackup(store, at), "application/json");
+          }}
+        >
+          {t("backup.downloadBackup")}
+        </Button>,
+      )}
 
-        <div className="border-t-2 border-dashed border-border" />
+      <div className="border-t-2 border-dashed border-border" />
 
-        {part(
-          t("backup.restoreTitle"),
-          t("backup.restoreDesc"),
-          <Button variant="outline" onClick={() => fileRef.current?.click()}>
-            {t("backup.chooseFile")}
-          </Button>,
-        )}
-        <input ref={fileRef} type="file" accept=".json" onChange={readFile} className="hidden" aria-hidden="true" tabIndex={-1} />
+      {part(
+        t("backup.restoreTitle"),
+        t("backup.restoreDesc"),
+        <Button variant="outline" onClick={() => fileRef.current?.click()}>
+          {t("backup.chooseFile")}
+        </Button>,
+      )}
+      <input ref={fileRef} type="file" accept=".json" onChange={readFile} className="hidden" aria-hidden="true" tabIndex={-1} />
 
-        {pending && !confirmReplace && (
-          <div className={looks.stack}>
-            <p className="font-bold">{t("backup.how")}</p>
-            <div className={cn(looks.buttons, "flex-wrap")}>
-              <Button variant="outline" onClick={() => doRestore("merge")}>
-                {t("backup.mergeKeep")}
-              </Button>
-              <Button variant="destructive" onClick={() => setConfirmReplace(true)}>
-                {t("backup.replaceAll")}
-              </Button>
-            </div>
+      {pending && !confirmReplace && (
+        <div className={looks.stack}>
+          <p className="font-bold">{t("backup.how")}</p>
+          <div className={cn(looks.buttons, "flex-wrap")}>
+            <Button variant="outline" onClick={() => doRestore("merge")}>
+              {t("backup.mergeKeep")}
+            </Button>
+            <Button variant="destructive" onClick={() => setConfirmReplace(true)}>
+              {t("backup.replaceAll")}
+            </Button>
           </div>
-        )}
+        </div>
+      )}
 
-        {confirmReplace && (
-          <div className={looks.stack}>
-            <p className={looks.error}>{t("backup.confirmReplace")}</p>
-            <div className={looks.buttons}>
-              <Button variant="ghost" onClick={() => setConfirmReplace(false)}>
-                {t("common.cancel")}
-              </Button>
-              <Button variant="destructive" onClick={() => doRestore("replace")}>
-                {t("backup.yesReplace")}
-              </Button>
-            </div>
+      {confirmReplace && (
+        <div className={looks.stack}>
+          <p className={looks.error}>{t("backup.confirmReplace")}</p>
+          <div className={looks.buttons}>
+            <Button variant="ghost" onClick={() => setConfirmReplace(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button variant="destructive" onClick={() => doRestore("replace")}>
+              {t("backup.yesReplace")}
+            </Button>
           </div>
-        )}
+        </div>
+      )}
 
-        {error && (
-          <p role="alert" className={looks.error}>
-            {error}
-          </p>
-        )}
-        {done && (
-          <p role="status" className={looks.good}>
-            {done}
-          </p>
-        )}
-      </DialogContent>
-    </Dialog>
+      {error && (
+        <p role="alert" className={looks.error}>
+          {error}
+        </p>
+      )}
+      {done && (
+        <p role="status" className={looks.good}>
+          {done}
+        </p>
+      )}
+    </>
   );
 }

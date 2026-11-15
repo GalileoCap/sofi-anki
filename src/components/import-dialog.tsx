@@ -35,68 +35,71 @@ type JsonImportDialogProps<T> = DialogProps<T> & {
   read: (text: string) => Result<T, DecodeError>;
 };
 
-/** Pasted JSON read by `read`, with a prompt to copy for a language model that writes it. */
-function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description, prompt, example, read }: JsonImportDialogProps<T>) {
+/** Pasted JSON read by `read`, with a prompt to copy for a language model that writes it. Each opening starts empty. */
+function JsonImportDialog<T>({ open, onOpenChange, ...body }: JsonImportDialogProps<T>) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className={looks.wideDialog}>
+        <JsonBody {...body} onDone={() => onOpenChange(false)} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+type JsonBodyProps<T> = Omit<JsonImportDialogProps<T>, "open" | "onOpenChange"> & { onDone: () => void };
+
+/** The dialog's inside, whose text and error go when the dialog closes. */
+function JsonBody<T>({ onImport, onDone, title, description, prompt, example, read }: JsonBodyProps<T>) {
   const { t } = useLanguage();
   const [json, setJson] = useState("");
   const [error, setError] = useState<DecodeError | null>(null);
-
-  function changeOpen(next: boolean) {
-    onOpenChange(next);
-    if (next) {
-      setJson("");
-      setError(null);
-    }
-  }
 
   function importJson() {
     read(json).match(
       (data) => {
         onImport(data);
-        changeOpen(false);
+        onDone();
       },
       setError,
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={changeOpen}>
-      <DialogContent className={looks.wideDialog}>
-        <DialogHeader>
-          <DialogTitle>{t(title)}</DialogTitle>
-          <DialogDescription>{t(description)}</DialogDescription>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>{t(title)}</DialogTitle>
+        <DialogDescription>{t(description)}</DialogDescription>
+      </DialogHeader>
 
-        <div className={looks.column}>
-          <div className={looks.spread}>
-            <p className={looks.label}>{t("importDialog.llmPromptTemplate")}</p>
-            <CopyButton text={t(prompt)} />
-          </div>
-          <pre tabIndex={0} className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{t(prompt)}</pre>
+      <div className={looks.column}>
+        <div className={looks.spread}>
+          <p className={looks.label}>{t("importDialog.llmPromptTemplate")}</p>
+          <CopyButton text={t(prompt)} />
         </div>
+        <pre tabIndex={0} className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{t(prompt)}</pre>
+      </div>
 
-        <Textarea
-          placeholder={example}
-          value={json}
-          onChange={(e) => {
-            setJson(e.target.value);
-            setError(null);
-          }}
-          rows={8}
-          className={looks.code}
-        />
-        {error && (
-          <p role="alert" className={looks.error}>
-            {t(decodeMessage[error.kind])}
-          </p>
-        )}
-        <DialogFooter>
-          <Button onClick={importJson} disabled={!json.trim()}>
-            {t("importDialog.bringIn")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <Textarea
+        placeholder={example}
+        value={json}
+        onChange={(e) => {
+          setJson(e.target.value);
+          setError(null);
+        }}
+        rows={8}
+        className={looks.code}
+      />
+      {error && (
+        <p role="alert" className={looks.error}>
+          {t(decodeMessage[error.kind])}
+        </p>
+      )}
+      <DialogFooter>
+        <Button onClick={importJson} disabled={!json.trim()}>
+          {t("importDialog.bringIn")}
+        </Button>
+      </DialogFooter>
+    </>
   );
 }
 
