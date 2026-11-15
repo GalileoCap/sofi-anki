@@ -29,7 +29,7 @@ export function ExportDialog({ deck, open, onOpenChange }: ExportDialogProps) {
           <Button onClick={() => download(`${deck.title}.json`, deckJson, "application/json")}>{t("exportDialog.download")}</Button>
           <CopyButton text={deckJson} />
         </div>
-        <pre className="max-h-60 min-w-0 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{deckJson}</pre>
+        <pre tabIndex={0} className="max-h-60 min-w-0 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{deckJson}</pre>
       </DialogContent>
     </Dialog>
   );

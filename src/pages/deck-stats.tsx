@@ -50,7 +50,7 @@ export function DeckStatsPage({ deck, store, now, onBack }: DeckStatsPageProps) 
   return (
     <div className={looks.narrow}>
       <div className={looks.topbar}>
-        <Button variant="ghost" className="-ml-3" onClick={onBack}>
+        <Button variant="ghost" onClick={onBack}>
           {t("deckStats.back")}
         </Button>
       </div>

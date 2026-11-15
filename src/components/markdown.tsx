@@ -6,13 +6,15 @@ import { cn } from "@/lib/utils";
 interface MarkdownProps {
   children: string;
   className?: string;
-  /** Suppress block-level wrappers for short inline content */
+  /** Text that runs in a line: a span, with no paragraphs, headings, lists or blocks. */
   inline?: boolean;
 }
 
+/** Text the person wrote, rendered as the Markdown they meant (data-5). */
 export function Markdown({ children, className, inline }: MarkdownProps) {
+  const Wrapper = inline ? "span" : "div";
   return (
-    <div className={cn(className)}>
+    <Wrapper className={cn(className)}>
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       disallowedElements={inline ? ["p", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "blockquote", "ul", "ol", "pre", "table"] : undefined}
@@ -90,6 +92,6 @@ export function Markdown({ children, className, inline }: MarkdownProps) {
     >
       {children}
     </ReactMarkdown>
-    </div>
+    </Wrapper>
   );
 }

@@ -156,7 +156,7 @@ export function DeckRow({ deck, meta, end, onOpen, head }: DeckRowProps) {
     <>
       <EmojiSticker deck={deck} large={head} />
       <span className="flex min-w-0 flex-col leading-snug">
-        {head ? <h1 className="text-lg font-extrabold">{deck.title}</h1> : <span className="truncate text-sm font-bold">{deck.title}</span>}
+        {head ? <h1 className="text-lg font-extrabold">{deck.title}</h1> : <span className="truncate text-sm font-bold" title={deck.title}>{deck.title}</span>}
         <span className={looks.fine}>{meta}</span>
       </span>
       {end}
@@ -221,7 +221,7 @@ export function Segmented<T extends string>({ label, options, value, onChange, c
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "min-h-9 flex-1 cursor-pointer rounded-full px-3.5 text-sm font-bold whitespace-nowrap transition-colors",
+            "min-h-10 flex-1 cursor-pointer rounded-full px-3.5 text-sm font-bold whitespace-nowrap transition-colors",
             value === option.value ? looks.ink : "text-muted-foreground hover:bg-muted",
           )}
         >

@@ -33,7 +33,7 @@ export function StatsPage({ store, now, onBack, onOpenDeck }: StatsPageProps) {
   return (
     <div className={looks.narrow}>
       <div className={looks.topbar}>
-        <Button variant="ghost" className="-ml-3" onClick={onBack}>
+        <Button variant="ghost" onClick={onBack}>
           {t("deck.back")}
         </Button>
       </div>

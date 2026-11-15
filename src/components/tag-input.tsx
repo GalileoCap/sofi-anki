@@ -47,7 +47,7 @@ export function TagInput({ tags, onChange, placeholder }: TagInputProps) {
   }
 
   return (
-    <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border-2 border-input bg-card px-3 py-1.5 text-base font-normal focus-within:border-primary">
+    <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border-2 border-input bg-card px-3 text-base font-normal focus-within:border-primary">
       {tags.map((tag) => (
         <button
           key={tag}
@@ -71,7 +71,7 @@ export function TagInput({ tags, onChange, placeholder }: TagInputProps) {
           }
         }}
         placeholder={tags.length === 0 ? placeholder : ""}
-        className="min-w-20 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+        className="-my-0.5 h-10 min-w-20 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
       />
     </div>
   );

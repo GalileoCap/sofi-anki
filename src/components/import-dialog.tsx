@@ -72,7 +72,7 @@ function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description,
             <p className={looks.label}>{t("importDialog.llmPromptTemplate")}</p>
             <CopyButton text={t(prompt)} />
           </div>
-          <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{t(prompt)}</pre>
+          <pre tabIndex={0} className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{t(prompt)}</pre>
         </div>
 
         <Textarea

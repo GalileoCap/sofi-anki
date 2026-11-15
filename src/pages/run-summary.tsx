@@ -44,7 +44,7 @@ export function RunSummary({ results, items, decks, totalTimeMs, onRestart, onEx
   return (
     <div className={looks.narrow}>
       <div className={cn(looks.topbar, "justify-end")}>
-        <Button variant="ghost" className="-mr-3" onClick={onExit}>
+        <Button variant="ghost" onClick={onExit}>
           {t("common.close")}
         </Button>
       </div>

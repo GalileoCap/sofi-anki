@@ -79,7 +79,7 @@ export function ImportApkgDialog({ open, onOpenChange, onImport }: ImportApkgDia
             <div className={looks.list}>
               {state.result.decks.map((deck) => (
                 <div key={deck.id} className={looks.listRow}>
-                  <span className="min-w-0 truncate font-bold">{deck.title}</span>
+                  <span className="min-w-0 truncate font-bold" title={deck.title}>{deck.title}</span>
                   <span className={looks.fineFigure}>
                     {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
                   </span>

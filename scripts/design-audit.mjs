@@ -7,9 +7,13 @@
 // new scratch directory. It exits 1 when axe reports a violation and 0 otherwise.
 //
 //   node scripts/design-audit.mjs <page> [--screens <selector>] [--phone <selector>] [--dark <js>]
+//   node scripts/design-audit.mjs <url> --walk <module>
 //
 // <page> is a URL or a file path. The defaults fit the mocks: screens are `.device`, a phone
-// screen is `.device.phone`, and dark mode adds `dark` to every `.theme`.
+// screen is `.device.phone`, and dark mode adds `dark` to every `.theme`. With `--walk`, the page
+// is the running app: the module exports `screens`, each a name and the steps that reach it from
+// a fresh load, and each is audited whole at 375 and 1280 px wide, with `anki-theme` set to the
+// mode before the load.
 import { AxeBuilder } from "@axe-core/playwright";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -24,6 +28,7 @@ const { positionals, values } = parseArgs({
     screens: { type: "string", default: ".device" },
     phone: { type: "string", default: ".device.phone" },
     dark: { type: "string", default: 'document.querySelectorAll(".theme").forEach((e) => e.classList.add("dark"))' },
+    walk: { type: "string" },
   },
 });
 if (positionals.length !== 1) {
@@ -46,7 +51,8 @@ function inspect(screen, isPhone) {
   const targets = isPhone
     ? all
         .filter((e) => e.matches("button, a[href], input, select, textarea, [role=button], [tabindex]:not([tabindex='-1'])"))
-        .map((e) => ({ e, r: e.getBoundingClientRect() }))
+        // A control inside its label is pressed anywhere on the label.
+        .map((e) => ({ e, r: (e.closest("label") ?? e).getBoundingClientRect() }))
         .filter(({ r }) => r.width < 44 || r.height < 44)
         .map(({ e, r }) => `${label(e)} (${Math.round(r.width)} x ${Math.round(r.height)})`)
     : [];
@@ -62,15 +68,24 @@ function inspect(screen, isPhone) {
 
   const overflow = [];
   const scrolls = [];
+  // A field scrolls its own text, an ellipsis with the full text in its title announces the cut,
+  // and text clipped for screen readers alone is never seen, so none of them, nor what they hold, is overflow.
+  const announces = (e) => {
+    const style = getComputedStyle(e);
+    return e.matches("input, textarea") || (style.textOverflow === "ellipsis" && e.title) || style.clipPath !== "none" || style.clip !== "auto";
+  };
+  const announcedWithin = (e) => {
+    for (let a = e; a && a !== screen.parentElement; a = a.parentElement) if (announces(a)) return true;
+    return false;
+  };
   for (const e of all) {
     const style = getComputedStyle(e);
-    // A field scrolls its own text, and an ellipsis announces the cut, so neither is overflow.
-    const announced = e.matches("input, textarea") || (style.textOverflow === "ellipsis" && e.title);
+    const announced = announcedWithin(e);
     if (e.scrollWidth > e.clientWidth + 1 && e.clientWidth > 0 && !announced) {
       (["auto", "scroll"].includes(style.overflowX) ? scrolls : overflow).push(`${label(e)} (${e.scrollWidth} in ${e.clientWidth})`);
     }
     const r = e.getBoundingClientRect();
-    if (r.right > box.right + 1 || r.left < box.left - 1) overflow.push(`${label(e)} leaves the screen`);
+    if (!announced && (r.right > box.right + 1 || r.left < box.left - 1)) overflow.push(`${label(e)} leaves the screen`);
   }
 
   const census = { fontSizes: new Set(), colors: new Set(), radii: new Set(), shadows: new Set() };
@@ -90,35 +105,66 @@ function inspect(screen, isPhone) {
 }
 
 const browser = await chromium.launch();
-const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 });
-const page = await context.newPage();
 const results = [];
 let violations = 0;
 
-for (const mode of ["light", "dark"]) {
-  await page.goto(target, { waitUntil: "networkidle" });
-  if (mode === "dark") await page.evaluate(values.dark);
+/** Audits one screen, the element `screen`, and keeps its result and screenshot. */
+async function audit(page, screen, { id, name, mode, isPhone }) {
   await page.evaluate(() => document.fonts.ready);
-  const screens = await page.locator(values.screens).all();
-  for (const [i, screen] of screens.entries()) {
-    await screen.evaluate((e, id) => e.setAttribute("data-audit", id), String(i));
-    const name = await screen.evaluate((e) => e.parentElement?.querySelector(":scope > p")?.textContent?.trim() ?? "");
-    const isPhone = await screen.evaluate((e, sel) => e.matches(sel), values.phone);
-    const axe = await new AxeBuilder({ page })
-      .include(`[data-audit="${i}"]`)
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"])
-      .analyze();
-    const found = axe.violations.map((v) => ({
-      id: v.id,
-      impact: v.impact,
-      help: v.help,
-      nodes: v.nodes.map((n) => `${n.target.join(" ")}: ${n.failureSummary?.split("\n").slice(1).join(" ").trim()}`),
-    }));
-    violations += found.reduce((sum, v) => sum + v.nodes.length, 0);
-    const dom = await screen.evaluate(inspect, isPhone);
-    const shot = join(out, `${String(i).padStart(2, "0")}-${mode}.png`);
-    await screen.screenshot({ path: shot });
-    results.push({ screen: i, name, mode, phone: isPhone, shot, axe: found, ...dom });
+  await screen.evaluate((e, i) => e.setAttribute("data-audit", i), id);
+  const axe = await new AxeBuilder({ page })
+    .include(`[data-audit="${id}"]`)
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"])
+    .analyze();
+  const found = axe.violations.map((v) => ({
+    id: v.id,
+    impact: v.impact,
+    help: v.help,
+    nodes: v.nodes.map((n) => `${n.target.join(" ")}: ${n.failureSummary?.split("\n").slice(1).join(" ").trim()}`),
+  }));
+  violations += found.reduce((sum, v) => sum + v.nodes.length, 0);
+  const dom = await screen.evaluate(inspect, isPhone);
+  const shot = join(out, `${id}-${mode}.png`);
+  await screen.screenshot({ path: shot });
+  results.push({ screen: id, name, mode, phone: isPhone, shot, axe: found, ...dom });
+}
+
+if (values.walk) {
+  const { screens } = await import(pathToFileURL(resolve(values.walk)).href);
+  const sizes = [
+    { device: "phone", viewport: { width: 375, height: 812 } },
+    { device: "laptop", viewport: { width: 1280, height: 800 } },
+  ];
+  for (const { device, viewport } of sizes) {
+    for (const mode of ["light", "dark"]) {
+      for (const [i, { name, go }] of screens.entries()) {
+        const context = await browser.newContext({ viewport, deviceScaleFactor: 2, permissions: ["clipboard-read", "clipboard-write"] });
+        await context.addInitScript((theme) => localStorage.setItem("anki-theme", theme), mode);
+        const page = await context.newPage();
+        await page.goto(target, { waitUntil: "networkidle" });
+        await go(page);
+        await page.waitForTimeout(300);
+        // The viewport takes the page's height, so a sticky bar is drawn at the page's foot, below the content.
+        const height = await page.evaluate(() => document.documentElement.scrollHeight);
+        await page.setViewportSize({ width: viewport.width, height: Math.max(viewport.height, height) });
+        // A dialog or menu renders outside the root, so the screen is the body.
+        await audit(page, page.locator("body"), { id: `${device}-${String(i).padStart(2, "0")}`, name, mode, isPhone: device === "phone" });
+        await context.close();
+      }
+    }
+  }
+} else {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  for (const mode of ["light", "dark"]) {
+    await page.goto(target, { waitUntil: "networkidle" });
+    if (mode === "dark") await page.evaluate(values.dark);
+    const screens = await page.locator(values.screens).all();
+    for (const [i, screen] of screens.entries()) {
+      const name = await screen.evaluate((e) => e.parentElement?.querySelector(":scope > p")?.textContent?.trim() ?? "");
+      const isPhone = await screen.evaluate((e, sel) => e.matches(sel), values.phone);
+      await audit(page, screen, { id: String(i).padStart(2, "0"), name, mode, isPhone });
+    }
   }
 }
 await browser.close();

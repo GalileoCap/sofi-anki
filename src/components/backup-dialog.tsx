@@ -52,7 +52,7 @@ export function BackupDialog({ open, onOpenChange, store, onRestore }: BackupDia
     <div className="flex flex-wrap items-center gap-3.5">
       <div className="min-w-48 flex-1">
         <p className="font-bold">{title}</p>
-        <p className={looks.muted}>{body}</p>
+        <p className="text-base text-muted-foreground">{body}</p>
       </div>
       {action}
     </div>

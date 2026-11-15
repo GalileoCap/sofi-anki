@@ -113,7 +113,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
     <div className="grid gap-x-10 gap-y-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
       <div className={cn(looks.form, "lg:self-start")}>
         <div className={looks.topbar}>
-          <Button variant="ghost" className="-ml-3" onClick={onBack}>
+          <Button variant="ghost" onClick={onBack}>
             {t("deck.back")}
           </Button>
         </div>

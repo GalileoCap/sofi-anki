@@ -117,7 +117,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
 
   if (totalMs !== null || card === undefined) {
     return (
-      <div className={looks.page}>
+      <main className={looks.page}>
         <RunSummary
           results={[...run.results.values()]}
           items={items}
@@ -126,7 +126,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
           onRestart={onRestart}
           onExit={onExit}
         />
-      </div>
+      </main>
     );
   }
 
@@ -138,7 +138,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
   for (const item of items) inRun.set(item.deckId, (inRun.get(item.deckId) ?? 0) + 1);
 
   return (
-    <div className={cn(looks.page, "grid min-h-dvh gap-x-10 gap-y-4 lg:grid-cols-[17.5rem_minmax(0,45rem)]")}>
+    <main className={cn(looks.page, "grid min-h-dvh gap-x-10 gap-y-4 lg:grid-cols-[17.5rem_minmax(0,45rem)]")}>
       <aside className="hidden flex-col gap-4 pt-15 lg:flex">
         <Sheet label={t("home.sheet")} value={t("home.ofGoal").replace("{n}", String(stickers.length)).replace("{goal}", String(dailyGoal))}>
           <Spots stickers={stickers} goal={dailyGoal} decks={before.decks} />
@@ -157,9 +157,9 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
         <p className={looks.fine}>{t("study.keys")}</p>
       </aside>
 
-      <main className={looks.form}>
+      <div className={looks.form}>
         <div className={looks.topbar}>
-          <Button variant="ghost" className="-ml-3" onClick={leave}>
+          <Button variant="ghost" onClick={leave}>
             {t("study.leave")}
             <Key>Esc</Key>
           </Button>
@@ -210,8 +210,8 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
             }
           />
         )}
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
 
@@ -229,7 +229,7 @@ function StudyMenu({ paused, canUndo, onPostpone, onSkip, onPause, onUndo }: Stu
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <Button variant="ghost" className="-mr-3">
+        <Button variant="ghost">
           {t("home.more")}
         </Button>
       </DropdownMenu.Trigger>
