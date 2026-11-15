@@ -407,12 +407,10 @@ export async function exportAsApkg(deck: Deck, srsMap: Map<string, CardSRS>): Pr
     const cardId = nowMs + i * 2 + 1;
 
     const frontMd = card.title;
-    let backMd = '';
-    if (card.type === 'standard') {
-      backMd = card.response;
-    } else {
-      backMd = card.options.map((o) => (o.correct ? `✓ ${o.text}` : `• ${o.text}`)).join('\n');
-    }
+    const backMd =
+      card.type === 'standard'
+        ? card.response
+        : card.options.map((o) => (o.correct ? `✓ ${o.text}` : `• ${o.text}`)).join('\n');
 
     // Anki renders fields as HTML, so convert our Markdown to HTML
     const front = markdownToHtml(frontMd);

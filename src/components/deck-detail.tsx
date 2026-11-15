@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { useLanguage } from "@/contexts/language-context";
 import type { TranslationKey } from "@/lib/translations";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
@@ -23,7 +23,6 @@ import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
 import { RunStartDialog } from "@/components/run-start-dialog";
 import { encodeDeck, MAX_SHARE_URL_LENGTH } from "@/lib/share";
-import { exportAsApkg } from "@/lib/apkg";
 import { Markdown } from "@/components/markdown";
 import type { Card, ChoiceOption, Complexity, Deck, DeckImportCard, RunMode, SessionGoal } from "@/types";
 import type { CardPerf } from "@/App";
@@ -90,7 +89,7 @@ export function DeckDetail({
   const [now] = useState(() => Date.now());
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
-  const listRef = useRef<HTMLDivElement>(null);
+  const [listTop, setListTop] = useState(0);
 
   function toggleExpand(cardId: string) {
     setExpandedCards((prev) => {
@@ -122,6 +121,7 @@ export function DeckDetail({
           .filter(([, p]) => p.srs != null)
           .map(([id, p]) => [id, p.srs!])
       );
+      const { exportAsApkg } = await import("@/lib/apkg");
       const bytes = await exportAsApkg(deck, srsMap);
       const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/zip' });
       const url = URL.createObjectURL(blob);
@@ -194,7 +194,7 @@ export function DeckDetail({
     count: filteredCards.length,
     estimateSize: () => 64,
     overscan: 5,
-    scrollMargin: listRef.current?.offsetTop ?? 0,
+    scrollMargin: listTop,
   });
 
   function toggleComplexity(c: Complexity) {
@@ -511,7 +511,7 @@ export function DeckDetail({
           <p className="text-sm text-muted-foreground">{t("deckDetail.noMatch")}</p>
         </div>
       ) : (
-        <div ref={listRef} style={{ position: 'relative', height: `${virtualizer.getTotalSize()}px` }}>
+        <div ref={(node) => { if (node) setListTop(node.offsetTop); }} style={{ position: 'relative', height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map((vItem) => {
             const card = filteredCards[vItem.index];
             const perf = cardPerf.get(card.id);

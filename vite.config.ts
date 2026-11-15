@@ -58,8 +58,23 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(import.meta.dirname, './src'),
     },
   },
-
+  build: {
+    rolldownOptions: {
+      output: {
+        // Libraries apart from the app, so each chunk stays under the 500 kB warning and a
+        // release that changes only the app leaves them cached.
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
+            { name: 'markdown', test: /node_modules[\\/](react-markdown|remark-|micromark|mdast-|unified|hast-|vfile|property-information)/ },
+            { name: 'anki-file', test: /node_modules[\\/](sql\.js|turndown|fzstd|marked)[\\/]/ },
+            { name: 'vendor', test: /node_modules[\\/]/ },
+          ],
+        },
+      },
+    },
+  },
 })

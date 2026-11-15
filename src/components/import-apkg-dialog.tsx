@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { CardSRS, Deck } from "@/types";
-import { parseApkg, type ParsedApkg } from "@/lib/apkg";
+import type { ParsedApkg } from "@/lib/apkg";
 
 interface ImportApkgDialogProps {
   trigger?: React.ReactNode;
@@ -49,6 +49,7 @@ export function ImportApkgDialog({
   async function handleFile(file: File) {
     setState({ kind: "loading" });
     try {
+      const { parseApkg } = await import("@/lib/apkg");
       const result = await parseApkg(file);
       if (result.decks.length === 0) {
         setState({ kind: "error", message: t("importApkg.noCards") });
