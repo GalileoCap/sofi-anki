@@ -5,15 +5,27 @@ import { CardForm } from "@/components/card-form";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DeckForm } from "@/components/deck-form";
 import { EmptyState, NoMatch } from "@/components/empty-state";
+import { Fold } from "@/components/fold";
 import { ExportDialog } from "@/components/export-dialog";
 import { ImportCardsDialog } from "@/components/import-dialog";
-import { DeckRow, Key, Segmented } from "@/components/sticker";
+import { DeckRow, Key, Segmented, Toggle } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/language-context";
 import { cardFromJson } from "@/core/deck-json";
-import { type CardDraft, addCards, cardFromDraft, matchingCards, removeCard, removeDeck, replaceCard, restyleDeck } from "@/core/decks";
-import { type Deck, type Millis, type RunMode, type SessionGoal, type Store, runModes } from "@/core/model";
+import {
+  type CardDraft,
+  addCards,
+  allTags,
+  cardFromDraft,
+  matchingCards,
+  removeCard,
+  removeDeck,
+  replaceCard,
+  restyleDeck,
+  toggled,
+} from "@/core/decks";
+import { type Complexity, type Deck, type Millis, type RunMode, type SessionGoal, type Store, complexities, runModes } from "@/core/model";
 import type { RunChoice } from "@/core/run";
 import { deckSchedules, dueCards, indexSchedules, newCards, weakCards, withoutDeck } from "@/core/scheduler";
 import { shareUrl } from "@/core/share";
@@ -54,15 +66,20 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<RunMode>("all");
+  const [difficulties, setDifficulties] = useState<ReadonlySet<Complexity>>(new Set());
+  const [tags, setTags] = useState<ReadonlySet<string>>(new Set());
+  const [opened, setOpened] = useState<ReadonlySet<string>>(new Set());
   const [dialog, setDialog] = useState<"import" | "export" | "choose" | "delete" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const kept = new Set(byMode[filter].map((card) => card.id));
   const shown = studyOrder(
-    matchingCards(deck.cards, { search, complexities: new Set(), tags: new Set() }).filter((card) => kept.has(card.id)),
+    matchingCards(deck.cards, { search, complexities: difficulties, tags }).filter((card) => kept.has(card.id)),
     performance,
     now,
   );
+  const deckTags = allTags(deck.cards);
+  const allOpen = shown.length > 0 && shown.every((card) => opened.has(card.id));
   const change = (decks: (decks: readonly Deck[]) => readonly Deck[]) => update((s) => ({ ...s, decks: decks(s.decks) }));
   const draftCard = (draft: CardDraft, id: string) => cardFromDraft(draft, id, newId);
   const studyNow = () => onStudy({ mode: byMode.due.length > 0 ? "due" : "all", complexities: null }, undefined, false);
@@ -184,6 +201,56 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
             <Segmented label={t("deck.filter")} options={runModes.map((mode) => ({ value: mode, label: t(filterWords[mode]) }))} value={filter} onChange={setFilter} />
           </div>
         )}
+        {deck.cards.length > 0 && (
+          <div className="flex items-start justify-between gap-2">
+            <Fold
+              className="min-w-0 flex-1"
+              open={difficulties.size + tags.size > 0}
+              summary={
+                <span className={looks.muted}>
+                  {t("deck.moreFilters")}
+                  {difficulties.size + tags.size > 0 && ` (${t("deck.filtersOn").replace("{n}", String(difficulties.size + tags.size))})`}
+                </span>
+              }
+            >
+              <div className={cn(looks.stack, "pt-1 pb-2")}>
+                <div role="group" aria-label={t("cardForm.difficulty")} className={looks.chips}>
+                  {complexities.map((c) => (
+                    <Toggle key={c} pressed={difficulties.has(c)} onClick={() => setDifficulties(toggled(difficulties, c))}>
+                      {t(`complexity.${c}`)}
+                    </Toggle>
+                  ))}
+                </div>
+                {deckTags.length > 0 && (
+                  <div role="group" aria-label={t("common.tags")} className={looks.chips}>
+                    {deckTags.map((tag) => (
+                      <Toggle key={tag} pressed={tags.has(tag)} onClick={() => setTags(toggled(tags, tag))}>
+                        {tag}
+                      </Toggle>
+                    ))}
+                  </div>
+                )}
+                {(difficulties.size > 0 || tags.size > 0) && (
+                  <Button
+                    variant="ghost"
+                    className="-ml-3 self-start"
+                    onClick={() => {
+                      setDifficulties(new Set());
+                      setTags(new Set());
+                    }}
+                  >
+                    {t("deck.clearFilters")}
+                  </Button>
+                )}
+              </div>
+            </Fold>
+            {shown.length > 0 && (
+              <Button variant="ghost" className="shrink-0" onClick={() => setOpened(allOpen ? new Set() : new Set(shown.map((card) => card.id)))}>
+                {allOpen ? t("deck.foldAll") : t("deck.openAll")}
+              </Button>
+            )}
+          </div>
+        )}
         {deck.cards.length === 0 ? (
           <EmptyState message={t("deckDetail.noCards")} hint={t("deckDetail.noCardsHint")} />
         ) : shown.length === 0 ? (
@@ -194,6 +261,8 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
             cards={shown}
             performance={performance}
             now={now}
+            opened={opened}
+            onToggle={(id) => setOpened(toggled(opened, id))}
             onEdit={(id, draft) => change((d) => replaceCard(d, deck.id, draftCard(draft, id)))}
             onDelete={(id) => change((d) => removeCard(d, deck.id, id))}
           />
@@ -203,8 +272,8 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
       <RunStartDialog
         open={dialog === "choose"}
         onOpenChange={(open) => setDialog(open ? "choose" : null)}
-        counts={{ due: byMode.due.length, weak: byMode.weak.length, new: byMode.new.length }}
-        onStart={(mode, goal, shuffle) => onStudy({ mode, complexities: null }, goal, shuffle)}
+        cards={byMode}
+        onStart={(mode, difficulties, goal, shuffle) => onStudy({ mode, complexities: difficulties }, goal, shuffle)}
       />
       <ImportCardsDialog
         open={dialog === "import"}

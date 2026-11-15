@@ -78,6 +78,13 @@ function inspect(screen, isPhone) {
     for (let a = e; a && a !== screen.parentElement; a = a.parentElement) if (announces(a)) return true;
     return false;
   };
+  // What a box that scrolls sideways holds is clipped to it, and the box itself is reported as scrolling.
+  const scrolledWithin = (e) => {
+    for (let a = e.parentElement; a && a !== screen.parentElement; a = a.parentElement) {
+      if (["auto", "scroll"].includes(getComputedStyle(a).overflowX)) return true;
+    }
+    return false;
+  };
   for (const e of all) {
     const style = getComputedStyle(e);
     const announced = announcedWithin(e);
@@ -85,7 +92,7 @@ function inspect(screen, isPhone) {
       (["auto", "scroll"].includes(style.overflowX) ? scrolls : overflow).push(`${label(e)} (${e.scrollWidth} in ${e.clientWidth})`);
     }
     const r = e.getBoundingClientRect();
-    if (!announced && (r.right > box.right + 1 || r.left < box.left - 1)) overflow.push(`${label(e)} leaves the screen`);
+    if (!announced && !scrolledWithin(e) && (r.right > box.right + 1 || r.left < box.left - 1)) overflow.push(`${label(e)} leaves the screen`);
   }
 
   const census = { fontSizes: new Set(), colors: new Set(), radii: new Set(), shadows: new Set() };

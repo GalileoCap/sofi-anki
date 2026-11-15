@@ -26,3 +26,6 @@ export const kindWords = (card: Card, t: (key: TranslationKey) => string): strin
   t(`complexity.${card.complexity}`),
   ...(card.type === "choice" ? [card.multiSelect ? t("cardType.multiple") : t("cardType.single")] : []),
 ];
+
+/** The place a small mark takes at a line's start, kept empty where there is none, so the lines' text aligns. */
+export const markSlot = "w-3.5 shrink-0";

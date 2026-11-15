@@ -126,3 +126,10 @@ export function receiveAnkiDecks(store: Store, decks: readonly Deck[], schedules
     schedules: [...new Map([...indexSchedules(store.schedules), ...indexSchedules(schedules)]).values()],
   };
 }
+
+/** `set` with `item` added, or taken out when it was in. */
+export const toggled = <T,>(set: ReadonlySet<T>, item: T): Set<T> => {
+  const next = new Set(set);
+  if (!next.delete(item)) next.add(item);
+  return next;
+};

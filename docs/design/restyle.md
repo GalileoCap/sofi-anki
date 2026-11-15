@@ -26,7 +26,7 @@ The owner approved the mock, which leaves these out of the screens. Each is reco
 - Leaving a run keeps the cards answered without asking first, since nothing is lost. Overruled the same way: Leave and Esc ask first, saying what is kept.
 - The run's end lists the cards to look at again without each card's tries. "Study these again" studies those cards, and the others are done. Overruled the same way: every card is listed under its first try's outcome with its tries, and the run can be studied again whole.
 - Home drops the tag filter. A search field shows once there are more than eight decks.
-- The deck page filters its cards by status (all, due, weak, new) in place of complexity and tag chips. Choosing cards to study other than the due ones (all, weak, new, shuffled, with a goal) stays in the deck's menu as "Choose cards to study".
+- The deck page filters its cards by status (all, due, weak, new) in place of complexity and tag chips. Overruled with every dropped capability: difficulty and tags filter the list again, folded under the status filter, and "Choose cards to study" takes a difficulty. Choosing cards to study other than the due ones (all, weak, new, shuffled, with a goal) stays in the deck's menu as "Choose cards to study".
 - The theme and language toggles move to home's More menu.
 - The daily goal is changed from home's More menu.
 - The confetti goes. The sheet filling is the feedback for the daily goal. Overruled with every dropped capability: a run right the first time throughout ends with stickers falling ([restore.md](restore.md)).

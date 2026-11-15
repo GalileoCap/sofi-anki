@@ -29,7 +29,7 @@ export function Markdown({ children, className, inline }: MarkdownProps) {
         em: ({ children }) => <em className="italic">{children}</em>,
         del: ({ children }) => <del className="line-through opacity-70">{children}</del>,
         pre: ({ children }) => (
-          <pre className="my-2 overflow-x-auto rounded-lg bg-muted/80 border p-3 text-xs font-mono leading-relaxed">
+          <pre tabIndex={0} className="my-2 overflow-x-auto rounded-lg bg-muted/80 border p-3 text-xs font-mono leading-relaxed">
             {children}
           </pre>
         ),
@@ -76,7 +76,7 @@ export function Markdown({ children, className, inline }: MarkdownProps) {
           </a>
         ),
         table: ({ children }) => (
-          <div className="my-2 overflow-x-auto">
+          <div tabIndex={0} className="my-2 overflow-x-auto">
             <table className="w-full text-sm border-collapse">{children}</table>
           </div>
         ),

@@ -67,9 +67,6 @@ export const looks = {
   error: "text-sm text-destructive",
   /** A screen's title. */
   title: "text-2xl font-extrabold leading-tight text-foreground",
-  /** A filter chip, and its look when chosen. */
-  chip: "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors",
-  chosen: "border-foreground/20 bg-foreground/5 text-foreground",
   /** A dropdown menu's panel. */
   menu: "z-50 min-w-56 rounded-md bg-popover p-1.5 text-sm shadow-md",
   /** A rule between groups of a menu's entries. */

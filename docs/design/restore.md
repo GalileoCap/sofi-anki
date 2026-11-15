@@ -32,12 +32,12 @@ Each screen is a commit, with `pnpm check` green, the audit walk clean, and the 
 
 ## Deck page and its cards
 
-- [ ] Studying one difficulty: easy, medium or hard, in "Choose cards to study" (runs pass `complexities: null` today, `deck.tsx`).
-- [ ] Filtering the card list by difficulty and by tag, beside the status filter (old `deck.tsx:269-297`).
-- [ ] Expand all and collapse all in the card list (old `deck.tsx:299-301`).
-- [ ] An opened card shows its hint (old `deck-card-list.tsx:219-226`).
-- [ ] An opened card shows its accuracy, sessions, interval, due date and ease, and its last grade, on a phone too (old `deck-card-list.tsx:149-154, 228-261`).
-- [ ] Choice cards labelled single or multiple choice (old `card-heading.tsx:26-30`), and their right options marked with the tick (old `deck-card-list.tsx:208-211`).
+- [x] Studying one difficulty: easy, medium or hard, in "Choose cards to study" (runs pass `complexities: null` today, `deck.tsx`).
+- [x] Filtering the card list by difficulty and by tag, beside the status filter (old `deck.tsx:269-297`). They sit folded under "Difficulty and tags", since a deck's tags fill a phone's screen.
+- [x] Expand all and collapse all in the card list (old `deck.tsx:299-301`).
+- [x] An opened card shows its hint (old `deck-card-list.tsx:219-226`).
+- [x] An opened card shows its accuracy, sessions, interval, due date and ease, and its last grade, on a phone too (old `deck-card-list.tsx:149-154, 228-261`).
+- [x] Choice cards labelled single or multiple choice (old `card-heading.tsx:26-30`), and their right options marked with the tick (old `deck-card-list.tsx:208-211`).
 - The rest of the old deck buttons (edit the cover, bring in, the exports) stay in the deck's menu. Each is one menu away. No change.
 
 ## Forms

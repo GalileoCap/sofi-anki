@@ -8,7 +8,7 @@ import type { AnswerResult, CardAttempt, CardDisposition, CardRunResult, Deck } 
 import { type RunItem, byFirstTry, isPerfect } from "@/core/run";
 import { scheduleKey } from "@/core/scheduler";
 import { shortDuration } from "@/core/time";
-import { gradeLooks, kindWords, smallMark } from "@/lib/sticker-looks";
+import { gradeLooks, kindWords, markSlot, smallMark } from "@/lib/sticker-looks";
 import type { TranslationKey } from "@/lib/translations";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
@@ -183,7 +183,7 @@ function Picks({ card, attempt }: { card: Extract<CardRunResult["card"], { type:
         const words = chosen ? (option.correct ? "runEnd.picked" : "runEnd.wrongPick") : option.correct ? "runEnd.missed" : "runEnd.notPicked";
         return (
           <li key={option.id} className={cn(looks.row, mark === null && "text-muted-foreground")}>
-            <span className="w-3.5 shrink-0">{mark && <GradeMark result={mark} className={cn(smallMark, gradeLooks[mark].text)} />}</span>
+            <span className={markSlot}>{mark && <GradeMark result={mark} className={cn(smallMark, gradeLooks[mark].text)} />}</span>
             <Markdown inline className="min-w-0">
               {option.text}
             </Markdown>

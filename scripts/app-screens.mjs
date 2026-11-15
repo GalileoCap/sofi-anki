@@ -39,6 +39,14 @@ export const screens = [
       await click(page, "button", /^Choose cards to study$/);
     },
   },
+  {
+    name: "deck, filters and cards open",
+    go: async (page) => {
+      await openDeck(page);
+      await page.locator("main summary").first().click();
+      await click(page, "button", /^Open all$/);
+    },
+  },
   { name: "deck, export a file", go: (page) => deckMenu(page, "Export a file") },
   {
     name: "deck stats",

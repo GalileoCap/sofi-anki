@@ -198,6 +198,25 @@ export function Bar({ parts, label }: BarProps) {
   );
 }
 
+type ToggleProps = { pressed: boolean; onClick: () => void; children: ReactNode };
+
+/** A filter that is on or off, as a pill, in ink when on. */
+export function Toggle({ pressed, onClick, children }: ToggleProps) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={cn(
+        "min-h-10 cursor-pointer rounded-full border-2 px-3.5 text-sm font-bold whitespace-nowrap transition-colors",
+        pressed ? cn("border-primary", looks.ink) : "border-border text-muted-foreground hover:bg-muted",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 /** A key that does the same as what it sits beside, shown where there is a keyboard. */
 export function Key({ children }: { children: ReactNode }) {
   return <Kbd className="ml-1 hidden h-auto rounded-sm border-[1.5px] border-current bg-transparent px-1 text-xs text-inherit sm:inline-flex">{children}</Kbd>;
