@@ -5,16 +5,24 @@ import { EmojiSticker } from "@/components/sticker";
 import type { Deck } from "@/core/model";
 import { cn } from "@/lib/utils";
 
-type CardFaceProps = { deck: Deck | undefined; title: string; className?: string; children?: ReactNode };
+type CardFaceProps = {
+  deck: Deck | undefined;
+  title: string;
+  /** Quiet words at the end of the deck's line, such as the card's difficulty. */
+  corner?: ReactNode;
+  className?: string;
+  children?: ReactNode;
+};
 
 /** A card as it studies, lifted off the page: the deck it comes from, its question, and what follows. */
-export function CardFace({ deck, title, className, children }: CardFaceProps) {
+export function CardFace({ deck, title, corner, className, children }: CardFaceProps) {
   return (
     <div className={cn("flex flex-col gap-2.5 rounded-xl bg-card p-4.5 shadow-md", className)}>
-      {deck && (
+      {(deck || corner) && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <EmojiSticker deck={deck} />
-          {deck.title}
+          {deck && <EmojiSticker deck={deck} />}
+          {deck?.title}
+          {corner && <span className="ml-auto">{corner}</span>}
         </div>
       )}
       <Markdown className="text-xl leading-snug font-extrabold">{title}</Markdown>

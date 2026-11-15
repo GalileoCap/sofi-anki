@@ -13,12 +13,12 @@ Each screen is a commit, with `pnpm check` green, the audit walk clean, and the 
 
 ## Study
 
-- [ ] The estimate of the run's whole time at the pace so far, on hover of the timer (old `Timer`, `estimatedTotal` in `src/core/run.ts`), and a way to hide the timer.
-- [ ] A confirmation before leaving the run, with Esc opening it.
-- [ ] The run's progress: done, to ask again, still to go (old `RunProgress`, `progress` in `src/core/run.ts`).
-- [ ] The run goal's progress as a bar, with "Goal reached" (old `GoalProgress`).
-- [ ] The card's difficulty: the C key, and shown after the answer (old `study-card.tsx:95, 109-120`).
-- [ ] Redo later: whether a wrong or almost card is asked again in this run, with the R key (old `study-card.tsx:191-195`). Today it is always asked again.
+- [x] The estimate of the run's whole time at the pace so far, on hover of the timer (old `Timer`, `estimatedTotal` in `src/core/run.ts`), and a way to hide the timer. The estimate shows beside the time on a phone and under it on a laptop, since a phone has no hover.
+- [x] A confirmation before leaving the run, with Esc opening it.
+- [x] The run's progress: done, to ask again, still to go (old `RunProgress`, `progress` in `src/core/run.ts`).
+- [x] The run goal's progress as a bar, with "Goal reached" (old `GoalProgress`).
+- [x] The card's difficulty: the C key, and shown after the answer (old `study-card.tsx:95, 109-120`).
+- [x] Redo later: whether a wrong or almost card is asked again in this run, with the R key (old `study-card.tsx:191-195`). It is now a choice under the stamps: if not right (the default), yes, or no.
 - Changing a grade before moving on is served by Undo, now outside the menu on a laptop. No change.
 
 ## The run's end

@@ -1,17 +1,21 @@
 import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
 
-import { GradeMark, Key, Sheet, Spots } from "@/components/sticker";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Bar, GradeMark, Key, Sheet, Spots } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import type { CardRunResult, Deck, SessionGoal, Store } from "@/core/model";
 import {
   type RunAction,
   type RunItem,
+  type RunState,
   answeredResults,
   currentCard,
+  estimatedTotal,
   goalReached,
   isFinished,
+  progress,
   runQueue,
   runsByDeck,
   shuffled,
@@ -62,6 +66,8 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
   const [shown, setShown] = useState(0);
   const [totalMs, setTotalMs] = useState<number | null>(null);
   const [goalDismissed, setGoalDismissed] = useState(false);
+  const [timeShown, setTimeShown] = useState(true);
+  const [leaving, setLeaving] = useState(false);
   /** The store as the run found it, so the sheet counts today's earlier cards once. */
   const [before] = useState(store);
   const paused = watch.pausedAt !== null;
@@ -93,7 +99,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
     refreshTick();
   }
 
-  /** Leaving keeps the cards answered so far, and nothing when none was. */
+  /** Leaving, once confirmed, keeps the cards answered so far, and nothing when none was. */
   function leave() {
     const answered = answeredResults(run);
     if (answered.length > 0) keep(answered, elapsed(watch, now()));
@@ -105,9 +111,9 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
   const postpone = () => step((durationMs) => ({ kind: "postpone", durationMs, random: randoms(1)[0] }));
 
   useKeys((event) => {
-    if (totalMs !== null) return;
+    if (totalMs !== null || leaving) return;
     if (event.key === "p") togglePause();
-    else if (event.key === "Escape") leave();
+    else if (event.key === "Escape") setLeaving(true);
     else if (!paused && event.key === "s") skip();
     else if (!paused && event.key === "l") postpone();
     else if ((event.ctrlKey || event.metaKey) && event.key === "z") {
@@ -135,12 +141,15 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
   const stickers = [...stickersOn(before.runs, opened), ...answeredNow.flatMap((result) => byKey.get(result.card.id)?.deckId ?? [])];
   const showGoal = goal !== undefined && !goalDismissed && goalReached(goal, run, spent);
   const dailyGoal = before.settings.dailyCardGoal;
+  const estimate = estimatedTotal(run, spent);
+  const answeredSoFar = answeredResults(run).length;
   const actions: StudyAction[] = [
     { label: paused ? t("common.resume") : t("common.pause"), key: "P", onClick: togglePause },
     { label: t("common.undo"), key: "⌘Z", onClick: undo, disabled: run.undo.length === 0 },
     { label: t("common.skip"), key: "S", onClick: skip, disabled: paused },
     { label: t("studyCard.saveForLater"), key: "L", onClick: postpone, disabled: paused },
   ];
+  const toggleTime = { label: timeShown ? t("study.hideTime") : t("study.showTime"), key: "time", onClick: () => setTimeShown(!timeShown) };
   const sheetValue = t("home.ofGoal").replace("{n}", String(stickers.length)).replace("{goal}", String(dailyGoal));
 
   return (
@@ -152,8 +161,16 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
         <div className={looks.stack}>
           <div className={looks.spread}>
             <h2 className={looks.sectionTitle}>{t("study.thisRun")}</h2>
-            <span className={cn(looks.value, "text-lg")}>{clockFace(spent)}</span>
+            {timeShown && (
+              <span className={cn(looks.value, "text-lg")} role="timer" aria-label={t("study.time")}>
+                {clockFace(spent)}
+              </span>
+            )}
           </div>
+          {timeShown && estimate !== null && <p className={looks.fine}>{t("study.estimate").replace("{time}", clockFace(estimate))}</p>}
+          <Button variant="ghost" className="-ml-3 self-start text-muted-foreground" onClick={toggleTime.onClick}>
+            {toggleTime.label}
+          </Button>
           <FirstTriesSoFar results={answeredNow} />
           <div className="flex flex-col items-start">
             {actions.map(({ label, key, onClick, disabled }) => (
@@ -169,7 +186,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
 
       <div className={looks.form}>
         <div className={looks.topbar}>
-          <Button variant="ghost" onClick={leave}>
+          <Button variant="ghost" onClick={() => setLeaving(true)}>
             {t("study.leave")}
             <Key>Esc</Key>
           </Button>
@@ -180,25 +197,22 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
             <Button variant="ghost" onClick={togglePause}>
               {paused ? t("common.resume") : t("common.pause")}
             </Button>
-            <StudyMenu actions={actions.filter((action) => action.key !== "P")} />
+            <StudyMenu actions={[...actions.filter((action) => action.key !== "P"), toggleTime]} />
           </span>
         </div>
         <div className="flex flex-col gap-1.5 lg:hidden">
           <p className={cn(looks.spread, looks.muted)}>
             <span>{`${t("home.sheet")}: ${sheetValue}`}</span>
-            <span className="tabular-nums" role="timer" aria-label={t("study.time")}>
-              {clockFace(spent)}
-            </span>
+            {timeShown && (
+              <span className="tabular-nums" role="timer" aria-label={t("study.time")}>
+                {estimate === null ? clockFace(spent) : t("study.timeOf").replace("{n}", clockFace(spent)).replace("{total}", clockFace(estimate))}
+              </span>
+            )}
           </p>
           <Spots stickers={stickers} goal={dailyGoal} decks={before.decks} />
         </div>
-        {goal && (
-          <p className={cn(looks.muted, "tabular-nums")}>
-            {goal.type === "cards"
-              ? t("study.goalCards").replace("{n}", String(Math.min(run.completed, goal.value))).replace("{goal}", String(goal.value))
-              : t("study.goalTime").replace("{n}", clockFace(Math.min(spent, goal.value * 60_000))).replace("{goal}", clockFace(goal.value * 60_000))}
-          </p>
-        )}
+        <RunProgress run={run} />
+        {goal && <GoalProgress goal={goal} completed={run.completed} spent={spent} reached={goalReached(goal, run, spent) && !showGoal} />}
         {showGoal && !paused && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-positive bg-card px-4 py-3">
             <p className={looks.good}>{t("studySession.youReachedGoal")}</p>
@@ -225,18 +239,82 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
             deck={deckOf(card.id)}
             schedule={schedules.get(card.id)}
             now={opened}
-            paused={paused}
-            onAnswer={(result, selectedOptionIds) =>
-              step((durationMs) => ({ kind: "answer", result, durationMs, redoLater: result !== "correct", selectedOptionIds }))
+            paused={paused || leaving}
+            onAnswer={(result, redoLater, selectedOptionIds) =>
+              step((durationMs) => ({ kind: "answer", result, durationMs, redoLater, selectedOptionIds }))
             }
           />
         )}
       </div>
+      <ConfirmDialog
+        open={leaving}
+        onOpenChange={setLeaving}
+        title={t("study.leaveTitle")}
+        body={
+          answeredSoFar === 0
+            ? t("study.leaveNothing")
+            : answeredSoFar === 1
+              ? t("study.leaveKeepsOne")
+              : t("study.leaveKeeps").replace("{n}", String(answeredSoFar))
+        }
+        confirm={t("study.leave")}
+        cancel={t("study.keepStudying")}
+        destructive={false}
+        onConfirm={leave}
+      />
     </main>
   );
 }
 
 type StudyAction = { label: string; key: string; onClick: () => void; disabled?: boolean };
+
+/** The run's cards as a bar: done, to ask again, still to go, with each count in words. */
+function RunProgress({ run }: { run: RunState }) {
+  const { t } = useLanguage();
+  const { done, redo, pending, total } = progress(run);
+  const words = [
+    t("study.done").replace("{n}", String(done)),
+    ...(redo > 0 ? [t("study.again").replace("{n}", String(redo))] : []),
+    t("study.toGo").replace("{n}", String(pending)),
+  ];
+  return (
+    <div className={looks.tight}>
+      <Bar
+        label={`${t("study.progress")}: ${words.join(", ")}`}
+        parts={[
+          { share: done / total, className: "bg-foreground" },
+          { share: redo / total, className: "bg-caution" },
+        ]}
+      />
+      <p className={cn(looks.fine, "flex flex-wrap gap-x-3 tabular-nums")} aria-hidden="true">
+        {words.map((word) => (
+          <span key={word}>{word}</span>
+        ))}
+      </p>
+    </div>
+  );
+}
+
+type GoalProgressProps = { goal: SessionGoal; completed: number; spent: number; reached: boolean };
+
+/** How far the run is toward its goal, in cards or in time, as a green bar. */
+function GoalProgress({ goal, completed, spent, reached }: GoalProgressProps) {
+  const { t } = useLanguage();
+  const goalMs = goal.value * 60_000;
+  const words =
+    goal.type === "cards"
+      ? t("study.goalCards").replace("{n}", String(Math.min(completed, goal.value))).replace("{goal}", String(goal.value))
+      : t("study.goalTime").replace("{n}", clockFace(Math.min(spent, goalMs))).replace("{goal}", clockFace(goalMs));
+  return (
+    <div className={looks.tight}>
+      <p className={cn(looks.spread, looks.fine, "flex-wrap gap-x-3 tabular-nums")}>
+        <span>{words}</span>
+        {reached && <span className="font-bold text-positive">{t("study.goalReached")}</span>}
+      </p>
+      <Bar label={words} parts={[{ share: goal.type === "cards" ? completed / goal.value : spent / goalMs, className: "bg-positive" }]} />
+    </div>
+  );
+}
 
 /** The first tries of the cards answered so far, each grade's count beside its mark. */
 function FirstTriesSoFar({ results }: { results: readonly CardRunResult[] }) {

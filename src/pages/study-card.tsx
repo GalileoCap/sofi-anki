@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { Markdown } from "@/components/markdown";
 import { CardFace, UnderRule } from "@/components/card-face";
-import { GradeMark, Key } from "@/components/sticker";
+import { GradeMark, Key, Segmented } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import type { AnswerResult, Card, CardSchedule, Deck, Millis } from "@/core/model";
@@ -24,14 +24,20 @@ type StudyCardProps = {
   now: Millis;
   /** While the run is paused the card stays as it is and takes no keys. */
   paused: boolean;
-  onAnswer: (result: AnswerResult, selectedOptionIds?: readonly string[]) => void;
+  onAnswer: (result: AnswerResult, redoLater: boolean, selectedOptionIds?: readonly string[]) => void;
 };
+
+/** Whether a graded card is asked again in this run: when its grade is short of right, always, or never. */
+type AskAgain = "missed" | "yes" | "no";
+const askAgainOrder: readonly AskAgain[] = ["missed", "yes", "no"];
 
 /** One card of a run: the question, then the answer under it and three stamps that grade it and move on. */
 export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: StudyCardProps) {
   const { t } = useLanguage();
   const [revealed, setRevealed] = useState(false);
   const [hintShown, setHintShown] = useState(false);
+  const [difficultyShown, setDifficultyShown] = useState(false);
+  const [askAgain, setAskAgain] = useState<AskAgain>("missed");
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   /** A choice card is graded by the options picked; the person may stamp another grade. */
   const suggested = revealed && card.type === "choice" ? gradeChoice(card, selected) : null;
@@ -48,12 +54,14 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
     setSelected(next);
   }
 
-  const answer = (result: AnswerResult) => onAnswer(result, card.type === "choice" ? [...selected] : undefined);
+  const answer = (result: AnswerResult) =>
+    onAnswer(result, askAgain === "yes" || (askAgain === "missed" && result !== "correct"), card.type === "choice" ? [...selected] : undefined);
 
   useKeys((event) => {
     if (paused) return;
     const confirm = event.key === " " || event.key === "Enter";
     if (confirm) event.preventDefault();
+    if (event.key === "c") setDifficultyShown(true);
     if (!revealed) {
       if (confirm) reveal();
       else if (event.key === "h" && card.hint) setHintShown(!hintShown);
@@ -61,6 +69,7 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
     }
     const graded = grades[Number(event.key) - 1];
     if (graded) answer(graded);
+    else if (event.key === "r") setAskAgain(askAgainOrder[(askAgainOrder.indexOf(askAgain) + 1) % askAgainOrder.length]);
     else if (confirm && suggested !== null) answer(suggested);
   });
 
@@ -71,22 +80,31 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <CardFace deck={deck} title={card.title} className="flex-1">
+      <CardFace deck={deck} title={card.title} corner={(revealed || difficultyShown) && t(`complexity.${card.complexity}`)} className="flex-1">
         {card.type === "choice" && <ChoiceOptions card={card} selected={selected} revealed={revealed} onPick={pick} />}
-        {!revealed && card.hint && (
-          <div className="mt-auto">
-            {hintShown ? (
+        {!revealed && (card.hint || !difficultyShown) && (
+          <div className="mt-auto flex flex-col">
+            {card.hint && hintShown && (
               <UnderRule>
                 <p>
                   <strong>{t("common.hint")}.</strong> <Markdown inline>{card.hint}</Markdown>
                 </p>
               </UnderRule>
-            ) : (
-              <Button variant="ghost" className="-ml-3 text-muted-foreground" onClick={() => setHintShown(true)}>
-                {t("study.showHint")}
-                <Key>H</Key>
-              </Button>
             )}
+            <div className="-ml-3 flex flex-wrap">
+              {card.hint && !hintShown && (
+                <Button variant="ghost" className="text-muted-foreground" onClick={() => setHintShown(true)}>
+                  {t("study.showHint")}
+                  <Key>H</Key>
+                </Button>
+              )}
+              {!difficultyShown && (
+                <Button variant="ghost" className="text-muted-foreground" onClick={() => setDifficultyShown(true)}>
+                  {t("study.showDifficulty")}
+                  <Key>C</Key>
+                </Button>
+              )}
+            </div>
           </div>
         )}
         {revealed && card.type === "standard" && (
@@ -97,28 +115,47 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
       </CardFace>
 
       {revealed ? (
-        <div className="grid grid-cols-3 justify-items-center gap-2.5">
-          {grades.map((result, i) => (
-            <div key={result} className="grid w-full justify-items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => answer(result)}
-                className={cn(
-                  "relative flex aspect-square w-full max-w-26 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full border-[3px] border-current bg-card px-2 text-sm font-extrabold transition-colors hover:bg-muted focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ring",
-                  gradeLooks[result].text,
-                  suggested === result && "bg-muted outline-3 outline-offset-2 outline-ring",
-                )}
-              >
-                <span aria-hidden="true" className="absolute inset-1.25 rounded-full border-[1.5px] border-dashed border-current opacity-60" />
-                <GradeMark result={result} className="h-6 w-7" />
-                {t(gradeWords[result])}
-              </button>
-              <span className="text-center text-xs text-muted-foreground">
-                {goes(result)}
-                <Key>{i + 1}</Key>
-              </span>
-            </div>
-          ))}
+        <div className={looks.form}>
+          <div className="grid grid-cols-3 justify-items-center gap-2.5">
+            {grades.map((result, i) => (
+              <div key={result} className="grid w-full justify-items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => answer(result)}
+                  className={cn(
+                    "relative flex aspect-square w-full max-w-26 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full border-[3px] border-current bg-card px-2 text-sm font-extrabold transition-colors hover:bg-muted focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                    gradeLooks[result].text,
+                    suggested === result && "bg-muted outline-3 outline-offset-2 outline-ring",
+                  )}
+                >
+                  <span aria-hidden="true" className="absolute inset-1.25 rounded-full border-[1.5px] border-dashed border-current opacity-60" />
+                  <GradeMark result={result} className="h-6 w-7" />
+                  {t(gradeWords[result])}
+                </button>
+                <span className="text-center text-xs text-muted-foreground">
+                  {goes(result)}
+                  <Key>{i + 1}</Key>
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col items-center gap-1.5">
+            <span className={looks.muted}>
+              {t("study.askAgain")}
+              <Key>R</Key>
+            </span>
+            <Segmented
+              label={t("study.askAgain")}
+              options={[
+                { value: "missed", label: t("study.againIfMissed") },
+                { value: "yes", label: t("study.againYes") },
+                { value: "no", label: t("study.againNo") },
+              ]}
+              value={askAgain}
+              onChange={setAskAgain}
+              className="self-center"
+            />
+          </div>
         </div>
       ) : (
         <Button size="lg" className="w-full" onClick={reveal} disabled={card.type === "choice" && selected.size === 0}>

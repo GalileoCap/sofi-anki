@@ -6,15 +6,19 @@ type ConfirmDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  /** What is lost, and that it cannot be undone. */
+  /** What is lost or kept, and whether it can be undone. */
   body: string;
   /** The button's words, which say what it deletes. */
   confirm: string;
   onConfirm: () => void;
+  /** False when nothing is lost, so the button is the screen's plain action. */
+  destructive?: boolean;
+  /** The cancel button's words, when "Cancel" says less than staying put. */
+  cancel?: string;
 };
 
-/** Asks before a deletion, with the deletion named on its button. */
-export function ConfirmDialog({ open, onOpenChange, title, body, confirm, onConfirm }: ConfirmDialogProps) {
+/** Asks before a deletion or a step out, with what it does named on its button. */
+export function ConfirmDialog({ open, onOpenChange, title, body, confirm, onConfirm, destructive = true, cancel }: ConfirmDialogProps) {
   const { t } = useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -25,10 +29,10 @@ export function ConfirmDialog({ open, onOpenChange, title, body, confirm, onConf
         </DialogHeader>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            {t("common.cancel")}
+            {cancel ?? t("common.cancel")}
           </Button>
           <Button
-            variant="destructive"
+            variant={destructive ? "destructive" : "default"}
             onClick={() => {
               onConfirm();
               onOpenChange(false);

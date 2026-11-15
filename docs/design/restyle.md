@@ -21,9 +21,9 @@ Each step is a commit, with `pnpm check` green and the screens it touches driven
 
 The owner approved the mock, which leaves these out of the screens. Each is recorded here so it is a decision.
 
-- The study timer and its estimate leave the study screen. The run's time shows at its end. Overruled by the owner on 2026-11-15 ("The timer is missing"): the run's time is back, above the spots on a phone and in the laptop's side panel, and the estimate stays out.
-- The redo-later checkbox goes. A wrong or almost grade asks for the card again in the run, as the default was.
-- Leaving a run keeps the cards answered without asking first, since nothing is lost.
+- The study timer and its estimate leave the study screen. The run's time shows at its end. Overruled by the owner on 2026-11-15 ("The timer is missing"): the run's time is back, above the spots on a phone and in the laptop's side panel, and the estimate stays out. The estimate came back with the rest ([restore.md](restore.md)).
+- The redo-later checkbox goes. A wrong or almost grade asks for the card again in the run, as the default was. Overruled by the owner on 2026-11-15 with every dropped capability: it is back as a choice under the stamps ([restore.md](restore.md)).
+- Leaving a run keeps the cards answered without asking first, since nothing is lost. Overruled the same way: Leave and Esc ask first, saying what is kept.
 - The run's end lists the cards to look at again without each card's tries. "Study these again" studies those cards, and the others are done.
 - Home drops the tag filter. A search field shows once there are more than eight decks.
 - The deck page filters its cards by status (all, due, weak, new) in place of complexity and tag chips. Choosing cards to study other than the due ones (all, weak, new, shuffled, with a goal) stays in the deck's menu as "Choose cards to study".

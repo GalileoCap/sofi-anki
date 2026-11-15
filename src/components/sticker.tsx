@@ -180,6 +180,24 @@ export function DeckRow({ deck, meta, end, onOpen, head }: DeckRowProps) {
   );
 }
 
+type BarProps = {
+  /** Each part's share of the whole, from 0 to 1, and its colour, from the left. */
+  parts: readonly { share: number; className: string }[];
+  /** What the bar shows, for a screen reader. */
+  label: string;
+};
+
+/** A thin bar of parts of a whole, on a quiet track. */
+export function Bar({ parts, label }: BarProps) {
+  return (
+    <div role="img" aria-label={label} className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
+      {parts.map(({ share, className }, i) => (
+        <span key={i} className={cn("h-full shrink-0", className)} style={{ width: `${Math.min(1, Math.max(0, share)) * 100}%` }} />
+      ))}
+    </div>
+  );
+}
+
 /** A key that does the same as what it sits beside, shown where there is a keyboard. */
 export function Key({ children }: { children: ReactNode }) {
   return <Kbd className="ml-1 hidden h-auto rounded-sm border-[1.5px] border-current bg-transparent px-1 text-xs text-inherit sm:inline-flex">{children}</Kbd>;

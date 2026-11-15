@@ -6,6 +6,8 @@ export const looks = {
   form: "flex flex-col gap-4",
   /** A dialog's paragraph with its controls under it. */
   stack: "flex flex-col gap-3",
+  /** A bar or a field with its line of words, close together. */
+  tight: "flex flex-col gap-1.5",
   /** A short list, one item under another. */
   column: "flex flex-col gap-2",
   /** Choices or bars that take the full width. */

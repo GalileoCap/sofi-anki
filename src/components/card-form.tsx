@@ -164,7 +164,7 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
             </Field>
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className={looks.tight}>
             <p className={cn(looks.muted, "font-bold")}>{t("cardForm.asItStudies")}</p>
             <CardFace deck={deck} title={title || " "}>
               {cardType === "standard"
