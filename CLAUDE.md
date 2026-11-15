@@ -1,38 +1,37 @@
-# CLAUDE.md
+# sofi-anki
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+A flashcard study app in the spirit of Anki, for the owner and their friends. It runs wholly in the browser and is served from GitHub Pages: each person's decks, runs and schedule live in their own browser's `localStorage`, and decks travel between people by share link or file. There is no server, no account and no sync.
 
-## Project
+The working rules are session-kit's (`~/.claude/CLAUDE.md`), and the shape of the code is `CODE.md`'s:
 
-sofi-anki is a personal-use Anki clone. Keep it simple: no multi-user features, auth, or backend. Built with React + TypeScript, Vite 8, Tailwind CSS 4, and the React Compiler (via Babel plugin).
+@~/.claude/plugins/marketplaces/galileo-kit/global/CODE.md
 
-## Development Guidelines
+This file adds the project's own. `.claude/settings.json` declares the plugin, and `.claude/claude-kit.json` points `session-tells` at the TypeScript comments and `session-codeintel looks` at `src/`. Comments, documents and replies are in English. The interface is in English and Spanish.
 
-- Use **Tailwind CSS** for all styling.
-- Use **shadcn/ui** for UI components. Do not create shadcn components manually: ask the user to run the CLI (`pnpm dlx shadcn@latest add <component>`) to add them.
+## Environment
+
+`nix develop` (or direnv, with an untracked `.envrc` holding `use flake`) gives Node 22, pnpm, ast-grep and python3, and puts the session-kit commands on PATH. `packageManager` in `package.json` pins pnpm.
 
 ## Commands
 
-- `pnpm dev`: start dev server with HMR
-- `pnpm build`: type-check (`tsc -b`) then bundle with Vite
-- `pnpm lint`: ESLint across all TS/TSX files
-- `pnpm preview`: serve the production build locally
+- `pnpm dev`: the dev server with HMR.
+- `pnpm check:static`: every static gate (`scripts/check.sh`), at zero warnings.
+- `pnpm check`: the static gates and the production build.
+- `pnpm build`: type-check, then bundle to `dist/`.
+- `pnpm preview`: serve the production build.
 
-Package manager is **pnpm**.
+Before calling a change done: `pnpm check`, the tests, and the flows it touches driven in the browser, saying which ran.
 
-## Architecture
+## Stored data
 
-- `src/main.tsx`: React entry point, renders `<App />` into `#root` with StrictMode.
-- `src/App.tsx`: root component, switches between the deck list, a deck, a study session, a deck's stats, the global stats and a shared deck (the `View` union).
-- `src/index.css`: global styles. It imports Tailwind and defines the CSS custom properties for theming (light and dark).
-- Path alias: `@/*` maps to `./src/*` (configured in `tsconfig.app.json`).
+The deployed site holds people's real decks. Whatever the app stores (the `localStorage` keys `anki-decks`, `anki-runs`, `anki-srs`, `anki-settings`, `lang`, `anki-theme`), a backup file, a share link and an `.apkg` must keep reading as before. A change to what is stored reads the old shape, and its step is written in `OWED.md`.
 
-## Tech Notes
+## UI
 
-- React Compiler is enabled via `@rolldown/plugin-babel` + `babel-plugin-react-compiler` in `vite.config.ts`.
-- Tailwind 4 uses the Vite plugin (`@tailwindcss/vite`), so there is no `tailwind.config` file: configuration is done in CSS with `@import "tailwindcss"`.
-- TypeScript target is ES2023; strict unused-variable/parameter checks are on (`noUnusedLocals`, `noUnusedParameters`).
+- Tailwind CSS for all styling.
+- shadcn/ui for components. Do not write a shadcn component by hand: it is added with `pnpm dlx shadcn@latest add <component>`.
 
 ## Documents
 
-- [docs/session-kit-adoption.md](docs/session-kit-adoption.md): what the project lacks against the session-kit rules and `CODE.md`, and the plan to close it.
+- [docs/session-kit-adoption.md](docs/session-kit-adoption.md): the review against the session-kit rules and `CODE.md`, and the order of work.
+- [docs/suppressions.md](docs/suppressions.md): every suppression and type escape with its reason, written by `session-suppressions index`.

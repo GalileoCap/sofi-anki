@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint . --max-warnings 0",
+    "check:static": "scripts/check.sh",
+    "check": "scripts/check.sh && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

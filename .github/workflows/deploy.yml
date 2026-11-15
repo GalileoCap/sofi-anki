@@ -21,8 +21,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: latest
 
       - uses: actions/setup-node@v4
         with:
@@ -32,8 +30,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Build
-        run: pnpm build
+      # The session-kit gates run on the owner's machine only: the kit is not installed here.
+      - name: Lint and build
+        run: pnpm lint && pnpm build
 
       - uses: actions/upload-pages-artifact@v3
         with:

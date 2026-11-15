@@ -1,0 +1,6 @@
+{
+  "test_commands": ["pnpm test"],
+  "iterate": { "static": ["pnpm check:static"] },
+  "tells": { "readers": ["typescript"] },
+  "looks": { "src": "src", "skip": ["src/components/ui"] }
+}
