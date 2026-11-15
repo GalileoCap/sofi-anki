@@ -49,5 +49,5 @@ The deployed site holds people's real decks. Whatever the app stores (the `local
 
 - [docs/session-kit-adoption.md](docs/session-kit-adoption.md): the review against the session-kit rules and `CODE.md`, and the order of work.
 - [docs/rewrite-plan.md](docs/rewrite-plan.md): the design and order of the rewrite onto the pure-core shape.
-- [docs/design-research.md](docs/design-research.md): why the first restyle mocks read as machine-made, the research on avoiding it, and the design tools proposed for trial here (`O6`).
+- [docs/design-research.md](docs/design-research.md): why the first restyle mocks read as machine-made, the research and working designers' patterns for avoiding it, and the design tools proposed for trial here and for session-kit after (`O6`).
 - [docs/suppressions.md](docs/suppressions.md): every suppression and type escape with its reason, written by `session-suppressions index`.
