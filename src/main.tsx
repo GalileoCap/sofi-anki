@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { LanguageProvider } from './contexts/language-context.tsx'
+import { LanguageProvider } from './contexts/language-provider.tsx'
 import { seedIfEmpty } from './lib/seed.ts'
 
 seedIfEmpty()

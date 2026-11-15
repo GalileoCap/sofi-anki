@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Nix and direnv
+.direnv
+
+# session-kit handoff
+CLAUDE.local.md

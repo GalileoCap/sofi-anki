@@ -1,0 +1,3 @@
+allowBuilds:
+  # msw comes with the shadcn package, and the app never runs it.
+  msw: false

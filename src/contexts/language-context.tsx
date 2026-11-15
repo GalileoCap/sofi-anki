@@ -1,35 +1,14 @@
-import { createContext, useContext, useState } from "react";
-import { translate } from "@/lib/translations";
+import { createContext, useContext } from "react";
 import type { Lang, TranslationKey } from "@/lib/translations";
 
-interface LanguageContextValue {
+export interface LanguageContextValue {
   lang: Lang;
   setLang: (lang: Lang) => void;
   t: (key: TranslationKey) => string;
   tp: (n: number, oneKey: TranslationKey, otherKey: TranslationKey) => string;
 }
 
-const LanguageContext = createContext<LanguageContextValue | null>(null);
-
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => {
-    const stored = localStorage.getItem("lang");
-    return stored === "es" ? "es" : "en";
-  });
-
-  function setLang(next: Lang) {
-    localStorage.setItem("lang", next);
-    setLangState(next);
-  }
-  const t = (key: TranslationKey) => translate(lang, key);
-  const tp = (n: number, oneKey: TranslationKey, otherKey: TranslationKey) =>
-    translate(lang, n === 1 ? oneKey : otherKey);
-  return (
-    <LanguageContext.Provider value={{ lang, setLang, t, tp }}>
-      {children}
-    </LanguageContext.Provider>
-  );
-}
+export const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function useLanguage(): LanguageContextValue {
   const ctx = useContext(LanguageContext);
