@@ -28,7 +28,8 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 
 - `pnpm dev`: the dev server with HMR.
 - `pnpm check:static`: every static gate (`scripts/check.sh`), at zero warnings.
-- `pnpm check`: the static gates and the production build.
+- `pnpm test`: the tests (Vitest, under `tests/`, 2 s a test).
+- `pnpm check`: the static gates, the tests and the production build.
 - `pnpm build`: type-check, then bundle to `dist/`.
 - `pnpm preview`: serve the production build.
 
