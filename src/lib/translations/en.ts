@@ -72,6 +72,8 @@ export const en = {
   "theme.light": "Light",
   "theme.dark": "Dark",
   "theme.system": "System",
+  "theme.label": "Theme",
+  "language.label": "Language",
   // Deck list
   "deckList.title": "Your Decks",
   "deckList.newDeck": "New Deck",

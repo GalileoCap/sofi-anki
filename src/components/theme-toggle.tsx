@@ -12,7 +12,7 @@ export function ThemeToggle() {
   const { t } = useLanguage();
   const label = t(NAMES[theme]);
   return (
-    <Button variant="ghost" size="sm" onClick={cycleTheme} title={`Theme: ${label}`}>
+    <Button variant="ghost" size="sm" onClick={cycleTheme} title={`${t("theme.label")}: ${label}`}>
       <span className="mr-1">{ICONS[theme]}</span>
       <span className="text-xs">{label}</span>
     </Button>

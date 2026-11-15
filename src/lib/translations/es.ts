@@ -69,6 +69,8 @@ export const es: Translation = {
   "theme.light": "Claro",
   "theme.dark": "Oscuro",
   "theme.system": "Sistema",
+  "theme.label": "Tema",
+  "language.label": "Idioma",
   "deckList.title": "Tus mazos",
   "deckList.newDeck": "Nuevo mazo",
   "deckList.moreOptions": "Más opciones",
