@@ -55,6 +55,23 @@ export const screens = [
       await click(page, "button", /^Stats$/);
     },
   },
+  {
+    name: "deck stats, a run and a card open",
+    go: async (page) => {
+      await openDeck(page);
+      await click(page, "button", /^Stats$/);
+      await page.locator("main button[aria-expanded]").first().click();
+      await page.locator("main details summary").first().click();
+    },
+  },
+  {
+    name: "stats, an earlier month and a day picked",
+    go: async (page) => {
+      await click(page, "button", /^Stats$/);
+      await click(page, "button", /^An earlier month$/);
+      await page.locator("main button[aria-pressed]").first().click();
+    },
+  },
   { name: "study, question", go: startStudy },
   {
     name: "study, answer",

@@ -142,7 +142,7 @@ function ResultRow({ result }: { result: CardRunResult }) {
     ...(attempts.length > 1 ? [t("runEnd.tries").replace("{n}", String(attempts.length))] : []),
   ].join(", ");
   const head = (
-    <span className="flex min-w-0 flex-col">
+    <span className={looks.titled}>
       <Markdown inline className="min-w-0">
         {card.title}
       </Markdown>
@@ -151,7 +151,7 @@ function ResultRow({ result }: { result: CardRunResult }) {
   );
   if (attempts.length < 2 && card.type !== "choice") return <div className={cn(looks.listRow, "pl-6")}>{head}</div>;
   return (
-    <Fold summary={head} className="border-b-[1.5px] border-border py-1.5 last:border-b-0">
+    <Fold summary={head} className={looks.foldRow}>
       <ol className="mt-1 mb-2 flex flex-col gap-2 pl-6">
         {attempts.map((attempt, i) => (
           <li key={i} className={looks.tight}>

@@ -30,8 +30,8 @@ The owner approved the mock, which leaves these out of the screens. Each is reco
 - The theme and language toggles move to home's More menu.
 - The daily goal is changed from home's More menu.
 - The confetti goes. The sheet filling is the feedback for the daily goal. Overruled with every dropped capability: a run right the first time throughout ends with stickers falling ([restore.md](restore.md)).
-- Stats measure accuracy as right on the first try, as the run's end does, and rank the decks by it, the lowest first. The stat tiles (decks, cards, sessions, total time) go (`data-2`).
-- A deck's stats are its line of runs, average time and first tries, its month, its chart, and its runs, each opening to its cards' tries. Each card's accuracy, time and interval history go, since the deck page's table shows each card's last grade, how often it was right and when it comes back.
+- Stats measure accuracy as right on the first try, as the run's end does, and rank the decks by it, the lowest first. The stat tiles (decks, cards, sessions, total time) go (`data-2`). Overruled with every dropped capability: the totals are back as a line of words ([restore.md](restore.md)).
+- A deck's stats are its line of runs, average time and first tries, its month, its chart, and its runs, each opening to its cards' tries. Each card's accuracy, time and interval history go, since the deck page's table shows each card's last grade, how often it was right and when it comes back. Overruled the same way: each card's accuracy, time and interval history are back on deck stats, the weakest first.
 
 ## Step 10: T4 and T5 on the app
 

@@ -21,6 +21,12 @@ export function shortDuration(ms: number): string {
   return rest > 0 ? `${Math.floor(seconds / 60)}m ${rest}s` : `${Math.floor(seconds / 60)}m`;
 }
 
+/** `ms` in hours and minutes from an hour, and as `shortDuration` under it, `1h 5m`. */
+export function longDuration(ms: number): string {
+  const minutes = Math.floor(ms / 60_000);
+  return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : shortDuration(ms);
+}
+
 /** A timer that leaves its pauses out: started at `startedAt`, paused since `pausedAt` when paused. */
 export type Stopwatch = { readonly startedAt: Millis; readonly pausedMs: number; readonly pausedAt: Millis | null };
 

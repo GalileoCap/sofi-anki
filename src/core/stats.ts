@@ -1,6 +1,7 @@
 import {
   type Card,
   type CardDisposition,
+  type CardRunResult,
   type CardSchedule,
   DAY_MS,
   type Deck,
@@ -8,7 +9,7 @@ import {
   type RunRecord,
   millis,
 } from "@/core/model";
-import { type Schedules, dueCards, dueTime, isAnswer, lastAnswer, scheduleKey } from "@/core/scheduler";
+import { NEW_SPACING, type Schedules, dueCards, dueTime, isAnswer, lastAnswer, nextSpacing, scheduleKey } from "@/core/scheduler";
 
 /** A calendar day in the browser's time zone, as `YYYY-MM-DD`. */
 export type DayKey = string;
@@ -54,6 +55,83 @@ export const totals = (runs: readonly RunRecord[]): { timeMs: number; cards: num
   timeMs: runs.reduce((sum, run) => sum + run.totalTimeMs, 0),
   cards: runs.reduce((sum, run) => sum + run.results.length, 0),
 });
+
+export type Timing = { readonly average: number; readonly fastest: number; readonly slowest: number; readonly perCard: number };
+
+/** How long `runs` took: on average, the fastest and the slowest, and the mean time of a try. Null without runs. */
+export function timing(runs: readonly RunRecord[]): Timing | null {
+  if (runs.length === 0) return null;
+  const times = runs.map((run) => run.totalTimeMs);
+  const attempts = runs.flatMap((run) => run.results.flatMap((r) => r.attempts));
+  return {
+    average: times.reduce((a, b) => a + b, 0) / times.length,
+    fastest: Math.min(...times),
+    slowest: Math.max(...times),
+    perCard: attempts.length > 0 ? attempts.reduce((sum, a) => sum + a.durationMs, 0) / attempts.length : 0,
+  };
+}
+
+export type CardStat = {
+  readonly card: CardRunResult["card"];
+  /** Runs that reached the card. */
+  readonly timesStudied: number;
+  /** Percent right of the answers, or null when never answered. */
+  readonly accuracy: number | null;
+  /** Mean time spent on the card in a run. */
+  readonly averageMs: number;
+  readonly schedule: CardSchedule | undefined;
+};
+
+/**
+ * One row per card of the deck, and per card studied in a run and since removed, with what the
+ * deck's runs say of it: cards never studied first, then never answered, then by accuracy, lowest
+ * first. `schedules` is the deck's, by card id.
+ */
+export function cardStats(deck: Deck, runs: readonly RunRecord[], schedules: ReadonlyMap<string, CardSchedule>): CardStat[] {
+  const seen = new Map<string, { card: CardRunResult["card"]; results: CardRunResult[] }>();
+  for (const card of deck.cards) seen.set(card.id, { card, results: [] });
+  for (const run of runs) {
+    for (const result of run.results) {
+      const entry = seen.get(result.card.id) ?? { card: result.card, results: [] };
+      seen.set(result.card.id, { ...entry, results: [...entry.results, result] });
+    }
+  }
+  const rows = [...seen.values()].map(({ card, results }): CardStat => {
+    const answers = results.flatMap((r) => r.attempts).filter((a) => isAnswer(a.result));
+    const times = results.map((r) => r.attempts.reduce((sum, a) => sum + a.durationMs, 0));
+    return {
+      card,
+      timesStudied: results.length,
+      accuracy: answers.length > 0 ? Math.round((answers.filter((a) => a.result === "correct").length / answers.length) * 100) : null,
+      averageMs: times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0,
+      schedule: schedules.get(card.id),
+    };
+  });
+  const rank = (stat: CardStat): number => (stat.timesStudied === 0 ? -2 : (stat.accuracy ?? -1));
+  return rows.sort((a, b) => rank(a) - rank(b));
+}
+
+export type TimelineEntry = { readonly at: Millis; readonly result: CardDisposition; readonly intervalAfter: number };
+
+/** Each run that reached a card, oldest first, with the interval in days the scheduler gave after it. */
+export function cardTimeline(cardId: string, runs: readonly RunRecord[]): TimelineEntry[] {
+  const entries = runs
+    .flatMap((run) =>
+      run.results
+        .filter((result) => result.card.id === cardId)
+        .map((result) => ({ at: run.completedAt, result: lastAnswer(result.attempts) ?? result.attempts[0]?.result ?? "skip" })),
+    )
+    .sort((a, b) => a.at - b.at);
+  let spacing = NEW_SPACING;
+  let answeredAt: Millis | null = null;
+  return entries.map((entry) => {
+    if (isAnswer(entry.result)) {
+      spacing = nextSpacing(spacing, entry.result, answeredAt === null ? Infinity : (entry.at - answeredAt) / DAY_MS);
+      answeredAt = entry.at;
+    }
+    return { ...entry, intervalAfter: spacing.intervalDays };
+  });
+}
 
 export type CardPerformance = {
   /** Runs in which the card was answered. */
@@ -175,14 +253,24 @@ export function firstTryRight(runs: readonly RunRecord[]): number | null {
 export const neediestFirst = (rows: readonly DeckRow[]): DeckRow[] =>
   [...rows].sort((a, b) => (a.firstRight ?? Infinity) - (b.firstRight ?? Infinity));
 
-/** Each day of the month of `now`, from the first, with the decks studied on it, each deck once. */
-export function monthDays(runs: readonly RunRecord[], now: Millis): { day: Date; decks: string[] }[] {
+/** Each day of the month `back` months before that of `now`, from the first, with the decks studied on it, each deck once, and its count of cards. */
+export function monthDays(runs: readonly RunRecord[], now: Millis, back = 0): { day: Date; decks: string[]; cards: number }[] {
   const today = new Date(now);
-  const length = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const first = new Date(today.getFullYear(), today.getMonth() - back, 1);
+  const length = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
   return Array.from({ length }, (_, i) => {
-    const day = new Date(today.getFullYear(), today.getMonth(), i + 1);
-    return { day, decks: [...new Set(stickersOn(runs, millis(day.getTime())))] };
+    const day = new Date(first.getFullYear(), first.getMonth(), i + 1);
+    const stickers = stickersOn(runs, millis(day.getTime()));
+    return { day, decks: [...new Set(stickers)], cards: stickers.length };
   });
+}
+
+/** How many months before that of `now` the earliest run is, or 0 without runs. */
+export function monthsBack(runs: readonly RunRecord[], now: Millis): number {
+  if (runs.length === 0) return 0;
+  const today = new Date(now);
+  const first = new Date(Math.min(...runs.map((run) => run.completedAt)));
+  return Math.max(0, (today.getFullYear() - first.getFullYear()) * 12 + today.getMonth() - first.getMonth());
 }
 
 /** The last seven days to today, each with the decks studied on it, each deck once. */

@@ -37,6 +37,12 @@ export const looks = {
   sectionTitle: "mb-1 text-lg font-bold",
   /** A list of lines split by rules. */
   list: "flex flex-col text-sm",
+  /** A list's line that folds open. */
+  foldRow: "border-b-[1.5px] border-border py-1.5 last:border-b-0",
+  /** A title over its line of words, free to shrink. */
+  titled: "flex min-w-0 flex-col",
+  /** A mark with its word, in bold. */
+  marked: "inline-flex items-center gap-1 font-bold",
   /** One line of such a list. */
   listRow: "flex items-center justify-between gap-3 border-b-[1.5px] border-border py-3 last:border-b-0",
   /** Solid ink, for what asks to be done now. */
@@ -47,6 +53,8 @@ export const looks = {
   good: "text-sm font-bold text-positive",
   /** Small text that says less than what is around it. */
   muted: "text-sm text-muted-foreground",
+  /** A screen's sentences of figures under its title, at body size on a phone. */
+  lead: "text-base text-muted-foreground lg:text-sm",
   /** Smaller text that says less still. */
   fine: "text-xs text-muted-foreground",
   /** A smaller side note at a line's end. */

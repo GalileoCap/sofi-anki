@@ -47,12 +47,12 @@ Each screen is a commit, with `pnpm check` green, the audit walk clean, and the 
 
 ## Stats and deck stats
 
-- [ ] The totals in one line: decks, cards, runs, total time (old `stats.tsx:38-53`).
-- [ ] History before this month, with the cards studied each day: the month calendar steps back through earlier months, and each day names its count (old `study-heatmap.tsx`, 13 weeks). This serves home's last week too.
-- [ ] The empty stats screen says there are no decks yet (old `stats.tsx:62-63`).
-- [ ] Deck stats: total runs, total time, cards studied, due and weak. Also the average, fastest and slowest run, and the time per card (old `deck-stats.tsx:44-73`).
-- [ ] Deck stats: each card's accuracy, times studied, average time, due date and interval history, those under 50 % marked (old `deck-stats.tsx:88-97, 156-221`).
-- [ ] Inside a run: each card's difficulty and first-try time, and the skipped count in the run's line (old `deck-stats.tsx:111, 141, 145`).
+- [x] The totals in one line: decks, cards, runs, total time (old `stats.tsx:38-53`), above the streak's line.
+- [x] History before this month, with the cards studied each day: the month calendar steps back through earlier months, and each day names its count (old `study-heatmap.tsx`, 13 weeks). This serves home's last week too. A studied day is a button: picking it names its count under the calendar, and hovering shows it too. The arrows stop at the month of the first run and at this month.
+- [x] The empty stats screen says there are no decks yet (old `stats.tsx:62-63`). Home hides Stats while there are no decks, so home's own empty state says it first.
+- [x] Deck stats: total runs, total time, cards studied, due and weak. Also the average, fastest and slowest run, and the time per card (old `deck-stats.tsx:44-73`). They read as two sentences under the deck (`data-2`).
+- [x] Deck stats: each card's accuracy, times studied, average time, due date and interval history, those under 50 % marked (old `deck-stats.tsx:88-97, 156-221`). The weakest first, each folding open to its runs with the spacing after each, and those under 50 % marked with the cross in the wrong grade's colour.
+- [x] Inside a run: each card's difficulty and first-try time, and the skipped count in the run's line (old `deck-stats.tsx:111, 141, 145`).
 
 ## Home, shared deck and imports
 
