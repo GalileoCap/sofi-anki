@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Page } from "@/components/page";
 import { useLanguage } from "@/contexts/language-context";
@@ -7,7 +7,7 @@ import { runCards } from "@/core/run";
 import { indexSchedules } from "@/core/scheduler";
 import { decodeDeck, sharedPart } from "@/core/share";
 import { now } from "@/effects/clock";
-import { clearHash, pageHash } from "@/effects/page";
+import { clearHash, onHashChange, pageHash } from "@/effects/page";
 import { useStore } from "@/hooks/use-store";
 import { DeckPage } from "@/pages/deck";
 import { DeckStatsPage } from "@/pages/deck-stats";
@@ -24,22 +24,33 @@ type View =
   | { kind: "stats"; deckId: string }
   | { kind: "shared"; deck: Deck };
 
-/** The view a page opens on: the shared deck its link carries, else the home screen. */
-function openingView(): View {
+/** The shared deck the page's link carries. A link that does not decode is removed from the address. */
+function sharedView(): View | null {
   const encoded = sharedPart(pageHash());
-  if (encoded === null) return { kind: "home" };
+  if (encoded === null) return null;
   return decodeDeck(encoded).match(
     (deck): View => ({ kind: "shared", deck }),
-    (): View => {
+    (): null => {
       clearHash();
-      return { kind: "home" };
+      return null;
     },
   );
 }
 
+/** The view a page opens on: the shared deck its link carries, else the home screen. */
+const openingView = (): View => sharedView() ?? { kind: "home" };
+
 export default function App({ initial }: { initial: Store }) {
   const { store, update, saveError } = useStore(initial);
   const [view, setView] = useState<View>(openingView);
+  useEffect(
+    () =>
+      onHashChange(() => {
+        const shared = sharedView();
+        if (shared !== null) setView(shared);
+      }),
+    [],
+  );
   const [openedAt] = useState(now);
   const { t } = useLanguage();
   const { decks, runs } = store;
