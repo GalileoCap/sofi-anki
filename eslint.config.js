@@ -19,5 +19,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // CODE.md: a file has a length. Past it, the file is split at its seam.
+      'max-lines': ['error', { max: 500, skipBlankLines: true, skipComments: true }],
+    },
   },
 ])
