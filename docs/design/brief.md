@@ -1,6 +1,6 @@
 # Design brief
 
-The first tool of the design trial (T1 in [design-research.md](../design-research.md)), serving `O6`. Written 2026-11-15 from the owner's answers of the same day and from the app as it runs on `dev`. Every later design step (tokens, directions, mocks, audits) is checked against it. **Status: waiting for the owner's approval.**
+The first tool of the design trial (T1 in [design-research.md](../design-research.md)), serving `O6`. Written 2026-11-15 from the owner's answers of the same day and from the app as it runs on `dev`. Every later design step (tokens, directions, mocks, audits) is checked against it. **Status: approved by the owner on 2026-11-15 ("Approve the brief"), references as proposed.**
 
 ## Register
 
