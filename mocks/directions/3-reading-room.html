@@ -91,6 +91,7 @@
   /* Phone: the same ledger with the columns a phone does not need folded away. */
   .phone .wide, .phone .keys, .phone header .btn { display: none; }
   .phone .dock { display: block; }
+  .phone .btn { padding: 0 8px; }
   .phone .ledger tr.card td:first-child { padding-left: 8px; }
   .phone .ledger td { padding: 10px 6px; }
   .laptop .room { padding: 28px 40px; }
@@ -191,8 +192,40 @@ inc(); // 2</pre>
   </div>
 </template>
 
+<template id="grade">
+  <div class="room">
+    <header><h1>Studying</h1><span class="figure" style="color: var(--muted-foreground)">1 of 6</span><button class="btn" type="button" style="margin-left: 8px">Leave</button></header>
+    <p class="today">The due cards stay in their ledger. The one being studied opens in its row.</p>
+    <table class="ledger">
+      <thead><tr><th>Card</th><th>Due</th></tr></thead>
+      <tbody>
+        <tr class="deck open"><td colspan="2" style="padding: 12px 8px 14px; font-size: var(--base); font-weight: 400;">
+          <div style="font-size: var(--xs); color: var(--muted-foreground);"><span class="tab" style="background: #f59e0b; height: 12px; width: 6px; vertical-align: -1px; margin-right: 6px;"></span>JavaScript Fundamentals, <span class="stamp now">Today</span></div>
+          <div style="font-size: var(--lg); font-weight: 650; margin: 6px 0;">What is a closure?</div>
+          <p style="margin: 0 0 8px;">A function that <strong>retains access</strong> to its enclosing scope's variables even after the outer function has returned.</p>
+          <pre class="mono" style="margin: 0 0 8px; padding: 8px 10px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r-md); font-size: var(--xs);">function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}</pre>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+            <button class="btn" type="button" style="color: var(--negative)">Wrong <span class="mono">1</span></button>
+            <button class="btn" type="button" style="color: var(--caution)">Almost <span class="mono">2</span></button>
+            <button class="btn" type="button" style="color: var(--positive)">Right <span class="mono">3</span></button>
+          </div>
+        </td></tr>
+        <tr class="card"><td>What is event bubbling?</td><td><span class="stamp now">Yesterday</span></td></tr>
+        <tr class="card"><td>What does <code>Array.from({length: 3}, (_, i) =&gt; i)</code> return?</td><td><span class="stamp now">Yesterday</span></td></tr>
+        <tr class="card"><td>What is a <code>Symbol</code> and when would you use one?</td><td><span class="stamp now">Yesterday</span></td></tr>
+        <tr class="card"><td>Which Array methods <strong>mutate</strong> the original array?</td><td><span class="stamp now">Today</span></td></tr>
+        <tr class="card"><td>How does spaced repetition (SRS) work in this app?</td><td><span class="stamp now">Today</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script src="frame.js"></script>
 <script>
-  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById("screen").content.cloneNode(true));
+  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById(screen.dataset.template ?? "screen").content.cloneNode(true));
   const roles = ["background", "card", "muted", "border", "foreground", "muted-foreground", "primary", "primary-foreground", "positive", "positive-soft", "caution", "caution-soft", "negative", "negative-soft"];
   const light = document.createElement("div"); light.className = "dir"; document.body.append(light);
   const darkHost = document.createElement("div"); darkHost.className = "dark"; const dark = document.createElement("div"); dark.className = "dir"; darkHost.append(dark); document.body.append(darkHost);

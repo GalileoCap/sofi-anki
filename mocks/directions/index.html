@@ -5,21 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Three directions for sofi-anki</title>
 <link rel="stylesheet" href="frame.css">
+<style>
+  .page { max-width: 1260px; }
+  .compare { display: grid; grid-template-columns: repeat(3, 375px); gap: 28px; justify-content: center; margin-top: 20px; }
+  .compare h2 { margin: 0; font-size: 17px; }
+  .compare .one { margin: 4px 0 12px; min-height: 4.5em; font-size: 14px; }
+  .moment { font-size: 13px; opacity: 0.7; margin: 14px 0 6px; }
+  iframe { display: block; width: 375px; height: 700px; border: 1px solid rgb(127 127 127 / 0.35); border-radius: 10px; background: #fff; }
+  .lead { max-width: 52em; margin: 16px auto 0; }
+  .lead p { margin: 0 0 8px; }
+  table.check { margin-top: 8px; }
+</style>
 </head>
 <body>
 <div class="page">
-  <div class="bar"><h1>Three directions for sofi-anki</h1></div>
-  <div class="notes" style="margin-top: 20px;">
-    <p>T7 of the design trial (<code>docs/design-research.md</code>), drawn from the approved brief (<code>docs/design/brief.md</code>) and inside the token roles of <code>docs/design/system.md</code>. Each direction is a different structure for the app, with its own palette and type to match. Pick one, or take a part of one into another, and it becomes the full mock. Every figure and card is the demo decks' own.</p>
+  <div class="bar">
+    <h1>Three directions for sofi-anki</h1>
+    <button type="button" id="dark">Light / dark</button>
   </div>
-  <section class="part">
+  <div class="lead">
+    <p>Each direction is a different answer to one question: <strong>what do you see when you open the app, and how do you get to studying?</strong> Below, the same two moments on a phone, for each: opening the app, and grading the same card. The palette and type differ too, but the arrangement is what you are choosing.</p>
+  </div>
+
+  <div class="compare">
+    <div>
+      <h2><a href="1-leitner-box.html">1. The Leitner box</a></h2>
+      <p class="one">You open on your schedule, drawn as a box: every card from every deck, sorted into today, tomorrow, this week. Study takes what is due today. Each grade says where the card goes next.</p>
+      <p class="moment">Opening the app</p>
+      <iframe data-src="1-leitner-box.html?only=home" title="Leitner box, opening the app"></iframe>
+      <p class="moment">Grading a card</p>
+      <iframe data-src="1-leitner-box.html?only=grade" title="Leitner box, grading a card"></iframe>
+    </div>
+    <div>
+      <h2><a href="2-index-card.html">2. The index card</a></h2>
+      <p class="one">You open straight on the next due card. There is no home screen to read first: decks, stats and editing sit behind a button. A grade brings the next card at once.</p>
+      <p class="moment">Opening the app</p>
+      <iframe data-src="2-index-card.html?only=screen&amp;state=closed" title="Index card, opening the app"></iframe>
+      <p class="moment">Grading a card</p>
+      <iframe data-src="2-index-card.html?only=screen" title="Index card, grading a card"></iframe>
+    </div>
+    <div>
+      <h2><a href="3-reading-room.html">3. The reading room</a></h2>
+      <p class="one">You open on a table of your decks, and a deck opens in place into its cards with their due dates. Studying happens inside that same table, one row at a time. Built for the laptop and the keyboard.</p>
+      <p class="moment">Opening the app</p>
+      <iframe data-src="3-reading-room.html?only=screen" title="Reading room, opening the app"></iframe>
+      <p class="moment">Grading a card</p>
+      <iframe data-src="3-reading-room.html?only=grade" title="Reading room, grading a card"></iframe>
+    </div>
+  </div>
+
+  <section class="part lead">
+    <h2>How they differ</h2>
     <table class="check">
-      <tr><th>Direction</th><td>The bet</td><td>Its bold element</td><td>Home on a phone</td></tr>
-      <tr><th><a href="1-leitner-box.html">1. The Leitner box</a></th><td>The schedule is a box you can see. Studying is its front compartment.</td><td>The box, each card an edge in its deck's colour, in the compartment of when it comes back</td><td>The box, then the decks ranked by due. Study is one tap.</td></tr>
-      <tr><th><a href="2-index-card.html">2. The index card</a></th><td>The card is the app. Opening it shows the next due card.</td><td>A ruled index card with the deck's colour as its head rule, graded with a teacher's tick, half tick and cross</td><td>The next due card. Decks are one tap behind it.</td></tr>
-      <tr><th><a href="3-reading-room.html">3. The reading room</a></th><td>One quiet page, driven by the keyboard. Decks open in place.</td><td>The date-due stamp on every deck and card</td><td>The ledger, folded to two columns. Study is one tap.</td></tr>
+      <tr><th></th><td>1. Leitner box</td><td>2. Index card</td><td>3. Reading room</td></tr>
+      <tr><th>First screen</th><td>The schedule, as a box</td><td>The next card</td><td>A table of decks</td></tr>
+      <tr><th>To start studying</th><td>One tap</td><td>None, it is already there</td><td>One tap, or <code>s</code></td></tr>
+      <tr><th>Where decks live</th><td>A list under the box</td><td>Behind a button</td><td>The main table</td></tr>
+      <tr><th>Studying</th><td>A card on its own screen, grades show where it goes</td><td>A ruled card, graded with a tick, half tick or cross</td><td>Inside the table, in the card's row</td></tr>
+      <tr><th>Made for</th><td>Phone and laptop alike</td><td>The phone first</td><td>The laptop first</td></tr>
+      <tr><th>Look</th><td>Beech wood, Atkinson Hyperlegible</td><td>Card stock and pencil, Literata serif</td><td>Linen and stamp ink, Recursive</td></tr>
     </table>
+    <p style="margin-top: 12px;">Each name opens that direction's page, with its reasoning, its type, its colours and the laptop screen. Parts can be combined, for example the index card's study screen with the Leitner box's home. Every figure and card is the demo decks' own.</p>
   </section>
 </div>
+<script>
+  const frames = document.querySelectorAll("iframe");
+  let dark = false;
+  const load = () => frames.forEach((frame) => { frame.src = frame.dataset.src + (dark ? "&dark=1" : ""); });
+  document.getElementById("dark").onclick = () => { dark = !dark; document.body.classList.toggle("dark-page", dark); load(); };
+  load();
+</script>
 </body>
 </html>

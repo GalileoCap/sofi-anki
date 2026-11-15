@@ -101,6 +101,25 @@
   .laptop .decks { margin-top: 0; }
   .laptop .kbd { font-size: var(--xs); opacity: 0.75; border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; }
   .phone .kbd { display: none; }
+
+  /* Studying: the card, and each grade named by the compartment it sends the card to. */
+  .run { padding: 12px 16px 20px; display: flex; flex-direction: column; gap: 14px; min-height: 100%; }
+  .run .top { display: flex; align-items: center; justify-content: space-between; font-size: var(--sm); color: var(--muted-foreground); }
+  .strip { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; gap: 3px; padding: 3px; border: 2px solid var(--border); border-radius: var(--r-md); background: var(--muted); font-size: var(--xs); }
+  .strip span { background: var(--card); border-radius: 4px; padding: 2px 6px; display: flex; justify-content: space-between; color: var(--muted-foreground); }
+  .strip span.front { outline: 2px solid var(--primary); outline-offset: -2px; color: var(--foreground); font-weight: 600; }
+  .studycard { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: var(--r-xl); box-shadow: var(--shadow-md); padding: 16px 18px; }
+  .studycard .deckname { font-size: var(--xs); color: var(--muted-foreground); }
+  .studycard h2 { margin: 4px 0 12px; font-size: var(--xl); font-weight: 700; }
+  .studycard p { margin: 0 0 10px; }
+  .studycard pre { margin: 0 0 10px; padding: 10px 12px; background: var(--muted); border-radius: var(--r-md); font-family: "Atkinson Hyperlegible Mono", monospace; font-size: var(--sm); }
+  .grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .grade { min-height: 60px; border-radius: var(--r-md); border: 1px solid; font: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+  .grade b { font-weight: 600; font-size: var(--base); }
+  .grade small { font-size: var(--xs); color: var(--foreground); }
+  .grade.wrong { background: var(--negative-soft); border-color: color-mix(in oklch, var(--negative) 40%, transparent); color: var(--negative); }
+  .grade.almost { background: var(--caution-soft); border-color: color-mix(in oklch, var(--caution) 40%, transparent); color: var(--caution); }
+  .grade.right { background: var(--positive-soft); border-color: color-mix(in oklch, var(--positive) 40%, transparent); color: var(--positive); }
 </style>
 </head>
 <body>
@@ -192,9 +211,34 @@ inc(); // 2</pre>
   </div>
 </template>
 
+<template id="grade">
+  <div class="run">
+    <div class="top"><span>Leave</span><span class="figure">1 of 6</span><span>More</span></div>
+    <div class="strip"><span class="front">Today <b class="figure">6</b></span><span>1 day <b class="figure">3</b></span><span>Week <b class="figure">15</b></span><span>Later</span><span>New</span></div>
+    <div class="studycard">
+      <div class="deckname">⚡ JavaScript Fundamentals</div>
+      <h2>What is a closure?</h2>
+      <p>A function that <strong>retains access</strong> to its enclosing scope's variables even after the outer function has returned.</p>
+      <pre>function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}
+const inc = makeCounter();
+inc(); // 1</pre>
+      <p>Closures power data privacy, partial application, and memoization.</p>
+    </div>
+    <div class="grades">
+      <button class="grade wrong" type="button"><b>Wrong</b><small>Back to today</small></button>
+      <button class="grade almost" type="button"><b>Almost</b><small>Tomorrow</small></button>
+      <button class="grade right" type="button"><b>Right</b><small>In 2 days</small></button>
+    </div>
+  </div>
+</template>
+
+<script src="frame.js"></script>
 <script>
   const colours = { js: "#f59e0b", guide: "#863bff" };
-  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById("home").content.cloneNode(true));
+  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById(screen.dataset.template ?? "home").content.cloneNode(true));
   for (const edges of document.querySelectorAll("[data-edges]")) {
     for (const part of edges.dataset.edges.split(" ").filter(Boolean)) {
       const [deck, n] = part.split(":");

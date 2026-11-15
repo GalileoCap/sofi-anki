@@ -104,6 +104,12 @@
   .laptop .mark { flex-direction: row; gap: 10px; min-height: 52px; }
   .laptop .mark .key { display: inline; font-family: ui-monospace, monospace; font-size: var(--xs); color: var(--muted-foreground); }
   .phone aside { display: none; }
+  .phone .study { min-height: min(100vh, 780px); }
+
+  /* Before the card turns: the question alone, and one button to turn it. */
+  .turn { display: none; min-height: 56px; border: 0; border-radius: var(--r-md); background: var(--primary); color: var(--primary-foreground); font: inherit; font-weight: 600; cursor: pointer; }
+  .closed .answer, .closed .marks { display: none; }
+  .closed .turn { display: block; }
 </style>
 </head>
 <body>
@@ -191,10 +197,8 @@ inc(); // 2</pre>
   let count = 0;
   return () =&gt; ++count;
 }
-
 const inc = makeCounter();
-inc(); // 1
-inc(); // 2</pre>
+inc(); // 1</pre>
           <p>Closures power data privacy, partial application, and memoization.</p>
         </div>
         </div>
@@ -204,12 +208,14 @@ inc(); // 2</pre>
         <button class="mark almost" type="button"><svg viewBox="0 0 30 26"><path d="M4 14 L11 21 L21 6"/><path d="M12 8 L19 17"/></svg>Almost <span class="key">2</span></button>
         <button class="mark right" type="button"><svg viewBox="0 0 30 26"><path d="M4 14 L11 21 L26 4"/></svg>Right <span class="key">3</span></button>
       </div>
+      <button class="turn" type="button">Turn the card</button>
     </div>
   </div>
 </template>
 
+<script src="frame.js"></script>
 <script>
-  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById("screen").content.cloneNode(true));
+  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById(screen.dataset.template ?? "screen").content.cloneNode(true));
   const roles = ["background", "card", "muted", "border", "foreground", "muted-foreground", "primary", "primary-foreground", "positive", "positive-soft", "caution", "caution-soft", "negative", "negative-soft"];
   const light = document.createElement("div"); light.className = "dir"; document.body.append(light);
   const darkHost = document.createElement("div"); darkHost.className = "dark"; const dark = document.createElement("div"); dark.className = "dir"; darkHost.append(dark); document.body.append(darkHost);
