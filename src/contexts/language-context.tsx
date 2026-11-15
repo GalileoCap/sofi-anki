@@ -1,5 +1,7 @@
 import { createContext, useContext } from "react";
-import type { Lang, TranslationKey } from "@/lib/translations";
+
+import type { Lang } from "@/core/model";
+import type { TranslationKey } from "@/lib/translations";
 
 export interface LanguageContextValue {
   lang: Lang;
