@@ -29,7 +29,7 @@ Kept: the restore regression (`A3`), the decoding of every stored shape the hist
 1. Dependencies to current (ESLint 10, `vite-plugin-pwa` 2 for Vite 8, browserslist data), gates green.
 2. Core: types, schemas, decoders with tests over old shapes, scheduler, run logic, stats, import, backup, share.
 3. Effects and hooks.
-4. Pages and components rebuilt on them, one screen at a time, with the looks file; the old `src/lib`, `src/hooks` and `src/components` files go as each screen moves.
+4. Pages and components rebuilt on them, one screen at a time, with the looks file. The old `src/lib`, `src/hooks` and `src/components` files go as each screen moves.
 5. The layers gate, looks at zero, tells and lengths at zero, build without warnings (code-split the `.apkg` import).
 6. Every flow driven in the browser against data written by the old version.
 
