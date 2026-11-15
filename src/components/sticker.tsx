@@ -56,7 +56,7 @@ export function Chip({ urgent, children }: { urgent?: boolean; children: ReactNo
 }
 
 /** A deck's emoji as a round sticker in the deck's colour, or the colour alone. */
-export function EmojiSticker({ deck, large }: { deck: Deck; large?: boolean }) {
+export function EmojiSticker({ deck, large }: { deck: Pick<Deck, "color" | "emoji">; large?: boolean }) {
   return (
     <span
       style={deckColour(deck)}

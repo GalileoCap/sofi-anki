@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Field } from "@/components/field";
+import { EmojiSticker } from "@/components/sticker";
 import { TagInput } from "@/components/tag-input";
 import { DECK_COLORS } from "@/lib/deck-colors";
 import { looks } from "@/lib/ui-looks";
@@ -21,7 +22,7 @@ const swatch = (picked: boolean): string =>
   cn("size-10 cursor-pointer rounded-full border-[3px] transition-colors", picked ? "border-foreground" : "border-card hover:border-border");
 
 interface DeckFormProps {
-  /** What opens the form; without one, the form is opened by `open`. */
+  /** What opens the form. Without one, `open` opens it. */
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -88,7 +89,7 @@ export function DeckForm({
         </DialogHeader>
         <form onSubmit={handleSubmit} className={looks.form}>
           <Field label={t("deckForm.title")}>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} autoFocus />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("deckForm.titleExample")} autoFocus />
           </Field>
           <Field label={t("common.tags")}>
             <TagInput tags={tags} onChange={setTags} placeholder={t("deckForm.tagsPlaceholder")} />
@@ -118,7 +119,10 @@ export function DeckForm({
             </div>
           </Field>
           <Field label={t("deckForm.emoji")}>
-            <Input value={emoji} onChange={(e) => setEmoji(e.target.value)} className="w-32" />
+            <div className={looks.row}>
+              <EmojiSticker deck={{ color, emoji: emoji.trim() || undefined }} />
+              <Input value={emoji} onChange={(e) => setEmoji(e.target.value)} placeholder={t("deckForm.emojiExample")} className="w-32" />
+            </div>
           </Field>
 
           <DialogFooter>

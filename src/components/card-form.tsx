@@ -64,6 +64,7 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
 
   const setOption = (id: string, change: Partial<OptionRow>) => setOptions(options.map((o) => (o.id === id ? { ...o, ...change } : o)));
 
+  const rightCount = options.filter((o) => o.correct).length;
   const isValid =
     title.trim() !== "" &&
     (cardType === "standard" ? response.trim() !== "" : options.length >= 2 && options.every((o) => o.text.trim()) && options.some((o) => o.correct));
@@ -77,7 +78,7 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
         : {
             ...common,
             type: "choice",
-            multiSelect: options.filter((o) => o.correct).length > 1,
+            multiSelect: rightCount > 1,
             options: options.map((o) => ({ id: o.id, text: o.text.trim(), correct: o.correct })),
           },
     );
@@ -144,6 +145,9 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
                 <Button type="button" variant="outline" className="self-start" onClick={() => setOptions([...options, newOption()])}>
                   {t("cardForm.addOption")}
                 </Button>
+                {rightCount > 0 && (
+                  <p className={looks.fine}>{rightCount > 1 ? t("cardForm.multiple").replace("{n}", String(rightCount)) : t("cardForm.single")}</p>
+                )}
               </Field>
             )}
             <div className="grid gap-4 sm:grid-cols-2">

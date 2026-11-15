@@ -42,8 +42,8 @@ Each screen is a commit, with `pnpm check` green, the audit walk clean, and the 
 
 ## Forms
 
-- [ ] The card form says whether a choice card is single or multiple answer (old `card-form.tsx:277-283`).
-- [ ] The deck form's emoji field shows a preview and example placeholders (old `deck-form.tsx`).
+- [x] The card form says whether a choice card is single or multiple answer (old `card-form.tsx:277-283`), under its options as they are ticked.
+- [x] The deck form's emoji field shows a preview and example placeholders (old `deck-form.tsx`). The preview is the deck's sticker, in the colour picked.
 
 ## Stats and deck stats
 
