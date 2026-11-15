@@ -1,4 +1,5 @@
-import type { Card, Deck } from "@/core/model";
+import type { Card, CardSchedule, Deck, Store } from "@/core/model";
+import { indexSchedules } from "@/core/scheduler";
 
 /** What a person sets on a deck in its form. An empty color or emoji is none. */
 export type DeckLooks = {
@@ -68,3 +69,29 @@ export function receiveDeck(decks: readonly Deck[], incoming: Deck, how: Arrival
 
 /** Every tag on a deck, sorted, each once. */
 export const allTags = (decks: readonly Deck[]): string[] => [...new Set(decks.flatMap((deck) => deck.tags))].sort();
+
+/**
+ * The decks that carry one of `tags`, when any is given, and match `search`, when it is not
+ * blank: in the deck's title or tags, or a card's title or tags.
+ */
+export function matchingDecks(decks: readonly Deck[], search: string, tags: ReadonlySet<string>): Deck[] {
+  const query = search.trim().toLowerCase();
+  const inTags = (list: readonly string[]) => list.some((tag) => tag.toLowerCase().includes(query));
+  return decks.filter(
+    (deck) =>
+      (tags.size === 0 || deck.tags.some((tag) => tags.has(tag))) &&
+      (query === "" ||
+        deck.title.toLowerCase().includes(query) ||
+        inTags(deck.tags) ||
+        deck.cards.some((card) => card.title.toLowerCase().includes(query) || inTags(card.tags))),
+  );
+}
+
+/** The store after decks read from Anki arrive: each merged by id, and their schedules over the store's. */
+export function receiveAnkiDecks(store: Store, decks: readonly Deck[], schedules: readonly CardSchedule[]): Store {
+  return {
+    ...store,
+    decks: decks.reduce<readonly Deck[]>((all, incoming) => receiveDeck(all, incoming, "merge"), store.decks),
+    schedules: [...new Map([...indexSchedules(store.schedules), ...indexSchedules(schedules)]).values()],
+  };
+}

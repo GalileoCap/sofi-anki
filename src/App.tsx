@@ -1,21 +1,17 @@
 import { useState } from "react";
 
 import { DeckDetail } from "@/components/deck-detail";
-import { DeckList } from "@/components/deck-list";
 import { DeckStats } from "@/components/deck-stats";
 import { GlobalStats } from "@/components/global-stats";
 import { Page } from "@/components/page";
 import { SharedDeckView } from "@/components/shared-deck-view";
 import { StudySession } from "@/components/study-session";
 import { useLanguage } from "@/contexts/language-context";
-import { cardFromJson, deckFromJson } from "@/core/deck-json";
+import { cardFromJson } from "@/core/deck-json";
 import {
   type CardDraft,
-  type DeckLooks,
   addCards,
-  addDeck,
   cardFromDraft,
-  newDeck,
   receiveDeck,
   removeCard,
   removeDeck,
@@ -31,6 +27,7 @@ import { newId, now } from "@/effects/clock";
 import { clearHash, pageHash } from "@/effects/page";
 import { useStore } from "@/hooks/use-store";
 import { looks } from "@/lib/looks";
+import { Home } from "@/pages/home";
 
 /** A card's record over its deck's runs, as the deck screen shows it. */
 export interface CardPerf {
@@ -69,7 +66,7 @@ export default function App({ initial }: { initial: Store }) {
   const [view, setView] = useState<View>(openingView);
   const [openedAt] = useState(now);
   const { t } = useLanguage();
-  const { decks, runs, settings } = store;
+  const { decks, runs } = store;
   const schedules = indexSchedules(store.schedules);
 
   const draftCard = (draft: CardDraft, id: string) => cardFromDraft(draft, id, newId);
@@ -201,29 +198,15 @@ export default function App({ initial }: { initial: Store }) {
     );
   }
 
-  const looksOf = (title: string, tags: string[], color?: string, emoji?: string): DeckLooks => ({ title, tags, color, emoji });
-
   return (
     <Page>
       {banner}
-      <DeckList
-        decks={[...decks]}
-        allRuns={[...runs]}
-        dailyGoal={settings.dailyCardGoal}
-        onUpdateDailyGoal={(goal) => update((s) => ({ ...s, settings: { ...s.settings, dailyCardGoal: Math.max(0, goal) } }))}
-        onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
-        onAddDeck={(...args) => update(withDecks((d) => addDeck(d, newDeck(newId(), looksOf(...args), now()))))}
-        onImportDeck={(data) => update(withDecks((d) => addDeck(d, deckFromJson(data, now(), newId))))}
-        onImportApkg={(parsed) =>
-          update((s) => ({
-            ...s,
-            decks: parsed.decks.reduce((all, incoming) => receiveDeck(all, incoming, "merge"), s.decks as Deck[]),
-            schedules: [...new Map([...indexSchedules(s.schedules), ...indexSchedules(parsed.schedules)]).values()],
-          }))
-        }
+      <Home
         store={store}
-        onRestore={(restored) => update(() => restored)}
-        onViewGlobalStats={() => setView({ kind: "globalStats" })}
+        update={update}
+        now={openedAt}
+        onOpenDeck={(id) => setView({ kind: "deck", deckId: id })}
+        onOpenStats={() => setView({ kind: "globalStats" })}
       />
     </Page>
   );

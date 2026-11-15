@@ -1,125 +1,62 @@
-import { useMemo, useState } from "react";
 import { useLanguage } from "@/contexts/language-context";
-import type { RunRecord } from "@/types";
+import type { Millis, RunRecord } from "@/core/model";
+import { cardsByDay, dayKey, heatmapWeeks } from "@/core/stats";
 import { cn } from "@/lib/utils";
 
-const WEEKS = 13;
-const DAYS = WEEKS * 7;
+/** The days the heatmap shows: thirteen weeks. */
+const DAYS = 13 * 7;
 
+/** The shade of a day, by the cards studied on it, from the least to the most. */
 const LEVELS = [
-  { min: 0, max: 0, className: "bg-muted/30" },
-  { min: 1, max: 5, className: "bg-green-200 dark:bg-green-900/50" },
-  { min: 6, max: 15, className: "bg-green-400 dark:bg-green-700/60" },
-  { min: 16, max: 30, className: "bg-green-500 dark:bg-green-600/70" },
-  { min: 31, max: Infinity, className: "bg-green-700 dark:bg-green-500" },
-];
+  { least: 0, className: "bg-muted/30" },
+  { least: 1, className: "bg-green-200 dark:bg-green-900/50" },
+  { least: 6, className: "bg-green-400 dark:bg-green-700/60" },
+  { least: 16, className: "bg-green-500 dark:bg-green-600/70" },
+  { least: 31, className: "bg-green-700 dark:bg-green-500" },
+] as const;
 
-function getLevel(count: number) {
-  return LEVELS.find((l) => count >= l.min && count <= l.max) ?? LEVELS[0];
-}
+const shade = (count: number): string => LEVELS.findLast((level) => count >= level.least)?.className ?? LEVELS[0].className;
 
-function dateKey(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+const DAY_LABELS = ["M", "", "W", "", "F", "", ""];
 
-function formatDateLabel(d: Date): string {
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
+const cell = "h-[20px]";
 
-interface StudyHeatmapProps {
-  runs: RunRecord[];
-}
-
-export function StudyHeatmap({ runs }: StudyHeatmapProps) {
-  const [now] = useState(() => new Date());
-  const { t } = useLanguage();
-
-  const { days, cardsByDate } = useMemo(() => {
-    // Build date → card count map
-    const map = new Map<string, number>();
-    for (const run of runs) {
-      const d = new Date(run.completedAt);
-      const key = dateKey(d);
-      map.set(key, (map.get(key) ?? 0) + run.results.length);
-    }
-
-    // Build array of days (last DAYS days, ending today)
-    const result: { date: Date; key: string }[] = [];
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    // Find the start: go back DAYS-1 days, then align to start of week (Monday)
-    const start = new Date(today);
-    start.setDate(start.getDate() - (DAYS - 1));
-    // Align to Monday (getDay: 0=Sun, 1=Mon, ...)
-    const dayOfWeek = start.getDay();
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    start.setDate(start.getDate() + mondayOffset);
-
-    const cursor = new Date(start);
-    while (cursor <= today) {
-      result.push({ date: new Date(cursor), key: dateKey(cursor) });
-      cursor.setDate(cursor.getDate() + 1);
-    }
-
-    return { days: result, cardsByDate: map };
-  }, [runs, now]);
-
-  // Group days into columns (weeks)
-  const weeks: { date: Date; key: string }[][] = [];
-  let currentWeek: { date: Date; key: string }[] = [];
-  for (const day of days) {
-    // Monday = start of week (getDay: 1)
-    const dow = day.date.getDay();
-    const mondayIndex = dow === 0 ? 6 : dow - 1;
-    if (mondayIndex === 0 && currentWeek.length > 0) {
-      weeks.push(currentWeek);
-      currentWeek = [];
-    }
-    currentWeek.push(day);
-  }
-  if (currentWeek.length > 0) weeks.push(currentWeek);
-
-  const DAY_LABELS = ["M", "", "W", "", "F", "", ""];
+/** The cards studied each day of the last thirteen weeks, a column a week from Monday. */
+export function StudyHeatmap({ runs, now }: { runs: readonly RunRecord[]; now: Millis }) {
+  const { t, tp } = useLanguage();
+  const counts = cardsByDay(runs);
+  const weeks = heatmapWeeks(now, DAYS);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-[3px]">
-        {/* Day labels */}
         <div className="flex flex-col gap-[3px] pr-1">
           {DAY_LABELS.map((label, i) => (
-            <div key={i} className="flex h-[20px] items-center justify-center text-[9px] text-muted-foreground">
+            <div key={i} className={cn(cell, "flex items-center justify-center text-[9px] text-muted-foreground")}>
               {label}
             </div>
           ))}
         </div>
-        {/* Weeks */}
-        {weeks.map((week, wi) => (
-          <div key={wi} className="flex flex-1 flex-col gap-[3px]">
-            {Array.from({ length: 7 }).map((_, di) => {
-              const day = week.find((d) => {
-                const dow = d.date.getDay();
-                return (dow === 0 ? 6 : dow - 1) === di;
-              });
-              if (!day) {
-                return <div key={di} className="h-[20px]" />;
-              }
-              const count = cardsByDate.get(day.key) ?? 0;
-              const level = getLevel(count);
+        {weeks.map((week) => (
+          <div key={dayKey(week[0])} className="flex flex-1 flex-col gap-[3px]">
+            {week.map((day) => {
+              const count = counts.get(dayKey(day)) ?? 0;
+              const label = day.toLocaleDateString(undefined, { month: "short", day: "numeric" });
               return (
                 <div
-                  key={di}
-                  className={cn("h-[20px] rounded-sm", level.className)}
-                  title={`${formatDateLabel(day.date)}: ${count} cards`}
+                  key={dayKey(day)}
+                  className={cn(cell, "rounded-sm", shade(count))}
+                  title={`${label}: ${count} ${tp(count, "common.card", "common.cards")}`}
                 />
               );
             })}
           </div>
         ))}
       </div>
-      {/* Legend */}
       <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
         <span>{t("heatmap.less")}</span>
-        {LEVELS.map((l, i) => (
-          <div key={i} className={cn("h-3 w-3 rounded-sm", l.className)} />
+        {LEVELS.map((level) => (
+          <div key={level.least} className={cn("h-3 w-3 rounded-sm", level.className)} />
         ))}
         <span>{t("heatmap.more")}</span>
       </div>

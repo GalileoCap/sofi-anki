@@ -245,7 +245,7 @@ export function DeckStats({ deck, runs, schedules, onBack }: DeckStatsProps) {
             <CardTitle>{t("deckStats.studyActivity")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <StudyHeatmap runs={runs} />
+            <StudyHeatmap runs={runs} now={now} />
           </CardContent>
         </UiCard>
 

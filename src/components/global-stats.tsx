@@ -177,7 +177,7 @@ export function GlobalStats({ decks, allRuns, schedules, onBack, onSelectDeck }:
               <CardTitle>{t("globalStats.studyActivity")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <StudyHeatmap runs={allRuns} />
+              <StudyHeatmap runs={allRuns} now={now} />
             </CardContent>
           </UiCard>
 
