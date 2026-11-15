@@ -9,6 +9,7 @@
     "lint": "eslint . --max-warnings 0",
     "check:static": "scripts/check.sh",
     "check": "scripts/check.sh && vitest run && vite build && node scripts/design-census.mjs",
+    "design:audit": "node scripts/design-audit.mjs",
     "preview": "vite preview",
     "test": "vitest run"
   },
@@ -38,6 +39,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@babel/core": "^7.29.13",
     "@eslint/js": "^10.0.1",
     "@projectwallace/css-analyzer": "^9.9.9",
@@ -55,6 +57,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.14.0",
+    "playwright": "^1.65.1",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.2",
     "vite": "^8.3.8",

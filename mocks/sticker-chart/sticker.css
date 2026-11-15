@@ -65,6 +65,8 @@
 .dir h1 { font-size: var(--2xl); font-weight: 800; line-height: 1.25; }
 .dir h2 { font-size: var(--xl); font-weight: 800; line-height: 1.3; }
 .dir h3 { font-size: var(--lg); font-weight: 700; }
+/* A section under a screen's title is an h2 for the outline, drawn at the h3 size. */
+.dir h2.section { font-size: var(--lg); font-weight: 700; line-height: 1.55; }
 .dir .quiet { color: var(--muted-foreground); }
 .dir .small { font-size: var(--sm); }
 .dir .fine { font-size: var(--xs); }
@@ -84,7 +86,8 @@
 .btn.ghost { border-color: transparent; background: none; color: var(--muted-foreground); font-weight: 500; padding: 0 10px; }
 .btn.ghost:hover { background: var(--muted); color: var(--foreground); }
 .btn:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
-.kbd { font-size: var(--xs); font-weight: 500; opacity: 0.75; border: 1.5px solid currentColor; border-radius: 6px; padding: 0 5px; }
+/* A key hint takes the colour of the text around it, which already meets AA, and is quieted by its thin border alone. */
+.kbd { font-size: var(--xs); font-weight: 500; border: 1.5px solid currentColor; border-radius: 6px; padding: 0 5px; }
 
 /* The sticker sheet: spots to fill, and stickers in a deck's colour. */
 .sheet { background: var(--card); border: 2px dashed var(--border); border-radius: var(--r-xl); padding: 14px 16px; }
