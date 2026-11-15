@@ -147,7 +147,7 @@ Most of these resolve by register: a dense professional tool and a personal app 
 
 The owner's projects range from professional tools to cozy personal apps. The machine look is the same failure in both: a choice made because it is probable, with no reason in the subject. So the method stays the same in every register, and the register sets the values it works with.
 
-The register is declared in the brief. Three are enough to start:
+The register is declared in the brief. The owner chose these three on 2026-11-15 ("use those for now"), and expects to rename them or add more as other projects take the tools:
 
 - **Tool.** Dense, used daily, judged by speed and trust: an admin, a dashboard, a developer tool. Neutrals carry nearly everything, colour comes from data and state, one sans-serif, small type, high disclosure discipline. Kole Jain's dashboard and colour-layer rules apply in full.
 - **Personal.** Used by a few people who know each other, judged by feel: this app, a family recipe book, a hobby log. Personality is allowed one strong voice: a typeface, a colour drawn from the subject's materials, an illustration style, or the copy's tone. Everything else follows the tool rules, because a cozy app that breaks consistency or hides state is still a bad app.
@@ -243,6 +243,5 @@ Proposed for after the trial, so a project of any kind and register takes them w
 ## 8. What this needs from the owner
 
 - Approval of `O6`, or its rewording.
-- Agreement that the three registers (tool, personal, showcase) are the right split, or a different one.
 - For this project's brief: who the friends are and what they study on; two or three things (apps, objects, places, books) whose feel you want, and two whose feel you don't; and what bothers you in the current app, if anything specific.
 - Whether the dev dependencies T3 and T4 need are acceptable here: `eslint-plugin-better-tailwindcss`, `@projectwallace/css-analyzer`, `@axe-core/playwright` and Playwright with one browser.
