@@ -38,7 +38,7 @@ type HomeProps = {
   update: Change;
   /** When the screen opened, which today, what is due and the streak count from. */
   now: Millis;
-  /** The title of a deck just kept from a link, to say so. */
+  /** The title of a deck just kept from a link, which home names once. */
   kept: string | null;
   onOpenDeck: (id: string) => void;
   onOpenStats: () => void;
