@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The index card: full mock</title>
+<link rel="stylesheet" href="../directions/frame.css">
+<link rel="stylesheet" href="index-card.css">
+<style>
+  .page { max-width: 1240px; }
+  .shots { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+  .shot { display: flex; flex-direction: column; gap: 6px; }
+  .shot > p { margin: 0; font-size: 13px; opacity: 0.75; max-width: 375px; }
+  .shot .device { border-radius: 14px; }
+  .phone { width: 375px; height: auto; min-height: 700px; overflow: visible; }
+  .phone > .dir { min-height: 700px; }
+  .phone .screen { min-height: 700px; }
+  .laptop { width: 1180px; height: auto; overflow: visible; }
+  .laptop > .dir { min-height: 640px; }
+  section.part > p.lead { max-width: 52em; margin: 0 0 14px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bar">
+    <h1>The index card, every screen</h1>
+    <button type="button" id="dark">Light / dark</button>
+    <nav><a href="../directions/index.html">The four directions</a></nav>
+  </div>
+  <div class="notes" style="margin-top: 18px;">
+    <p>Direction 2 carried to every screen the brief's six tasks reach, at the width each task is done on. The app opens on the next due card. Home is the sheet of decks behind its Decks button. Every deck, card and figure is the demo decks' own, as the app shows them on 2026-11-15. The values are in <code>index-card.css</code>, by the roles of <code>docs/design/system.md</code>.</p>
+    <p>Two things here are new to the app, beyond the look: the first screen is a card due from any deck, and a mark brings the next card with no Next button.</p>
+  </div>
+
+  <!-- Task 1 -->
+  <section class="part">
+    <h2>1. On a phone: study what is due today</h2>
+    <p class="lead">Opening the app is the first step of studying. The decks sit one tap behind the card.</p>
+    <div class="shots">
+      <div class="shot"><p>Opening the app: the next due card</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><button class="btn ghost">Decks</button><span class="figure">1 of 6 due</span><button class="btn ghost" aria-label="More: pause, undo, stats">More</button></div>
+          <div class="card grow" style="--deck: #f59e0b">
+            <div class="head"><span>⚡ JavaScript Fundamentals</span><span>Missed last time</span></div>
+            <div class="ruled grow"><h2>What is a closure?</h2></div>
+          </div>
+          <div class="stack"></div><div class="stack"></div>
+          <button class="btn ghost" style="align-self: center;">Show the hint</button>
+          <button class="btn primary big">Turn the card</button>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>The same screen in Spanish, to check every label fits (copy-5)</p><div class="device phone theme"><div class="dir" lang="es">
+        <div class="screen">
+          <div class="topbar"><button class="btn ghost">Mazos</button><span class="figure">1 de 6 pendientes</span><button class="btn ghost" aria-label="Más">Más</button></div>
+          <div class="card grow" style="--deck: #f59e0b">
+            <div class="head"><span>⚡ JavaScript Fundamentals</span><span>Fallada la última vez</span></div>
+            <div class="ruled grow"><h2>What is a closure?</h2></div>
+          </div>
+          <div class="stack"></div><div class="stack"></div>
+          <button class="btn ghost" style="align-self: center;">Ver la pista</button>
+          <button class="btn primary big">Dar vuelta la carta</button>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>The hint, pencilled on the card</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><button class="btn ghost">Decks</button><span class="figure">1 of 6 due</span><button class="btn ghost" aria-label="More">More</button></div>
+          <div class="card grow" style="--deck: #f59e0b">
+            <div class="head"><span>⚡ JavaScript Fundamentals</span><span>Missed last time</span></div>
+            <div class="ruled grow"><h2>What is a closure?</h2><div class="gap"></div><div class="gap"></div><p class="pencil">Hint: think of a function "closing over" variables from its surrounding scope. It takes them with it.</p></div>
+          </div>
+          <div class="stack"></div><div class="stack"></div>
+          <button class="btn primary big">Turn the card</button>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>The card turned, to be marked</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><button class="btn ghost">Decks</button><span class="figure">1 of 6 due</span><button class="btn ghost" aria-label="More">More</button></div>
+          <div class="card grow" style="--deck: #f59e0b">
+            <div class="head"><span>⚡ JavaScript Fundamentals</span><span>Missed last time</span></div>
+            <div class="ruled grow">
+              <h2>What is a closure?</h2>
+              <div class="gap"></div>
+              <p>A function that <strong>retains access</strong> to its enclosing scope's variables even after the outer function has returned.</p>
+              <pre>function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}
+const inc = makeCounter();
+inc(); // 1</pre>
+              <p>Closures power data privacy, partial application, and memoization.</p>
+            </div>
+          </div>
+          <div class="marks">
+            <button class="mark"><i data-mark="wrong"></i>Wrong</button>
+            <button class="mark"><i data-mark="almost"></i>Almost</button>
+            <button class="mark"><i data-mark="right"></i>Right</button>
+          </div>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>Marked: the card goes into the pile, the next comes up. Here a choice card, one answer picked</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><button class="btn ghost">Decks</button><span class="figure">2 of 6 due</span><button class="btn ghost" aria-label="More">More</button></div>
+          <div class="card grow" style="--deck: #f59e0b">
+            <div class="head"><span>⚡ JavaScript Fundamentals</span><span>Pick one answer</span></div>
+            <div class="ruled grow">
+              <h2>What does <code>typeof null</code> return?</h2>
+              <div class="gap"></div>
+              <button class="option picked"><span class="ring"></span><code>"object"</code></button>
+              <button class="option"><span class="ring"></span><code>"null"</code></button>
+              <button class="option"><span class="ring"></span><code>"undefined"</code></button>
+              <button class="option"><span class="ring"></span><code>"number"</code></button>
+            </div>
+          </div>
+          <div class="stack"></div>
+          <button class="btn primary big">Check</button>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>The end of a run, as a record card, drawn with yesterday's JavaScript run (12 cards)</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><span></span><button class="btn ghost">Close</button></div>
+          <div class="card" style="--deck: #f59e0b">
+            <div class="head"><span>⚡ JavaScript Fundamentals</span><span class="figure">12 cards in 3:02</span></div>
+            <div class="ruled">
+              <h2>First tries</h2>
+              <p style="display: flex; gap: 18px;"><span style="display: inline-flex; align-items: center; gap: 6px;"><i data-mark="right" data-small></i><b class="figure">6</b> right</span><span style="display: inline-flex; align-items: center; gap: 6px;"><i data-mark="almost" data-small></i><b class="figure">3</b> almost</span><span style="display: inline-flex; align-items: center; gap: 6px;"><i data-mark="wrong" data-small></i><b class="figure">3</b> wrong</span></p>
+              <div class="gap"></div>
+              <p style="font-weight: 600;">To look at again</p>
+              <p class="small" style="display: flex; gap: 8px; align-items: center;"><i data-mark="wrong" data-small></i>What is event bubbling?</p>
+              <p class="small" style="display: flex; gap: 8px; align-items: center;"><i data-mark="wrong" data-small></i>What does <code>Array.from(…)</code> return?</p>
+              <p class="small" style="display: flex; gap: 8px; align-items: center;"><i data-mark="wrong" data-small></i>What is a <code>Symbol</code>?</p>
+              <p class="small" style="display: flex; gap: 8px; align-items: center;"><i data-mark="almost" data-small></i>Which Array methods <strong>mutate</strong>…?</p>
+              <p class="small" style="display: flex; gap: 8px; align-items: center;"><i data-mark="almost" data-small></i>What is a closure?</p>
+              <p class="small" style="display: flex; gap: 8px; align-items: center;"><i data-mark="almost" data-small></i>Which of these return a <strong>new</strong> array?</p>
+            </div>
+          </div>
+          <button class="btn primary big" style="margin-top: auto;">Study these 6 again</button>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>Home, behind the Decks button: each deck as a card, ranked by due</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><button class="btn ghost">Back to the card</button><button class="btn ghost" aria-label="More: new deck, import, stats, back up">More</button></div>
+          <div><h1>Decks</h1><p class="quiet small"><span class="figure">0 of 20</span> cards today, <span class="figure">10</span> days in a row</p></div>
+          <div class="card flat" style="--deck: #f59e0b">
+            <div class="head short"><span>⚡ 12 cards</span><span class="due now figure">5 due</span></div>
+            <div class="ruled"><h2>JavaScript Fundamentals</h2><p class="small quiet">Studied yesterday, 48% right</p></div>
+          </div>
+          <div class="card flat" style="--deck: #863bff">
+            <div class="head short"><span>📖 12 cards</span><span class="due now figure">1 due</span></div>
+            <div class="ruled"><h2>sofi-anki Guide</h2><p class="small quiet">Studied yesterday, 60% right</p></div>
+          </div>
+          <button class="btn primary big" style="margin-top: auto;">Study 6 due</button>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>Nothing left due, drawn with yesterday's 24 cards against the goal of 20</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><button class="btn ghost">Decks</button><span></span><button class="btn ghost" aria-label="More">More</button></div>
+          <div class="card grow" style="--deck: var(--positive)">
+            <div class="head"><span>Today</span><span class="figure">24 of 20</span></div>
+            <div class="ruled grow">
+              <h2>Nothing else is due.</h2>
+              <p class="quiet">The goal is met, with 4 cards past it.</p>
+              <div class="gap"></div>
+              <p class="small">Next: 3 cards tomorrow.</p>
+            </div>
+          </div>
+          <button class="btn big">Study ahead anyway</button>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>No decks: a blank card, and the way to fill it</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><span></span><button class="btn ghost" aria-label="More">More</button></div>
+          <div class="card grow">
+            <div class="head"><span>No decks yet</span><span></span></div>
+            <div class="ruled grow">
+              <h2>Nothing to study yet.</h2>
+              <p class="quiet">Make a deck and write its first card, or bring in one made in Anki.</p>
+            </div>
+          </div>
+          <button class="btn primary big">Make a deck</button>
+          <button class="btn ghost" style="align-self: center;">Bring in from Anki</button>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- Studying on a laptop -->
+  <section class="part">
+    <h2>1, on a laptop: the card keeps its shape</h2>
+    <p class="lead">The card at its 5 by 3 shape in the middle, the queue and the decks beside it. Space turns it, and 1, 2 and 3 mark it.</p>
+    <div class="shots">
+      <div class="shot"><p>Studying, the card turned</p><div class="device laptop theme"><div class="dir">
+        <div style="display: grid; grid-template-columns: 280px 1fr; min-height: 640px;">
+          <aside style="border-right: 1px solid var(--border); padding: 24px 20px; font-size: var(--sm); display: flex; flex-direction: column; gap: 6px;">
+            <h3>Due now</h3>
+            <p class="fine quiet"><span class="figure">0 of 20</span> cards today, <span class="figure">10</span> days in a row</p>
+            <div class="rows" style="margin-top: 10px;">
+              <div class="row" style="border-left: 4px solid #f59e0b; padding-left: 10px;"><span>JavaScript Fundamentals</span><b class="figure">5</b></div>
+              <div class="row" style="border-left: 4px solid #863bff; padding-left: 10px;"><span>sofi-anki Guide</span><b class="figure">1</b></div>
+            </div>
+            <p class="fine quiet" style="margin-top: auto;"><span class="kbd">Space</span> turns the card. <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> mark it. <span class="kbd">⌘Z</span> takes a mark back.</p>
+          </aside>
+          <div style="padding: 24px 40px; display: flex; flex-direction: column; align-items: center; gap: 14px;">
+            <div class="topbar" style="width: 100%; max-width: 760px;"><button class="btn ghost">Decks</button><span class="figure">1 of 6 due</span><button class="btn ghost">More</button></div>
+            <div class="card" style="--deck: #f59e0b; width: 100%; max-width: 760px; min-height: 456px; padding: 0 32px 20px;">
+              <div class="head"><span>⚡ JavaScript Fundamentals</span><span>Missed last time</span></div>
+              <div class="ruled grow">
+                <h2>What is a closure?</h2>
+                <div class="gap"></div>
+                <p>A function that <strong>retains access</strong> to its enclosing scope's variables even after the outer function has returned.</p>
+                <pre>function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}
+const inc = makeCounter();
+inc(); // 1</pre>
+                <p>Closures power data privacy, partial application, and memoization.</p>
+              </div>
+            </div>
+            <div class="marks" style="width: 100%; max-width: 760px;">
+              <button class="mark inline"><i data-mark="wrong"></i>Wrong <span class="kbd">1</span></button>
+              <button class="mark inline"><i data-mark="almost"></i>Almost <span class="kbd">2</span></button>
+              <button class="mark inline"><i data-mark="right"></i>Right <span class="kbd">3</span></button>
+            </div>
+          </div>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- Tasks 2 and 3 -->
+  <section class="part">
+    <h2>2 and 3. On a laptop: make a deck, write cards, bring cards in</h2>
+    <p class="lead">A deck is its title card and the cards filed behind it, each a row with its head rule. The rare and destructive actions sit in one menu, drawn open.</p>
+    <div class="shots">
+      <div class="shot"><p>A deck, its menu open</p><div class="device laptop theme"><div class="dir">
+        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 40px; padding: 28px 40px;">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <button class="btn ghost" style="align-self: flex-start;">Back to the card</button>
+            <div class="card" style="--deck: #f59e0b;">
+              <div class="head"><span>⚡ 12 cards</span><span>javascript, web</span></div>
+              <div class="ruled"><h2>JavaScript Fundamentals</h2><p class="small quiet">Studied yesterday, 48% right</p></div>
+            </div>
+            <button class="btn primary big">Study 5 due <span class="kbd">S</span></button>
+            <div style="display: flex; gap: 8px;"><button class="btn" style="flex: 1;">Write a card <span class="kbd">N</span></button><button class="btn" aria-label="More">More</button></div>
+            <div class="menu">
+              <div>Share a link</div><div>Export a file</div><div>Export for Anki</div><div>Bring in cards</div><div>Edit the title card</div><hr><div class="danger">Delete the deck</div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input class="input" style="flex: 1;" placeholder="Search cards">
+              <div class="segmented"><span class="on">All</span><span>Due</span><span>Weak</span><span>New</span></div>
+            </div>
+            <div class="rows" id="deck-rows"></div>
+          </div>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>Writing a card: Markdown on the left, the card as it will study on the right</p><div class="device laptop theme"><div class="dir">
+        <div style="padding: 28px 40px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px;"><h1 style="flex: 1;">Edit a card</h1><button class="btn ghost">Cancel</button><button class="btn primary">Save <span class="kbd">⌘ Enter</span></button></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <label class="field">Question<input class="input" value="What is a closure?"></label>
+              <label class="field">Answer, in Markdown<textarea class="input focus" style="min-height: 250px;">A function that **retains access** to its enclosing scope's variables even after the outer function has returned.
+
+```js
+function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}
+```</textarea></label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <label class="field">Hint<input class="input" value="Think of a function &quot;closing over&quot; variables"></label>
+                <div class="field">Difficulty<div class="segmented"><span>Easy</span><span class="on">Medium</span><span>Hard</span></div></div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <p class="small quiet" style="font-weight: 600;">As it will study, turned</p>
+              <div class="card" style="--deck: #f59e0b;">
+                <div class="head"><span>⚡ JavaScript Fundamentals</span><span>Medium</span></div>
+                <div class="ruled">
+                  <h2>What is a closure?</h2>
+                  <div class="gap"></div>
+                  <p>A function that <strong>retains access</strong> to its enclosing scope's variables even after the outer function has returned.</p>
+                  <pre>function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></div></div>
+
+      <div class="shot"><p>Bringing cards in, from Anki or a file</p><div class="device laptop theme"><div class="dir">
+        <div class="scrim" style="min-height: 600px;">
+          <div class="card" style="width: 560px; padding-bottom: 20px;">
+            <div class="head"><span>From a file</span><span>Into a new deck</span></div>
+            <div style="display: flex; flex-direction: column; gap: 16px; padding-top: 16px;">
+              <h2 style="font-size: var(--xl); font-weight: 600;">Bring in cards</h2>
+              <div class="segmented" style="align-self: flex-start;"><span class="on">An Anki file</span><span>A JSON file or text</span></div>
+              <div class="drop"><p style="font-weight: 600;">Drop an <code>.apkg</code> file here</p><p class="small quiet">or <u>choose one</u>. Its decks come in with their cards and their schedule.</p></div>
+              <div style="display: flex; justify-content: flex-end; gap: 8px;"><button class="btn ghost">Cancel</button><button class="btn primary" disabled style="opacity: 0.45; cursor: not-allowed;">Bring in</button></div>
+            </div>
+          </div>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- Task 4 -->
+  <section class="part">
+    <h2>4. Share a deck, and a friend keeps it</h2>
+    <p class="lead">Share a link is the first entry of the deck's menu (above). The friend opens the link on their phone and sees the title card and a few of its cards before keeping it.</p>
+    <div class="shots">
+      <div class="shot"><p>The friend's phone, from the link</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><span>A deck shared with you</span><span></span></div>
+          <div class="card" style="--deck: #f59e0b;">
+            <div class="head"><span>⚡ 12 cards</span><span>javascript, web</span></div>
+            <div class="ruled"><h2>JavaScript Fundamentals</h2><div class="gap"></div>
+              <p class="small quiet">Some of its cards</p>
+              <p class="small">What's the difference between <code>let</code> and <code>const</code>?</p>
+              <p class="small">What does the <code>**</code> operator do?</p>
+              <p class="small">What is the difference between <code>==</code> and <code>===</code>?</p>
+            </div>
+          </div>
+          <div class="stack"></div><div class="stack"></div>
+          <button class="btn primary big" style="margin-top: auto;">Keep this deck</button>
+          <button class="btn ghost" style="align-self: center;">Not now</button>
+        </div>
+      </div></div></div>
+      <div class="shot"><p>Kept: the app opens on the deck's first new card</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><button class="btn ghost">Decks</button><span class="figure">1 of 12 new</span><button class="btn ghost" aria-label="More">More</button></div>
+          <p class="note good">JavaScript Fundamentals is yours now.</p>
+          <div class="card grow" style="--deck: #f59e0b">
+            <div class="head"><span>⚡ JavaScript Fundamentals</span><span>New</span></div>
+            <div class="ruled grow"><h2>What's the difference between <code>let</code> and <code>const</code>?</h2></div>
+          </div>
+          <div class="stack"></div><div class="stack"></div>
+          <button class="btn primary big">Turn the card</button>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- Task 5 -->
+  <section class="part">
+    <h2>5. See how studying is going</h2>
+    <p class="lead">A record card: the month with a tick on each day studied, each run's first tries as a bar, and the decks ranked by what they need.</p>
+    <div class="shots">
+      <div class="shot"><p>Stats on a phone, from home's More menu</p><div class="device phone theme"><div class="dir">
+        <div class="screen">
+          <div class="topbar"><button class="btn ghost">Back to the decks</button><span></span></div>
+          <div><h1>How it's going</h1><p class="quiet small"><span class="figure">10</span> days in a row, <span class="figure">52%</span> right the first time</p></div>
+          <div class="card flat">
+            <div class="head short"><span>November</span><span>11 days studied</span></div>
+            <div id="calendar" style="padding-top: 10px;"></div>
+          </div>
+          <div class="card flat">
+            <div class="head short"><span>First tries, run by run</span><span>17 runs</span></div>
+            <div id="runs" style="padding-top: 12px;"></div>
+          </div>
+          <div class="card flat">
+            <div class="head short"><span>Decks, the neediest first</span><span>Right</span></div>
+            <div class="rows small">
+              <div class="row" style="border-left: 4px solid #f59e0b; padding-left: 10px;"><span>JavaScript Fundamentals<br><span class="fine quiet">Studied yesterday, <span class="figure">5</span> due</span></span><b class="figure">48%</b></div>
+              <div class="row" style="border-left: 4px solid #863bff; padding-left: 10px;"><span>sofi-anki Guide<br><span class="fine quiet">Studied yesterday, <span class="figure">1</span> due</span></span><b class="figure">60%</b></div>
+            </div>
+          </div>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- Task 6 -->
+  <section class="part">
+    <h2>6. Back everything up, and restore it</h2>
+    <div class="shots">
+      <div class="shot"><p>Back up and restore, from the decks' More menu</p><div class="device laptop theme"><div class="dir">
+        <div class="scrim" style="min-height: 560px;">
+          <div class="card" style="width: 560px; padding-bottom: 20px;">
+            <div class="head"><span>Back up and restore</span><span></span></div>
+            <div style="display: flex; flex-direction: column; gap: 18px; padding-top: 16px;">
+              <div style="display: flex; gap: 14px; align-items: center;"><div style="flex: 1;"><p style="font-weight: 600;">Download a backup</p><p class="small quiet">One file with your 2 decks, 17 runs and every card's schedule.</p></div><button class="btn primary">Download</button></div>
+              <div style="border-top: 1px solid var(--border);"></div>
+              <div style="display: flex; gap: 14px; align-items: center;"><div style="flex: 1;"><p style="font-weight: 600;">Restore from a backup</p><p class="small quiet">Replaces everything in this browser with the file's decks and history. A file that is not a backup changes nothing.</p></div><button class="btn">Choose a file</button></div>
+              <div style="display: flex; justify-content: flex-end;"><button class="btn ghost">Close</button></div>
+            </div>
+          </div>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  const colours = { js: "#f59e0b", guide: "#863bff" };
+  const paths = {
+    wrong: '<path d="M6 4 L24 22 M24 4 L6 22"/>',
+    almost: '<path d="M4 14 L11 21 L21 6"/><path d="M12 8 L19 17"/>',
+    right: '<path d="M4 14 L11 21 L26 4"/>',
+  };
+  const mark = (kind, small) => `<svg class="m ${kind}${small ? " small" : ""}" viewBox="0 0 30 26" aria-hidden="true">${paths[kind]}</svg>`;
+  for (const host of document.querySelectorAll("[data-mark]")) host.outerHTML = mark(host.dataset.mark, host.hasAttribute("data-small"));
+
+  // November 2026, Monday first: a tick on each day studied, in the colour of each deck studied that day.
+  const studied = { 3: ["js"], 5: ["guide"], 6: ["js"], 7: ["guide"], 8: ["js"], 9: ["js", "guide"], 10: ["js"], 11: ["js", "guide"], 12: ["js"], 13: ["js", "guide"], 14: ["js", "guide"] };
+  const tick = (deck) => `<svg viewBox="0 0 30 26" width="16" height="14" fill="none" stroke="${colours[deck]}" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths.right}</svg>`;
+  const cells = ["M", "T", "W", "T", "F", "S", "S"].map((d) => `<span class="fine quiet">${d}</span>`);
+  for (let i = 0; i < 6; i++) cells.push("<span></span>");
+  for (let day = 1; day <= 30; day++) {
+    const ticks = (studied[day] ?? []).map(tick).join("");
+    const today = day === 15 ? "outline: 1.5px solid var(--ring); border-radius: 4px;" : "";
+    cells.push(`<span title="November ${day}" style="display: grid; justify-items: center; min-height: 40px; ${today} opacity: ${day > 15 ? 0.45 : 1}"><span class="fine figure">${day}</span><span style="display: flex; gap: 1px;">${ticks}</span></span>`);
+  }
+  document.getElementById("calendar").innerHTML = `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px 2px; text-align: center;">${cells.join("")}</div>`;
+
+  // Each run's first tries, oldest first: [deck, right, almost, wrong], twelve cards each.
+  const runs = [["js",2,0,10],["js",3,2,7],["js",5,2,5],["guide",2,0,10],["js",6,3,3],["guide",4,5,3],["js",7,3,2],["js",6,3,3],["guide",8,3,1],["js",7,3,2],["js",7,4,1],["guide",10,2,0],["js",7,1,4],["js",7,2,3],["guide",9,3,0],["js",6,3,3],["guide",10,2,0]];
+  const bar = ([deck, r, a, w]) => `<div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; flex-direction: column-reverse; height: 96px;"><span style="flex: ${r}; background: var(--positive)"></span><span style="flex: ${a}; background: var(--caution)"></span><span style="flex: ${w}; background: var(--negative)"></span></div><span style="height: 3px; background: ${colours[deck]}"></span></div>`;
+  document.getElementById("runs").innerHTML = `<div style="display: grid; grid-template-columns: auto 1fr; gap: 6px;"><div class="fine quiet" style="display: flex; flex-direction: column; justify-content: space-between; height: 96px; text-align: right;"><span>12</span><span>6</span><span>0</span></div><div style="display: grid; grid-template-columns: repeat(${runs.length}, 1fr); gap: 3px;">${runs.map(bar).join("")}</div></div><div class="fine" style="display: flex; gap: 14px; margin-top: 8px;"><span style="color: var(--positive)">Right</span><span style="color: var(--caution)">Almost</span><span style="color: var(--negative)">Wrong</span><span class="quiet">Rule under a bar: the deck</span></div>`;
+
+  // The deck's cards: question, difficulty and type, last mark, right the first time, when it comes back.
+  const cards = [
+    ["What is event bubbling?", "Medium", "wrong", "0%", "1 day late"],
+    ["What does <code>Array.from({length: 3}, (_, i) =&gt; i)</code> return?", "Hard, choice", "wrong", "0%", "1 day late"],
+    ["What is a <code>Symbol</code> and when would you use one?", "Hard", "wrong", "0%", "1 day late"],
+    ["Which Array methods <strong>mutate</strong> the original array? (select all)", "Medium, choice", "almost", "0%", "Today"],
+    ["What is a closure?", "Medium", "almost", "18%", "Today"],
+    ["What does <code>Promise.all()</code> do?", "Medium", "right", "45%", "Tomorrow"],
+    ["Which of these return a <strong>new</strong> array? (select all that apply)", "Easy, choice", "almost", "55%", "In 3 days"],
+    ["What is the difference between <code>==</code> and <code>===</code>?", "Easy", "right", "82%", "In 4 days"],
+    ["What does <code>typeof null</code> return?", "Easy, choice", "right", "82%", "In 4 days"],
+    ["What's the difference between <code>let</code> and <code>const</code>?", "Easy", "right", "91%", "In 4 days"],
+    ["What does the <code>**</code> operator do?", "Easy", "right", "100%", "In 7 days"],
+    ["What does optional chaining (<code>?.</code>) do?", "Easy", "right", "100%", "In 7 days"],
+  ];
+  const word = { wrong: "Wrong", almost: "Almost", right: "Right" };
+  const more = '<button class="btn ghost" aria-label="More: edit, move, delete" style="min-height: 36px; padding: 0 8px;"><svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><circle cx="3.5" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="14.5" cy="9" r="1.6"/></svg></button>';
+  const columns = "grid-template-columns: 1fr 96px 56px 96px 36px;";
+  const head = `<div class="row fine quiet" style="${columns} padding-top: 4px; padding-bottom: 6px;"><span>Card</span><span>Last mark</span><span style="text-align: right;">Right</span><span style="text-align: right;">Back</span><span></span></div>`;
+  document.getElementById("deck-rows").innerHTML = head + cards.map(([q, level, last, share, due]) => {
+    const now = due === "Today" || due.endsWith("late");
+    return `<div class="row" style="${columns} border-left: 3px solid #f59e0b; padding-left: 12px;"><span>${q}<br><span class="fine quiet">${level}</span></span><span class="small" style="display: inline-flex; align-items: center; gap: 6px;">${mark(last, true)}${word[last]}</span><span class="figure small" style="text-align: right;">${share}</span><span class="due ${now ? "now" : "later"}" style="text-align: right;">${due}</span>${more}</div>`;
+  }).join("");
+
+  document.getElementById("dark").onclick = () => {
+    document.body.classList.toggle("dark-page");
+    document.querySelectorAll(".theme").forEach((e) => e.classList.toggle("dark"));
+  };
+</script>
+</body>
+</html>

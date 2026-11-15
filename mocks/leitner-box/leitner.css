@@ -1,0 +1,162 @@
+/*
+ * The Leitner-box direction, as tokens by the roles of docs/design/system.md and the few parts
+ * every screen shares. Beech for the neutrals, walnut for the accent.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;500&family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&display=swap");
+
+.dir {
+  --background: oklch(0.975 0.006 75);
+  --card: oklch(0.995 0.003 75);
+  --muted: oklch(0.945 0.012 72);
+  --border: oklch(0.885 0.018 70);
+  --foreground: oklch(0.24 0.02 60);
+  --muted-foreground: oklch(0.5 0.02 65);
+  --primary: oklch(0.33 0.035 55);
+  --primary-foreground: oklch(0.98 0.005 75);
+  --ring: oklch(0.55 0.05 60);
+  --positive: oklch(0.53 0.13 150);
+  --positive-soft: oklch(0.96 0.03 150);
+  --caution: oklch(0.56 0.13 60);
+  --caution-soft: oklch(0.96 0.035 75);
+  --negative: oklch(0.52 0.18 27);
+  --negative-soft: oklch(0.96 0.02 25);
+  --destructive: oklch(0.52 0.18 27);
+  /* Two depths: a menu over the page, and the card in study. */
+  --shadow-sm: 0 1px 3px oklch(0.3 0.03 60 / 0.14);
+  --shadow-md: 0 4px 6px -1px oklch(0.3 0.03 60 / 0.12), 0 2px 4px -2px oklch(0.3 0.03 60 / 0.1);
+  /* The type scale of system.md, at its 18 px root. */
+  --xs: 13.5px; --sm: 15.75px; --base: 18px; --lg: 20.25px; --xl: 22.5px; --2xl: 27px;
+  /* Three radii. */
+  --r-sm: 6px; --r-md: 10px; --r-xl: 14px;
+  font-family: "Atkinson Hyperlegible Next", sans-serif;
+  font-size: var(--base);
+  line-height: 1.5;
+  background: var(--background);
+  color: var(--foreground);
+}
+.dark .dir {
+  --background: oklch(0.19 0.012 60);
+  --card: oklch(0.235 0.013 60);
+  --muted: oklch(0.28 0.014 60);
+  --border: oklch(0.36 0.016 60);
+  --foreground: oklch(0.93 0.01 75);
+  --muted-foreground: oklch(0.72 0.015 70);
+  --primary: oklch(0.86 0.04 70);
+  --primary-foreground: oklch(0.2 0.02 60);
+  --ring: oklch(0.7 0.05 70);
+  --positive: oklch(0.78 0.15 150);
+  --positive-soft: oklch(0.28 0.05 150);
+  --caution: oklch(0.82 0.13 75);
+  --caution-soft: oklch(0.29 0.05 70);
+  --negative: oklch(0.72 0.16 25);
+  --negative-soft: oklch(0.28 0.06 25);
+  --destructive: oklch(0.72 0.16 25);
+  --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.5);
+  --shadow-md: 0 6px 14px -4px oklch(0 0 0 / 0.6);
+}
+.dir *, .dir *::before, .dir *::after { box-sizing: border-box; }
+.dir code, .dir pre { font-family: "Atkinson Hyperlegible Mono", monospace; }
+.dir code { font-size: 0.88em; background: var(--muted); padding: 1px 5px; border-radius: 4px; }
+.dir pre { margin: 0; padding: 10px 12px; background: var(--muted); border-radius: var(--r-md); font-size: var(--sm); line-height: 1.5; overflow-x: auto; }
+.dir pre code { background: none; padding: 0; font-size: inherit; }
+.dir .figure { font-variant-numeric: tabular-nums; }
+.dir h1, .dir h2, .dir h3, .dir p { margin: 0; }
+.dir h1 { font-size: var(--2xl); font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; }
+.dir h2 { font-size: var(--xl); font-weight: 700; line-height: 1.3; }
+.dir h3 { font-size: var(--lg); font-weight: 600; }
+.dir .quiet { color: var(--muted-foreground); }
+.dir .small { font-size: var(--sm); }
+.dir .fine { font-size: var(--xs); }
+
+/* A screen's column. */
+.screen { padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: var(--sm); color: var(--muted-foreground); min-height: 44px; }
+.topbar .actions { display: flex; gap: 4px; }
+
+/* Buttons: walnut for the one primary action of a screen, the rest quiet. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--card); color: var(--foreground); font: inherit; font-size: var(--sm); font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn:hover { background: var(--muted); }
+.btn.primary { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); }
+.btn.primary:hover { background: oklch(from var(--primary) calc(l - 0.05) c h); }
+.dark .btn.primary:hover { background: oklch(from var(--primary) calc(l + 0.04) c h); }
+.btn.big { min-height: 52px; font-size: var(--base); width: 100%; }
+.btn.ghost { border-color: transparent; background: none; color: var(--muted-foreground); font-weight: 500; padding: 0 10px; }
+.btn.ghost:hover { background: var(--muted); color: var(--foreground); }
+.btn:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+.kbd { font-size: var(--xs); font-weight: 500; opacity: 0.75; border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; }
+
+/* The box: one compartment per place in the schedule, each card an edge in its deck's colour. */
+.box { border: 2px solid var(--border); border-radius: var(--r-xl); background: var(--muted); padding: 6px; display: grid; gap: 6px; }
+.slot { background: var(--card); border-radius: var(--r-md); padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; }
+.slot b { font-weight: 600; }
+.slot .count { font-size: var(--lg); font-weight: 600; }
+.slot .when { grid-column: 1 / -1; font-size: var(--xs); color: var(--muted-foreground); }
+.slot.front { outline: 2px solid var(--primary); outline-offset: -2px; }
+.edges { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 3px; min-height: 28px; align-items: flex-end; }
+.edges i { width: 6px; height: 28px; border-radius: 2px 2px 0 0; }
+.edges i.moved { outline: 2px solid var(--foreground); outline-offset: 1px; }
+.edges:empty::after { content: "Empty"; font-size: var(--xs); color: var(--muted-foreground); align-self: center; }
+.edges[lang="es"]:empty::after { content: "Vacío"; }
+/* The box drawn small, as a strip: the place a card goes, at a glance. */
+.strip { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; gap: 3px; padding: 3px; border: 2px solid var(--border); border-radius: var(--r-md); background: var(--muted); font-size: var(--xs); }
+.strip span { background: var(--card); border-radius: 4px; padding: 2px 6px; display: flex; justify-content: space-between; gap: 4px; color: var(--muted-foreground); }
+.strip span.front { outline: 2px solid var(--primary); outline-offset: -2px; color: var(--foreground); font-weight: 600; }
+.strip span.changed { color: var(--foreground); font-weight: 600; background: var(--positive-soft); }
+
+/* A deck in a list: its mark in its colour, the emoji its maker chose. */
+.mark { width: 36px; height: 36px; border-radius: var(--r-sm); display: grid; place-items: center; font-size: 20px; flex: none; }
+.mark.small { width: 26px; height: 26px; font-size: 14px; }
+.decklist { display: flex; flex-direction: column; }
+.deck { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+.deck:last-child { border-bottom: 0; }
+.deck .title { font-weight: 600; }
+
+/* The card in study, the one lifted thing. */
+.studycard { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-xl); box-shadow: var(--shadow-md); padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.studycard .from { display: flex; align-items: center; gap: 8px; font-size: var(--xs); color: var(--muted-foreground); }
+.studycard .rule { border-top: 1px solid var(--border); margin: 2px 0; }
+
+/* Grades, each named by the compartment it sends the card to. */
+.grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grade { min-height: 60px; border-radius: var(--r-md); border: 1px solid; font: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 4px; }
+.grade b { font-weight: 600; font-size: var(--base); }
+.grade small { font-size: var(--xs); color: var(--foreground); }
+.grade.wrong { background: var(--negative-soft); border-color: color-mix(in oklch, var(--negative) 40%, transparent); color: var(--negative); }
+.grade.almost { background: var(--caution-soft); border-color: color-mix(in oklch, var(--caution) 40%, transparent); color: var(--caution); }
+.grade.right { background: var(--positive-soft); border-color: color-mix(in oklch, var(--positive) 40%, transparent); color: var(--positive); }
+
+/* Choice options. */
+.option { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card); font: inherit; text-align: left; color: var(--foreground); cursor: pointer; width: 100%; }
+.option .tick { width: 20px; height: 20px; border-radius: 4px; border: 2px solid var(--border); flex: none; }
+.option.picked { border-color: var(--primary); }
+.option.picked .tick { background: var(--primary); border-color: var(--primary); }
+
+/* Lists and rows. */
+.rows { display: flex; flex-direction: column; }
+.row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; padding: 12px 4px; border-bottom: 1px solid var(--border); }
+.row:last-child { border-bottom: 0; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: var(--xs); font-weight: 600; border-radius: var(--r-sm); padding: 1px 8px; white-space: nowrap; }
+.chip.wrong { color: var(--negative); background: var(--negative-soft); }
+.chip.almost { color: var(--caution); background: var(--caution-soft); }
+.chip.right { color: var(--positive); background: var(--positive-soft); }
+.chip.due { color: var(--primary-foreground); background: var(--primary); }
+.chip.plain { color: var(--muted-foreground); background: var(--muted); }
+
+/* Menus, dialogs and fields. */
+.menu { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--shadow-md); padding: 6px; min-width: 230px; font-size: var(--sm); }
+.menu div { padding: 10px 12px; border-radius: var(--r-sm); }
+.menu div:hover { background: var(--muted); }
+.menu hr { border: 0; border-top: 1px solid var(--border); margin: 4px 6px; }
+.menu .danger { color: var(--destructive); }
+.dialog { background: var(--card); border-radius: var(--r-xl); box-shadow: var(--shadow-md); padding: 24px; display: flex; flex-direction: column; gap: 16px; width: 520px; }
+.scrim { background: oklch(0 0 0 / 0.35); display: grid; place-items: center; padding: 40px; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: var(--sm); font-weight: 600; }
+.input { min-height: 44px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card); padding: 8px 12px; font: inherit; font-size: var(--base); font-weight: 400; color: var(--foreground); }
+.input.focus { border-color: var(--primary); box-shadow: 0 0 0 3px oklch(from var(--ring) l c h / 0.35); }
+textarea.input { min-height: 180px; font-family: "Atkinson Hyperlegible Mono", monospace; font-size: var(--sm); line-height: 1.5; resize: vertical; }
+.drop { border: 2px dashed var(--border); border-radius: var(--r-xl); padding: 24px; text-align: center; display: grid; gap: 6px; }
+.segmented { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-md); padding: 3px; gap: 3px; background: var(--muted); }
+.segmented span { padding: 4px 14px; border-radius: var(--r-sm); font-size: var(--sm); font-weight: 600; color: var(--muted-foreground); }
+.segmented span.on { background: var(--card); color: var(--foreground); box-shadow: var(--shadow-sm); }
+.goal { height: 6px; border-radius: 999px; background: var(--muted); overflow: hidden; margin-top: 8px; }
+.goal span { display: block; height: 100%; background: var(--positive); }

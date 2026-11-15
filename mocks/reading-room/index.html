@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The reading room: full mock</title>
+<link rel="stylesheet" href="../directions/frame.css">
+<link rel="stylesheet" href="reading-room.css">
+<style>
+  .page { max-width: 1240px; }
+  .shots { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+  .shot { display: flex; flex-direction: column; gap: 6px; }
+  .shot > p { margin: 0; font-size: 13px; opacity: 0.75; max-width: 375px; }
+  .shot.wide > p { max-width: 60em; }
+  .phone { width: 375px; height: auto; min-height: 700px; overflow: visible; display: flex; }
+  .phone > .dir { min-height: 700px; flex: 1; display: flex; flex-direction: column; }
+  .phone > .dir > .room { flex: 1; }
+  .laptop { width: 1180px; height: auto; overflow: visible; }
+  .laptop > .dir { min-height: 560px; }
+  section.part > p.lead { max-width: 52em; margin: 0 0 14px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bar">
+    <h1>The reading room, every screen</h1>
+    <button type="button" id="dark">Light / dark</button>
+    <nav><a href="../directions/index.html">The four directions</a><a href="../sticker-chart/index.html">The sticker chart</a></nav>
+  </div>
+  <div class="notes" style="margin-top: 18px;">
+    <p>Direction 3, carried to every screen the brief's six tasks reach. Laptop first: every task is drawn at laptop width, and the phone gets the screens its tasks need. Every deck, card and figure is the demo decks' own, as the app shows them on 2026-11-15. The values are in <code>reading-room.css</code>, by the roles of <code>docs/design/system.md</code>.</p>
+    <p>Everything happens in one ledger. A deck opens in place into its cards, a card opens in place to be studied, edited or shared, and only a file choice gets a dialog. The date-due stamp is on every deck and card: solid when due, outlined when near, quiet when far.</p>
+    <p>New to the app beyond the look: studying starts from home across every deck with cards due, and the daily goal is one line with a bar, in place of the confetti.</p>
+  </div>
+
+  <!-- Task 1 -->
+  <section class="part">
+    <h2>1. On a phone: study what is due today</h2>
+    <p class="lead">The ledger folds to two columns on a phone, card and due, with one Study button under the thumb. Studying keeps the ledger: the card being studied opens in its row.</p>
+    <div class="shots">
+      <div class="shot"><p>Home</p><div class="device phone theme"><div class="dir"><div class="room" data-home="en"></div></div></div></div>
+      <div class="shot"><p>Home in Spanish, to check every label fits (copy-5)</p><div class="device phone theme"><div class="dir" lang="es"><div class="room" data-home="es"></div></div></div></div>
+
+      <div class="shot"><p>Studying: the first due card open in its row, its hint shown</p><div class="device phone theme"><div class="dir"><div class="room">
+        <header><h1>Studying</h1><span class="quiet figure">1 of 6</span><button class="btn ghost">Leave</button></header>
+        <table class="ledger"><thead><tr><th>Card</th><th class="end">Due</th></tr></thead><tbody>
+          <tr class="open sel"><td colspan="2"><div class="inrow">
+            <div class="from"><span class="tab small" style="background: #f59e0b"></span>JavaScript Fundamentals, Medium</div>
+            <div class="question">What is event bubbling?</div>
+            <div class="hint">Events "bubble up" from child to parent, like bubbles rising in water.</div>
+            <button class="btn primary big">Show the answer <kbd>Space</kbd></button>
+          </div></td></tr>
+        </tbody><tbody data-due-rows="1"></tbody></table>
+      </div></div></div></div>
+
+      <div class="shot"><p>The answer shown, graded in the row</p><div class="device phone theme"><div class="dir"><div class="room">
+        <header><h1>Studying</h1><span class="quiet figure">1 of 6</span><button class="btn ghost">Leave</button></header>
+        <table class="ledger"><thead><tr><th>Card</th><th class="end">Due</th></tr></thead><tbody>
+          <tr class="open sel"><td colspan="2"><div class="inrow">
+            <div class="from"><span class="tab small" style="background: #f59e0b"></span>JavaScript Fundamentals, Medium</div>
+            <div class="question">What is event bubbling?</div>
+            <div class="rule"></div>
+            <p>When an event fires on an element, it <strong>propagates upward</strong> through ancestor elements in the DOM.</p>
+            <pre>child.addEventListener('click', e =&gt; {});
+parent.addEventListener('click', e =&gt; {});</pre>
+            <p class="fine quiet"><code>event.stopPropagation()</code> stops bubbling.</p>
+            <div class="grades"><button class="btn mark-wrong">Wrong <kbd>1</kbd></button><button class="btn mark-almost">Almost <kbd>2</kbd></button><button class="btn mark-right">Right <kbd>3</kbd></button></div>
+          </div></td></tr>
+        </tbody><tbody data-due-rows="1"></tbody></table>
+      </div></div></div></div>
+
+      <div class="shot"><p>After the grade: the row closes with its new stamp, and the next card opens. This is a choice card.</p><div class="device phone theme"><div class="dir"><div class="room">
+        <header><h1>Studying</h1><span class="quiet figure">2 of 6</span><button class="btn ghost">Leave</button></header>
+        <table class="ledger"><thead><tr><th>Card</th><th class="end">Due</th></tr></thead><tbody>
+          <tr><td>What is event bubbling? <span class="fine mark-almost">Almost</span></td><td class="end"><span class="stamp fresh">Tomorrow</span></td></tr>
+          <tr class="open sel"><td colspan="2"><div class="inrow">
+            <div class="from"><span class="tab small" style="background: #f59e0b"></span>JavaScript Fundamentals, Hard, pick one</div>
+            <div class="question">What does <code>Array.from({length: 3}, (_, i) =&gt; i)</code> return?</div>
+            <div style="display: grid; gap: 6px;">
+              <button class="option picked"><span class="key">1</span><code>[0, 1, 2]</code></button>
+              <button class="option"><span class="key">2</span><code>[1, 2, 3]</code></button>
+              <button class="option"><span class="key">3</span><code>[undefined, undefined, undefined]</code></button>
+              <button class="option"><span class="key">4</span>Throws a TypeError</button>
+            </div>
+            <button class="btn primary big">Check</button>
+          </div></td></tr>
+        </tbody><tbody data-due-rows="2"></tbody></table>
+      </div></div></div></div>
+
+      <div class="shot"><p>The end of a run, drawn with yesterday's JavaScript run (12 cards)</p><div class="device phone theme"><div class="dir"><div class="room">
+        <header><h1>Run done</h1><button class="btn ghost">Close</button></header>
+        <p class="today"><b class="figure">12</b> cards in <b class="figure">3:02</b>. First tries: <b class="mark-right figure">6</b> right, <b class="mark-almost figure">3</b> almost, <b class="mark-wrong figure">3</b> wrong.</p>
+        <table class="ledger"><thead><tr><th>To look at again</th><th class="end">Back</th></tr></thead><tbody data-run-rows></tbody></table>
+        <div class="dock"><button class="btn primary big">Study these 6 again</button></div>
+      </div></div></div></div>
+
+      <div class="shot"><p>Home with the goal met, drawn with yesterday's 24 cards</p><div class="device phone theme"><div class="dir"><div class="room">
+        <header><h1>Decks</h1><button class="btn ghost">Stats</button><button class="btn ghost" aria-label="More">More</button></header>
+        <div class="goal today"><span><b class="figure mark-right">24 of 20</b> cards today, goal met</span><span class="track"><span style="width: 100%"></span></span></div>
+        <table class="ledger"><thead><tr><th>Deck</th><th class="end">Due</th></tr></thead><tbody>
+          <tr class="deck"><td><span class="tab" style="background: #f59e0b"></span>JavaScript Fundamentals <span class="count">12 cards</span></td><td class="end"><span class="stamp later">Nothing due</span></td></tr>
+          <tr class="deck"><td><span class="tab" style="background: #863bff"></span>sofi-anki Guide <span class="count">12 cards</span></td><td class="end"><span class="stamp later">Nothing due</span></td></tr>
+        </tbody></table>
+        <div class="dock"><button class="btn big">Study more</button></div>
+      </div></div></div></div>
+
+      <div class="shot"><p>Home with no decks: the ledger says what to do first</p><div class="device phone theme"><div class="dir"><div class="room">
+        <header><h1>Decks</h1><button class="btn ghost" aria-label="More">More</button></header>
+        <table class="ledger"><thead><tr><th>Deck</th><th class="end">Due</th></tr></thead><tbody>
+          <tr><td colspan="2" style="padding: 28px 8px; text-align: center;"><p class="quiet" style="margin-bottom: 12px;">No decks yet. Make one and write its first card, or bring one in from Anki.</p><div style="display: flex; gap: 8px; justify-content: center;"><button class="btn primary">Make a deck</button><button class="btn">Bring in from Anki</button></div></td></tr>
+        </tbody></table>
+      </div></div></div></div>
+    </div>
+
+    <div class="shots" style="margin-top: 28px;">
+      <div class="shot wide"><p>Home on a laptop: both decks in the ledger, the first one open, keys at the foot</p><div class="device laptop theme"><div class="dir"><div class="room" data-home="laptop"></div></div></div></div>
+      <div class="shot wide"><p>Studying on a laptop: the same ledger, the card open in its row, keys 1 to 3</p><div class="device laptop theme"><div class="dir"><div class="room">
+        <header><h1>Studying</h1><span class="quiet figure">1 of 6</span><button class="btn">Pause <kbd>P</kbd></button><button class="btn">Undo <kbd>⌘Z</kbd></button><button class="btn">Leave <kbd>Esc</kbd></button></header>
+        <table class="ledger"><thead><tr><th>Card</th><th>Deck</th><th>Last mark</th><th class="num">Right</th><th class="end">Due</th></tr></thead><tbody>
+          <tr class="open sel"><td colspan="5"><div class="inrow" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 32px;">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div class="from"><span class="tab small" style="background: #f59e0b"></span>JavaScript Fundamentals, Medium, last time Wrong, <span class="stamp now">Yesterday</span></div>
+              <div class="question">What is event bubbling?</div>
+              <p>When an event fires on an element, it <strong>propagates upward</strong> through ancestor elements in the DOM.</p>
+              <div class="grades"><button class="btn mark-wrong">Wrong <kbd>1</kbd></button><button class="btn mark-almost">Almost <kbd>2</kbd></button><button class="btn mark-right">Right <kbd>3</kbd></button></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <pre>// Listener on #parent fires after #child's listener
+child.addEventListener('click', e =&gt; { /* fires first */ });
+parent.addEventListener('click', e =&gt; { /* fires second */ });</pre>
+              <ul style="margin: 0; padding-left: 20px; font-size: var(--sm);">
+                <li><code>event.stopPropagation()</code> stops bubbling</li>
+                <li><code>event.target</code> is the element originally clicked</li>
+                <li><code>event.currentTarget</code> is the element the listener is on</li>
+              </ul>
+            </div>
+          </div></td></tr>
+        </tbody><tbody data-due-rows="1" data-wide="1"></tbody></table>
+        <p class="keys fine quiet"><kbd>Space</kbd> turns the card, <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> mark it, <kbd>H</kbd> shows the hint, <kbd>L</kbd> saves it for later</p>
+      </div></div></div></div>
+    </div>
+  </section>
+
+  <!-- Tasks 2 and 3 -->
+  <section class="part">
+    <h2>2 and 3. On a laptop: make a deck, write cards, bring cards in</h2>
+    <p class="lead">A new deck is a new row, a card is written in its own row, and the deck's rare and destructive actions sit in one menu on its row. Bringing in a file is the one dialog.</p>
+    <div class="shots">
+      <div class="shot wide"><p>A deck open, its row menu open</p><div class="device laptop theme"><div class="dir"><div class="room">
+        <header><h1>Decks</h1><button class="btn">Stats</button><button class="btn">New deck <kbd>N</kbd></button><button class="btn primary">Study 6 due <kbd>S</kbd></button><button class="btn" aria-label="More">More</button></header>
+        <p class="today"><b class="figure">0 of 20</b> cards today, <b class="figure">10</b> days in a row</p>
+        <div style="position: relative;">
+          <table class="ledger"><thead data-head="laptop"></thead><tbody data-deck="js" data-open="all" data-menu="1"></tbody><tbody data-deck="guide"></tbody></table>
+          <div class="menu" style="position: absolute; right: 8px; top: 86px; z-index: 2;">
+            <div class="on">Add a card <kbd>N</kbd></div><div>Share a link</div><div>Export a file</div><div>Export for Anki</div><div>Bring in cards</div><div>Edit the deck</div><hr><div class="danger">Delete the deck</div>
+          </div>
+        </div>
+      </div></div></div></div>
+
+      <div class="shot wide"><p>A new deck, typed into a new row at the top of the ledger</p><div class="device laptop theme"><div class="dir"><div class="room">
+        <header><h1>Decks</h1><button class="btn">Stats</button><button class="btn primary">Study 6 due <kbd>S</kbd></button><button class="btn" aria-label="More">More</button></header>
+        <table class="ledger"><thead data-head="laptop"></thead><tbody>
+          <tr class="open sel"><td colspan="6"><div class="inrow" style="flex-direction: row; align-items: flex-end; gap: 14px; flex-wrap: wrap;">
+            <label class="field" style="flex: 1; min-width: 260px;">Title<input class="input focus" placeholder="The deck's name"></label>
+            <label class="field" style="width: 220px;">Tags<input class="input" placeholder="Separated by commas"></label>
+            <div class="field">Colour<div style="display: flex; gap: 6px; padding: 9px 0;" id="swatch-row"></div></div>
+            <label class="field" style="width: 90px;">Emoji<input class="input" placeholder="Any"></label>
+            <button class="btn ghost">Cancel <kbd>Esc</kbd></button><button class="btn primary" disabled>Add <kbd>Enter</kbd></button>
+          </div></td></tr>
+        </tbody><tbody data-deck="js"></tbody><tbody data-deck="guide"></tbody></table>
+      </div></div></div></div>
+
+      <div class="shot wide"><p>Writing a card, in its own row: Markdown on the left, the card as it will study on the right</p><div class="device laptop theme"><div class="dir"><div class="room">
+        <header><h1>Decks</h1><button class="btn">Stats</button><button class="btn primary">Study 6 due <kbd>S</kbd></button><button class="btn" aria-label="More">More</button></header>
+        <table class="ledger"><thead data-head="laptop"></thead><tbody data-deck="js" data-open="4"></tbody><tbody>
+          <tr class="open sel"><td colspan="6"><div class="inrow" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 32px;">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <label class="field">Question<input class="input" value="What is a closure?"></label>
+              <label class="field">Answer, in Markdown<textarea class="input focus">A function that **retains access** to its enclosing scope's variables even after the outer function has returned.
+
+```js
+function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}
+```</textarea></label>
+              <div style="display: flex; gap: 12px; align-items: flex-end;">
+                <label class="field" style="flex: 1;">Hint<input class="input" value="Think of a function &quot;closing over&quot; variables"></label>
+                <div class="field">Level<div class="segmented"><span>Easy</span><span class="on">Medium</span><span>Hard</span></div></div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <p class="fine quiet">As it will study</p>
+              <div class="question">What is a closure?</div>
+              <p>A function that <strong>retains access</strong> to its enclosing scope's variables even after the outer function has returned.</p>
+              <pre>function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}</pre>
+              <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: auto;"><button class="btn ghost">Cancel <kbd>Esc</kbd></button><button class="btn primary">Save <kbd>⌘Enter</kbd></button></div>
+            </div>
+          </div></td></tr>
+        </tbody><tbody data-deck="js" data-open="after"></tbody><tbody data-deck="guide"></tbody></table>
+      </div></div></div></div>
+
+      <div class="shot wide"><p>Bringing cards in from a file, the one dialog</p><div class="device laptop theme"><div class="dir">
+        <div class="scrim" style="min-height: 560px;">
+          <div class="dialog">
+            <h2>Bring in cards</h2>
+            <div class="segmented" style="align-self: flex-start;"><span class="on">An Anki file</span><span>A JSON file or text</span></div>
+            <div class="drop"><p style="font-weight: 600;">Drop an <code>.apkg</code> file here</p><p class="fine quiet">or <u>choose one</u>. Its decks come in as new rows, with their cards and their schedule.</p></div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px;"><button class="btn ghost">Cancel <kbd>Esc</kbd></button><button class="btn primary" disabled>Bring in</button></div>
+          </div>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- Task 4 -->
+  <section class="part">
+    <h2>4. Share a deck, and a friend keeps it</h2>
+    <p class="lead">Share a link opens under the deck's row. The friend opens the link on their phone and reads the deck's ledger before keeping it.</p>
+    <div class="shots">
+      <div class="shot wide"><p>The link, under the deck's row, just copied</p><div class="device laptop theme"><div class="dir"><div class="room">
+        <header><h1>Decks</h1><button class="btn">Stats</button><button class="btn primary">Study 6 due <kbd>S</kbd></button><button class="btn" aria-label="More">More</button></header>
+        <table class="ledger"><thead data-head="laptop"></thead><tbody>
+          <tr class="deck open sel"><td><span class="tab" style="background: #f59e0b"></span>JavaScript Fundamentals <span class="count">12 cards</span></td><td class="wide"></td><td class="num wide figure">48%</td><td class="wide"></td><td class="end"><span class="stamp now">5 today</span></td><td class="end"></td></tr>
+          <tr class="open"><td colspan="6"><div class="inrow" style="flex-direction: row; align-items: center; gap: 12px;">
+            <span class="fine quiet" style="white-space: nowrap;">Share a link</span>
+            <input class="input" style="flex: 1;" value="A link that holds the whole deck, its 12 cards" readonly>
+            <button class="btn primary">Copied</button><button class="btn ghost">Close <kbd>Esc</kbd></button>
+          </div><p class="fine quiet" style="padding: 2px 0 4px;">Anyone with the link can open the deck and keep a copy. Your schedule stays yours.</p></td></tr>
+        </tbody><tbody data-deck="guide"></tbody></table>
+      </div></div></div></div>
+    </div>
+    <div class="shots" style="margin-top: 28px;">
+      <div class="shot"><p>The friend's phone, from the link</p><div class="device phone theme"><div class="dir"><div class="room">
+        <header><h1>A deck for you</h1></header>
+        <p class="today"><span class="tab small" style="background: #f59e0b"></span><b>JavaScript Fundamentals</b>, 12 cards, javascript and web</p>
+        <table class="ledger"><thead><tr><th>Card</th><th class="end">Level</th></tr></thead><tbody data-shared-rows></tbody></table>
+        <div class="dock" style="display: grid; gap: 6px;"><button class="btn primary big">Keep this deck</button><button class="btn ghost">Not now</button></div>
+      </div></div></div></div>
+      <div class="shot"><p>Kept: the deck is a row on the friend's home, its cards new</p><div class="device phone theme"><div class="dir"><div class="room">
+        <header><h1>Decks</h1><button class="btn ghost" aria-label="More">More</button></header>
+        <div class="note good">JavaScript Fundamentals is yours now.</div>
+        <p class="today"><b class="figure">0 of 20</b> cards today</p>
+        <table class="ledger"><thead><tr><th>Deck</th><th class="end">Due</th></tr></thead><tbody>
+          <tr class="deck"><td><span class="tab" style="background: #f59e0b"></span>JavaScript Fundamentals <span class="count">12 cards</span></td><td class="end"><span class="stamp now">12 new</span></td></tr>
+        </tbody></table>
+        <div class="dock"><button class="btn primary big">Study 12 new</button></div>
+      </div></div></div></div>
+    </div>
+  </section>
+
+  <!-- Task 5 -->
+  <section class="part">
+    <h2>5. See how studying is going</h2>
+    <p class="lead">The month as a calendar of stamps, each holding the cards studied that day, each run's first tries as a bar with its scale, and the decks as a ledger ranked by what they need.</p>
+    <div class="shots">
+      <div class="shot wide"><p>Stats on a laptop</p><div class="device laptop theme"><div class="dir"><div class="room">
+        <header><h1>Stats</h1><button class="btn ghost">Back to decks <kbd>Esc</kbd></button></header>
+        <p class="today"><b class="figure">10</b> days in a row, <b class="figure">52%</b> right the first time</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 6px;">
+          <div><h2 style="margin-bottom: 8px;">November <span class="fine quiet" style="font-weight: 400;">11 days studied</span></h2><div data-calendar></div></div>
+          <div><h2 style="margin-bottom: 8px;">First tries, run by run <span class="fine quiet" style="font-weight: 400;">17 runs</span></h2><div data-runs></div></div>
+        </div>
+        <h2 style="margin-top: 14px;">Decks, the neediest first</h2>
+        <table class="ledger" data-stat-decks="laptop"></table>
+      </div></div></div></div>
+    </div>
+    <div class="shots" style="margin-top: 28px;">
+      <div class="shot"><p>Stats on a phone</p><div class="device phone theme"><div class="dir"><div class="room">
+        <header><h1>Stats</h1><button class="btn ghost">Back</button></header>
+        <p class="today"><b class="figure">10</b> days in a row, <b class="figure">52%</b> right the first time</p>
+        <h2>November <span class="fine quiet" style="font-weight: 400;">11 days studied</span></h2>
+        <div data-calendar></div>
+        <h2 style="margin-top: 6px;">First tries, run by run</h2>
+        <div data-runs></div>
+        <h2 style="margin-top: 6px;">Decks, the neediest first</h2>
+        <table class="ledger" data-stat-decks="phone"></table>
+      </div></div></div></div>
+    </div>
+  </section>
+
+  <!-- Task 6 -->
+  <section class="part">
+    <h2>6. Back everything up, and restore it</h2>
+    <div class="shots">
+      <div class="shot wide"><p>Back up and restore, from home's More menu: a dialog, since it chooses a file</p><div class="device laptop theme"><div class="dir">
+        <div class="scrim" style="min-height: 520px;">
+          <div class="dialog">
+            <h2>Back up and restore</h2>
+            <table class="ledger"><tbody>
+              <tr><td><b>Download a backup</b><br><span class="fine quiet">One file with your 2 decks, 17 runs and every card's schedule.</span></td><td class="end"><button class="btn primary">Download</button></td></tr>
+              <tr><td><b>Restore from a backup</b><br><span class="fine quiet">Replaces everything in this browser with the file's decks and history. A file that is not a backup changes nothing.</span></td><td class="end"><button class="btn">Choose a file</button></td></tr>
+            </tbody></table>
+            <div style="display: flex; justify-content: flex-end;"><button class="btn ghost">Close <kbd>Esc</kbd></button></div>
+          </div>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  const decks = {
+    js: { title: "JavaScript Fundamentals", colour: "#f59e0b", cards: 12, right: "48%", due: 5, runs: 11 },
+    guide: { title: "sofi-anki Guide", colour: "#863bff", cards: 12, right: "60%", due: 1, runs: 6 },
+  };
+  // The JavaScript deck's cards, by when they come back: question, level, last mark, right the first time, due.
+  const jsCards = [
+    ["What is event bubbling?", "Medium", "wrong", "0%", "Yesterday"],
+    ["What does <code>Array.from({length: 3}, (_, i) =&gt; i)</code> return?", "Hard", "wrong", "0%", "Yesterday"],
+    ["What is a <code>Symbol</code> and when would you use one?", "Hard", "wrong", "0%", "Yesterday"],
+    ["Which Array methods <strong>mutate</strong> the original array?", "Medium", "almost", "0%", "Today"],
+    ["What is a closure?", "Medium", "almost", "18%", "Today"],
+    ["What does <code>Promise.all()</code> do?", "Medium", "right", "45%", "Tomorrow"],
+    ["Which of these return a <strong>new</strong> array?", "Easy", "almost", "55%", "In 3 days"],
+    ["What is the difference between <code>==</code> and <code>===</code>?", "Easy", "right", "82%", "In 4 days"],
+    ["What does <code>typeof null</code> return?", "Easy", "right", "82%", "In 4 days"],
+    ["What's the difference between <code>let</code> and <code>const</code>?", "Easy", "right", "91%", "In 4 days"],
+    ["What does the <code>**</code> operator do?", "Easy", "right", "100%", "In 7 days"],
+    ["What does optional chaining (<code>?.</code>) do?", "Easy", "right", "100%", "In 7 days"],
+  ];
+  // The six due cards across both decks, in study order.
+  const dueCards = [
+    ["js", ...jsCards[0]], ["js", ...jsCards[1]], ["js", ...jsCards[2]], ["js", ...jsCards[3]], ["js", ...jsCards[4]],
+    ["guide", "How does spaced repetition (SRS) work in this app?", "Medium", "almost", "0%", "Today"],
+  ];
+  const marks = { wrong: "Wrong", almost: "Almost", right: "Right" };
+  const stampFor = (due) => `<span class="stamp ${due === "Today" || due === "Yesterday" ? "now" : due === "Tomorrow" || due === "In 3 days" ? "" : "later"}">${due}</span>`;
+  const more = (label) => `<button class="btn ghost rowmenu" aria-label="${label}"><svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><circle cx="3.5" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="14.5" cy="9" r="1.6"/></svg></button>`;
+
+  const deckRow = (id, { phone = false, open = false } = {}) => {
+    const d = decks[id];
+    const name = `<td><span class="tab" style="background: ${d.colour}"></span>${d.title} <span class="count">${d.cards} cards</span></td>`;
+    if (phone) return `<tr class="deck${open ? " open" : ""}">${name}<td class="end"><span class="stamp now">${d.due} today</span></td></tr>`;
+    return `<tr class="deck${open ? " open sel" : ""}">${name}<td></td><td class="num figure">${d.right}</td><td></td><td class="end"><span class="stamp now">${d.due} today</span></td><td class="end">${more("Deck actions: add, share, export, edit, delete")}</td></tr>`;
+  };
+  const cardRow = ([q, level, last, right, due], phone) => phone
+    ? `<tr class="card"><td>${q}</td><td class="end">${stampFor(due)}</td></tr>`
+    : `<tr class="card"><td>${q}</td><td class="mark-${last}">${marks[last]}</td><td class="num figure">${right}</td><td class="fine quiet">${level}</td><td class="end">${stampFor(due)}</td><td class="end">${more("Card actions: edit, move, delete")}</td></tr>`;
+  const laptopHead = '<tr><th>Deck and cards</th><th>Last mark</th><th class="num">Right</th><th>Level</th><th class="end">Due</th><th class="end"></th></tr>';
+
+  for (const head of document.querySelectorAll("[data-head]")) head.innerHTML = laptopHead;
+
+  // A deck's rows: data-open="all" lists every card, a number lists that many, "after" the cards past the open one.
+  for (const body of document.querySelectorAll("[data-deck]")) {
+    const id = body.dataset.deck;
+    const open = body.dataset.open;
+    if (open === "after") { body.innerHTML = jsCards.slice(5).map((c) => cardRow(c, false)).join(""); continue; }
+    let html = open === "after" ? "" : deckRow(id, { open: Boolean(open) });
+    if (open === "all") html += jsCards.map((c) => cardRow(c, false)).join("");
+    else if (open) html += jsCards.slice(0, Number(open)).map((c) => cardRow(c, false)).join("");
+    body.innerHTML = html;
+  }
+
+  // Home, at each width and language.
+  const words = {
+    en: { title: "Decks", stats: "Stats", more: "More", today: "<b class=\"figure\">0 of 20</b> cards today, <b class=\"figure\">10</b> days in a row", deck: "Deck and cards", due: "Due", rest: "And 7 more, due tomorrow or later", study: "Study 6 due", cards: "cards", todayWord: "today" },
+    es: { title: "Mazos", stats: "Estadísticas", more: "Más", today: "<b class=\"figure\">0 de 20</b> cartas hoy, <b class=\"figure\">10</b> días seguidos", deck: "Mazo y cartas", due: "Vuelve", rest: "Y 7 más, desde mañana", study: "Estudiar 6 pendientes", cards: "cartas", todayWord: "hoy" },
+  };
+  const esStamps = { Yesterday: "Ayer", Today: "Hoy" };
+  for (const room of document.querySelectorAll("[data-home]")) {
+    const kind = room.dataset.home;
+    if (kind === "laptop") {
+      room.innerHTML = `<header><h1>Decks</h1><button class="btn">Stats</button><button class="btn">New deck <kbd>N</kbd></button><button class="btn primary">Study 6 due <kbd>S</kbd></button><button class="btn" aria-label="More: bring in cards, back up">More</button></header>
+        <div class="goal today"><span>${words.en.today}</span><span class="track"><span style="width: 0"></span></span></div>
+        <table class="ledger"><thead>${laptopHead}</thead><tbody>${deckRow("js", { open: true })}${jsCards.map((c) => cardRow(c, false)).join("")}${deckRow("guide")}</tbody></table>
+        <p class="keys fine quiet"><kbd>J</kbd> <kbd>K</kbd> move, <kbd>Enter</kbd> opens or closes a deck, <kbd>S</kbd> studies what is due, <kbd>N</kbd> adds a card to the open deck, <kbd>E</kbd> edits the card</p>`;
+      continue;
+    }
+    const w = words[kind];
+    const stamp = (due) => `<span class="stamp now">${kind === "es" ? esStamps[due] : due}</span>`;
+    const name = (id) => `<td><span class="tab" style="background: ${decks[id].colour}"></span>${decks[id].title} <span class="count">${decks[id].cards} ${w.cards}</span></td>`;
+    room.innerHTML = `<header><h1>${w.title}</h1><button class="btn ghost">${w.stats}</button><button class="btn ghost" aria-label="${w.more}">${w.more}</button></header>
+      <div class="goal today"><span>${w.today}</span></div>
+      <table class="ledger"><thead><tr><th>${w.deck}</th><th class="end">${w.due}</th></tr></thead><tbody>
+        <tr class="deck open">${name("js")}<td class="end"><span class="stamp now">5 ${w.todayWord}</span></td></tr>
+        ${jsCards.slice(0, 5).map(([q, , , , due]) => `<tr class="card"><td>${q}</td><td class="end">${stamp(due)}</td></tr>`).join("")}
+        <tr class="card"><td colspan="2" class="fine quiet">${w.rest}</td></tr>
+        <tr class="deck">${name("guide")}<td class="end"><span class="stamp now">1 ${w.todayWord}</span></td></tr>
+      </tbody></table>
+      <div class="dock"><button class="btn primary big">${w.study}</button></div>`;
+  }
+
+  // The due cards still ahead in a run, from the given position.
+  for (const body of document.querySelectorAll("[data-due-rows]")) {
+    const from = Number(body.dataset.dueRows);
+    const wide = body.dataset.wide;
+    body.innerHTML = dueCards.slice(from).map(([id, q, level, last, right, due]) => wide
+      ? `<tr class="card"><td>${q}</td><td class="fine quiet"><span class="tab small" style="background: ${decks[id].colour}"></span>${decks[id].title}</td><td class="mark-${last}">${marks[last]}</td><td class="num figure">${right}</td><td class="end">${stampFor(due)}</td></tr>`
+      : `<tr class="card"><td>${q}</td><td class="end">${stampFor(due)}</td></tr>`).join("");
+  }
+
+  // Yesterday's run: the six cards not right the first time, with when each comes back now.
+  const missed = [jsCards[0], jsCards[1], jsCards[2], jsCards[3], jsCards[4], jsCards[6]];
+  for (const body of document.querySelectorAll("[data-run-rows]")) {
+    body.innerHTML = missed.map(([q, , last, , due]) => `<tr class="card"><td>${q} <span class="fine mark-${last}">${marks[last]}</span></td><td class="end">${stampFor(due)}</td></tr>`).join("");
+  }
+
+  // A shared deck, as the friend sees it before keeping it.
+  const shared = [[jsCards[9][0], "Easy"], [jsCards[10][0], "Easy"], [jsCards[7][0], "Easy"], [jsCards[8][0], "Easy"]];
+  for (const body of document.querySelectorAll("[data-shared-rows]")) {
+    body.innerHTML = shared.map(([q, level]) => `<tr class="card"><td>${q}</td><td class="end fine quiet">${level}</td></tr>`).join("") + '<tr class="card"><td colspan="2" class="fine quiet">And 8 more cards</td></tr>';
+  }
+
+  // The deck colours a maker can pick, from src/lib/deck-colors.ts.
+  document.getElementById("swatch-row").innerHTML = ["#fda4af", "#fdba74", "#fcd34d", "#86efac", "#6ee7b7", "#7dd3fc", "#a5b4fc", "#c4b5fd", "#f9a8d4"]
+    .map((c, i) => `<span style="width: 24px; height: 24px; border-radius: 4px; background: ${c}; ${i === 5 ? "outline: 2px solid var(--primary); outline-offset: 2px;" : ""}"></span>`).join("");
+
+  // November 2026, Monday first: the cards studied each day, from the demo's runs.
+  const studied = { 3: 12, 5: 12, 6: 12, 7: 12, 8: 12, 9: 24, 10: 12, 11: 24, 12: 12, 13: 24, 14: 24 };
+  for (const host of document.querySelectorAll("[data-calendar]")) {
+    const cells = ["M", "T", "W", "T", "F", "S", "S"].map((d) => `<span class="fine quiet">${d}</span>`);
+    for (let i = 0; i < 6; i++) cells.push("<span></span>");
+    for (let day = 1; day <= 30; day++) {
+      const n = studied[day];
+      const inner = n
+        ? `<span class="stamp now figure" style="padding: 0 4px; min-width: 34px; text-align: center;" title="November ${day}: ${n} cards">${n}</span>`
+        : day === 15 ? `<span class="stamp" style="padding: 0 4px; min-width: 34px; text-align: center;" title="Today">0</span>`
+        : `<span class="fine quiet" style="opacity: ${day > 15 ? 0.45 : 1}">${day}</span>`;
+      cells.push(`<span style="display: grid; justify-items: center; align-items: center; min-height: 30px;">${inner}</span>`);
+    }
+    host.innerHTML = `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px 2px; text-align: center;">${cells.join("")}</div><p class="fine quiet" style="margin-top: 6px;">Each stamp is a day studied, with its cards. The outlined one is today.</p>`;
+  }
+
+  // Each run's first tries, oldest first: [deck, right, almost, wrong], twelve cards each.
+  const runs = [["js",2,0,10],["js",3,2,7],["js",5,2,5],["guide",2,0,10],["js",6,3,3],["guide",4,5,3],["js",7,3,2],["js",6,3,3],["guide",8,3,1],["js",7,3,2],["js",7,4,1],["guide",10,2,0],["js",7,1,4],["js",7,2,3],["guide",9,3,0],["js",6,3,3],["guide",10,2,0]];
+  const bar = ([deck, r, a, w]) => `<div style="display: flex; flex-direction: column; gap: 3px; align-items: center;"><div style="display: flex; flex-direction: column-reverse; height: 110px; width: 100%; overflow: hidden; border-radius: 2px;"><span style="flex: ${r}; background: var(--positive)"></span><span style="flex: ${a}; background: var(--caution)"></span><span style="flex: ${w}; background: var(--negative)"></span></div><span style="width: 100%; height: 3px; background: ${decks[deck].colour}"></span></div>`;
+  for (const host of document.querySelectorAll("[data-runs]")) {
+    host.innerHTML = `<div style="display: grid; grid-template-columns: auto 1fr; gap: 6px;"><div class="fine quiet figure" style="display: flex; flex-direction: column; justify-content: space-between; height: 110px; text-align: right;"><span>12</span><span>6</span><span>0</span></div><div style="display: grid; grid-template-columns: repeat(${runs.length}, 1fr); gap: 3px;">${runs.map(bar).join("")}</div></div><div class="fine" style="display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px;"><span class="mark-right">Right</span><span class="mark-almost">Almost</span><span class="mark-wrong">Wrong</span><span class="quiet">Under each bar, its deck's colour. Oldest on the left.</span></div>`;
+  }
+
+  // The decks, the neediest first.
+  for (const table of document.querySelectorAll("[data-stat-decks]")) {
+    const phone = table.dataset.statDecks === "phone";
+    const rows = ["js", "guide"].map((id) => {
+      const d = decks[id];
+      return phone
+        ? `<tr class="deck"><td><span class="tab" style="background: ${d.colour}"></span>${d.title}<br><span class="count">Studied yesterday, ${d.runs} runs</span></td><td class="num figure">${d.right}</td><td class="end"><span class="stamp now">${d.due} today</span></td></tr>`
+        : `<tr class="deck"><td><span class="tab" style="background: ${d.colour}"></span>${d.title}</td><td class="num figure">${d.runs}</td><td class="num figure">${d.right}</td><td>Yesterday</td><td class="end"><span class="stamp now">${d.due} today</span></td></tr>`;
+    }).join("");
+    table.innerHTML = phone
+      ? `<thead><tr><th>Deck</th><th class="num">Right</th><th class="end">Due</th></tr></thead><tbody>${rows}</tbody>`
+      : `<thead><tr><th>Deck</th><th class="num">Runs</th><th class="num">Right the first time</th><th>Last studied</th><th class="end">Due</th></tr></thead><tbody>${rows}</tbody>`;
+  }
+
+  document.getElementById("dark").onclick = () => {
+    document.body.classList.toggle("dark-page");
+    document.querySelectorAll(".theme").forEach((e) => e.classList.toggle("dark"));
+  };
+</script>
+</body>
+</html>

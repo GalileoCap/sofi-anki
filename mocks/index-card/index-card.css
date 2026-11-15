@@ -1,0 +1,144 @@
+/*
+ * The index-card direction (mocks/directions/2-index-card.html), as tokens by the roles of
+ * docs/design/system.md and the parts every screen shares.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400&display=swap");
+
+.dir {
+  /* Card stock for the surfaces, the ruled lines' blue for every stroke, graphite for the accent. */
+  --background: oklch(0.955 0.008 95);
+  --card: oklch(0.99 0.006 95);
+  --muted: oklch(0.93 0.01 95);
+  --border: oklch(0.86 0.03 240);
+  --foreground: oklch(0.25 0.012 250);
+  --muted-foreground: oklch(0.5 0.015 250);
+  --primary: oklch(0.3 0.012 250);
+  --primary-foreground: oklch(0.98 0.005 95);
+  --ring: oklch(0.55 0.08 240);
+  --positive: oklch(0.52 0.13 150);
+  --positive-soft: oklch(0.95 0.035 150);
+  --caution: oklch(0.56 0.13 65);
+  --caution-soft: oklch(0.95 0.04 75);
+  --negative: oklch(0.52 0.18 27);
+  --negative-soft: oklch(0.95 0.025 25);
+  --destructive: oklch(0.52 0.18 27);
+  /* Two depths: a card lying on the desk, and the card in hand or a menu over the page. */
+  --shadow-sm: 0 1px 2px oklch(0.3 0.02 250 / 0.14);
+  --shadow-md: 0 6px 16px -4px oklch(0.3 0.02 250 / 0.18), 0 2px 4px -2px oklch(0.3 0.02 250 / 0.12);
+  /* The type scale of system.md, at its 18 px root. */
+  --xs: 13.5px; --sm: 15.75px; --base: 18px; --lg: 20.25px; --xl: 22.5px; --2xl: 27px;
+  /* Three radii: cut card, controls, dialogs. */
+  --r-sm: 4px; --r-md: 8px; --r-xl: 14px;
+  /* One ruled line. */
+  --rule: 32px;
+  font-family: "Literata", serif;
+  font-optical-sizing: auto;
+  font-size: var(--base);
+  line-height: 1.5;
+  background: var(--background);
+  color: var(--foreground);
+}
+.dark .dir {
+  --background: oklch(0.2 0.008 250);
+  --card: oklch(0.255 0.01 250);
+  --muted: oklch(0.3 0.012 250);
+  --border: oklch(0.42 0.04 240);
+  --foreground: oklch(0.93 0.008 95);
+  --muted-foreground: oklch(0.72 0.012 95);
+  --primary: oklch(0.9 0.01 95);
+  --primary-foreground: oklch(0.22 0.01 250);
+  --ring: oklch(0.7 0.08 240);
+  --positive: oklch(0.78 0.14 150);
+  --positive-soft: oklch(0.3 0.05 150);
+  --caution: oklch(0.82 0.13 75);
+  --caution-soft: oklch(0.3 0.05 70);
+  --negative: oklch(0.72 0.16 25);
+  --negative-soft: oklch(0.3 0.06 25);
+  --destructive: oklch(0.72 0.16 25);
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.4);
+  --shadow-md: 0 6px 16px -4px oklch(0 0 0 / 0.5);
+}
+.dir *, .dir *::before, .dir *::after { box-sizing: border-box; }
+.dir code, .dir pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.dir code { font-size: 0.85em; }
+.dir pre { margin: 0; padding: 0 12px; background: var(--muted); border-radius: var(--r-md); font-size: var(--sm); line-height: var(--rule); overflow-x: auto; }
+.dir .figure { font-variant-numeric: tabular-nums lining-nums; }
+.dir h1, .dir h2, .dir h3, .dir p { margin: 0; }
+.dir h1 { font-size: var(--2xl); font-weight: 650; line-height: 1.25; }
+.dir h3 { font-size: var(--lg); font-weight: 600; }
+.dir .quiet { color: var(--muted-foreground); }
+.dir .small { font-size: var(--sm); }
+.dir .fine { font-size: var(--xs); }
+
+/* A screen's column, and the bar above the card. */
+.screen { padding: 12px 12px 20px; display: flex; flex-direction: column; gap: 12px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: var(--sm); color: var(--muted-foreground); min-height: 44px; }
+
+/* Buttons: graphite for the one primary action, the rest quiet. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--card); color: var(--foreground); font: inherit; font-size: var(--sm); cursor: pointer; white-space: nowrap; }
+.btn:hover { background: var(--muted); }
+.btn.primary { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); font-weight: 600; }
+.btn.big { min-height: 56px; font-size: var(--base); width: 100%; }
+.btn.ghost { border-color: transparent; background: none; color: var(--foreground); padding: 0 8px; }
+.btn.ghost:hover { background: var(--muted); }
+.btn:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+.kbd { font-family: ui-monospace, Menlo, monospace; font-size: var(--xs); color: var(--muted-foreground); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 0 5px; }
+.btn.primary .kbd { color: inherit; border-color: currentColor; opacity: 0.75; }
+
+/* The index card: cut stock, a head rule in the deck's colour, writing on the rules. */
+.card { background: var(--card); border-radius: var(--r-sm); box-shadow: var(--shadow-md); padding: 0 18px 16px; display: flex; flex-direction: column; }
+.card.flat { box-shadow: var(--shadow-sm); }
+.card .head { min-height: 56px; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; padding-bottom: 8px; border-bottom: 2px solid var(--deck, var(--primary)); font-size: var(--xs); color: var(--muted-foreground); }
+.card .head.short { min-height: 36px; }
+.ruled { background-image: repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in oklch, var(--border) 70%, transparent) 31px 32px); }
+.ruled > * { line-height: var(--rule); }
+.ruled h2 { font-size: var(--xl); font-weight: 600; }
+.ruled .gap { height: var(--rule); }
+.grow { flex: 1; }
+/* A pencilled note in the card's margin: the hint. */
+.pencil { font-style: italic; color: var(--muted-foreground); }
+/* The cards still to come, as the edges of a stack under the one in hand. */
+.stack { height: 10px; margin: 0 10px; border-radius: 0 0 var(--r-sm) var(--r-sm); background: var(--card); box-shadow: var(--shadow-sm); }
+.stack + .stack { margin: 0 20px; height: 8px; }
+
+/* The teacher's marks: the shape carries the grade, the colour repeats it. */
+.marks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mark { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 64px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card); font: inherit; font-size: var(--sm); color: var(--foreground); cursor: pointer; }
+.mark:hover { background: var(--muted); }
+.mark.inline { flex-direction: row; gap: 10px; min-height: 52px; }
+svg.m { width: 30px; height: 26px; fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+svg.m.small { width: 18px; height: 16px; stroke-width: 3.4; }
+svg.m.wrong { stroke: var(--negative); }
+svg.m.almost { stroke: var(--caution); }
+svg.m.right { stroke: var(--positive); }
+
+/* Choice options, written on the rules. */
+.option { display: flex; align-items: center; gap: 12px; min-height: 48px; border: 0; border-bottom: 1px solid var(--border); background: none; font: inherit; text-align: left; color: var(--foreground); cursor: pointer; width: 100%; padding: 0 4px; }
+.option .ring { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex: none; }
+.option.picked .ring { border: 6px solid var(--primary); }
+
+/* Lists of cards and decks. */
+.rows { display: flex; flex-direction: column; }
+.row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+.row:last-child { border-bottom: 0; }
+.due { font-size: var(--xs); font-weight: 600; white-space: nowrap; }
+.due.now { color: var(--foreground); }
+.due.later { color: var(--muted-foreground); font-weight: 400; }
+
+/* Menus, dialogs and fields. */
+.menu { background: var(--card); border-radius: var(--r-md); box-shadow: var(--shadow-md); padding: 6px; min-width: 230px; font-size: var(--sm); }
+.menu div { padding: 10px 12px; border-radius: var(--r-sm); }
+.menu div:hover { background: var(--muted); }
+.menu hr { border: 0; border-top: 1px solid var(--border); margin: 4px 6px; }
+.menu .danger { color: var(--destructive); }
+.scrim { background: oklch(0 0 0 / 0.35); display: grid; place-items: center; padding: 40px; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: var(--sm); font-weight: 600; }
+.input { min-height: 44px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card); padding: 8px 12px; font: inherit; font-size: var(--base); font-weight: 400; color: var(--foreground); }
+.input.focus { border-color: var(--ring); box-shadow: 0 0 0 3px oklch(from var(--ring) l c h / 0.3); }
+textarea.input { min-height: 180px; font-family: ui-monospace, Menlo, monospace; font-size: var(--sm); line-height: 1.5; resize: vertical; }
+.drop { border: 1.5px dashed var(--border); border-radius: var(--r-md); padding: 24px; text-align: center; display: grid; gap: 4px; }
+.segmented { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-md); padding: 3px; gap: 3px; }
+.segmented span { padding: 4px 12px; border-radius: var(--r-sm); font-size: var(--sm); color: var(--muted-foreground); }
+.segmented span.on { background: var(--primary); color: var(--primary-foreground); }
+.note { border-radius: var(--r-md); padding: 10px 14px; font-size: var(--sm); }
+.note.good { background: var(--positive-soft); color: var(--positive); }
