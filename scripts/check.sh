@@ -7,3 +7,4 @@ tsc -b
 eslint . --max-warnings 0
 session-suppressions check
 session-docs check
+session-intent check

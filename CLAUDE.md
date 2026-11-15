@@ -8,6 +8,18 @@ The working rules are session-kit's (`~/.claude/CLAUDE.md`), and the shape of th
 
 This file adds the project's own. `.claude/settings.json` declares the plugin, and `.claude/claude-kit.json` points `session-tells` at the TypeScript comments and `session-codeintel looks` at `src/`. Comments, documents and replies are in English. The interface is in English and Spanish.
 
+## Intent
+
+The owner's goals, the objectives and the constraints in force. Each entry is a file in [docs/intent/](docs/intent/INDEX.md), whose `INDEX.md` is written by `session-intent index`, and `session-intent check` holds this list to the record.
+
+- `G1` An Anki-like study app for the owner and their friends.
+- `C1` Keep it simple: no accounts, no server.
+- `O1` Nobody loses their decks or their study history to the app (proposed).
+- `O2` A friend can study a deck someone else made (proposed).
+- `O3` Cards come back for study around when they would be forgotten (proposed).
+- `O4` A deck made in Anki can be studied here (proposed).
+- `O5` A session can change the app unobserved without breaking what people rely on (proposed).
+
 ## Environment
 
 `nix develop` (or direnv, with an untracked `.envrc` holding `use flake`) gives Node 22, pnpm, ast-grep and python3, and puts the session-kit commands on PATH. `packageManager` in `package.json` pins pnpm.
