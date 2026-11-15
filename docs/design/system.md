@@ -53,7 +53,7 @@ One family, M PLUS Rounded 1c in its Latin set (weights 400, 500, 700 and 800), 
 
 ## Motion
 
-Colour changes on hover and press, and nothing else moves. The sheet filling with a sticker after each grade is the feedback for the daily goal. Each transition names its property (`mo-2`).
+Colour changes on hover and press. Two things move: a fold's chevron turns as it opens, and stickers fall over the run's end when every card was right the first time. Both stay still where motion is reduced. The sheet filling with a sticker after each grade is the feedback for the daily goal. Each transition names its property (`mo-2`).
 
 ## Budgets
 

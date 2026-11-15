@@ -129,6 +129,19 @@
 
   /* The scrim behind shadcn's dialog, its only use. */
   --color-black: oklch(0 0 0);
+
+  /* Stickers falling over the run's end when every card was right the first time. */
+  --animate-sticker-fall: sticker-fall linear forwards;
+  @keyframes sticker-fall {
+    0% {
+      transform: translateY(0) translateX(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) translateX(var(--drift, 0px)) rotate(540deg);
+      opacity: 0;
+    }
+  }
 }
 
 @theme inline {

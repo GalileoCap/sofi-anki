@@ -23,12 +23,12 @@ Each screen is a commit, with `pnpm check` green, the audit walk clean, and the 
 
 ## The run's end
 
-- [ ] Every card of the run, each under its outcome: right, almost, wrong, skipped, saved for later (old `run-summary.tsx:52-74`).
-- [ ] Each card's tries, and the time of its first try (old `run-summary.tsx:110-135`).
-- [ ] For a choice card, what was picked, what was missed, and the wrong picks (old `run-summary.tsx:143-173`).
-- [ ] The saved-for-later count.
-- [ ] Studying every card of the run again, beside studying the misses again (old `run-summary.tsx:79`).
-- [ ] Confetti on a run with every card right the first time (old `run-summary.tsx:41`).
+- [x] Every card of the run, each under its outcome: right, almost, wrong, skipped, saved for later (old `run-summary.tsx:52-74`).
+- [x] Each card's tries, and the time of its first try (old `run-summary.tsx:110-135`).
+- [x] For a choice card, what was picked, what was missed, and the wrong picks (old `run-summary.tsx:143-173`).
+- [x] The saved-for-later count.
+- [x] Studying every card of the run again, beside studying the misses again (old `run-summary.tsx:79`).
+- [x] Confetti on a run with every card right the first time (old `run-summary.tsx:41`). It is now stickers in the run's decks' colours, and nothing where motion is reduced.
 
 ## Deck page and its cards
 

@@ -1,4 +1,4 @@
-import type { AnswerResult, Deck } from "@/core/model";
+import type { AnswerResult, Card, Deck } from "@/core/model";
 import type { TranslationKey } from "@/lib/translations";
 
 /** A deck's colour as the `--deck` variable its parts paint with, and a quiet ink for a deck without one. */
@@ -20,3 +20,9 @@ export const gradeLooks: Record<AnswerResult, { text: string; chip: string }> = 
 
 /** A grade's mark at the size of the text beside it. */
 export const smallMark = "h-3 w-3.5 stroke-[3.6]";
+
+/** A card's difficulty and, for a choice card, whether it takes one answer or several, as words. */
+export const kindWords = (card: Card, t: (key: TranslationKey) => string): string[] => [
+  t(`complexity.${card.complexity}`),
+  ...(card.type === "choice" ? [card.multiSelect ? t("cardType.multiple") : t("cardType.single")] : []),
+];

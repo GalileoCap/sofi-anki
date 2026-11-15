@@ -24,12 +24,12 @@ The owner approved the mock, which leaves these out of the screens. Each is reco
 - The study timer and its estimate leave the study screen. The run's time shows at its end. Overruled by the owner on 2026-11-15 ("The timer is missing"): the run's time is back, above the spots on a phone and in the laptop's side panel, and the estimate stays out. The estimate came back with the rest ([restore.md](restore.md)).
 - The redo-later checkbox goes. A wrong or almost grade asks for the card again in the run, as the default was. Overruled by the owner on 2026-11-15 with every dropped capability: it is back as a choice under the stamps ([restore.md](restore.md)).
 - Leaving a run keeps the cards answered without asking first, since nothing is lost. Overruled the same way: Leave and Esc ask first, saying what is kept.
-- The run's end lists the cards to look at again without each card's tries. "Study these again" studies those cards, and the others are done.
+- The run's end lists the cards to look at again without each card's tries. "Study these again" studies those cards, and the others are done. Overruled the same way: every card is listed under its first try's outcome with its tries, and the run can be studied again whole.
 - Home drops the tag filter. A search field shows once there are more than eight decks.
 - The deck page filters its cards by status (all, due, weak, new) in place of complexity and tag chips. Choosing cards to study other than the due ones (all, weak, new, shuffled, with a goal) stays in the deck's menu as "Choose cards to study".
 - The theme and language toggles move to home's More menu.
 - The daily goal is changed from home's More menu.
-- The confetti goes. The sheet filling is the feedback for the daily goal.
+- The confetti goes. The sheet filling is the feedback for the daily goal. Overruled with every dropped capability: a run right the first time throughout ends with stickers falling ([restore.md](restore.md)).
 - Stats measure accuracy as right on the first try, as the run's end does, and rank the decks by it, the lowest first. The stat tiles (decks, cards, sessions, total time) go (`data-2`).
 - A deck's stats are its line of runs, average time and first tries, its month, its chart, and its runs, each opening to its cards' tries. Each card's accuracy, time and interval history go, since the deck page's table shows each card's last grade, how often it was right and when it comes back.
 
