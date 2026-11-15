@@ -19,7 +19,7 @@ The owner asked for a "cute, cozy, study" restyle, and found the first mocks mac
 
 ## Options
 
-The Leitner box (the schedule as a box), the index card (the app opens on the next card) and the reading room (a keyboard ledger for the laptop) were drawn beside it, each a different structure. The owner chose this one after seeing home and study for all four side by side. After the review of all four full mocks (`mocks/review.md`), the owner asked for the sticker chart to take the good things of the others: from the Leitner box, what comes after today and grades that say where the card goes; from the index card, grades carried by the shape of a mark; from the reading room, decks as a list ranked by due and keys on the laptop. The same pass fixed the review's faults in the sticker chart: the grid of covers, the empty sheet filling home, and the caution colour under AA contrast.
+The Leitner box (the schedule as a box), the index card (the app opens on the next card) and the reading room (a keyboard ledger for the laptop) were drawn beside it, each a different structure. The owner chose this one after seeing home and study for all four side by side. After the review of all four full mocks (`mocks/review.md`), the owner asked for the sticker chart to take the good things of the others. From the Leitner box it took what comes after today, and grades that say where the card goes. From the index card it took grades carried by the shape of a mark. From the reading room it took decks as a list ranked by due, and keys on the laptop. The same pass fixed the review's faults in the sticker chart: the grid of covers, the empty sheet filling home, and the caution colour under AA contrast.
 
 ## Consequences
 
