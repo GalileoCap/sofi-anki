@@ -23,11 +23,11 @@ Each screen is a commit, with `pnpm check` green, the audit walk clean, and the 
 
 ## The run's end
 
-- [ ] Every card of the run, not just the misses: right, almost, wrong, skipped, saved for later (old `run-summary.tsx:52-74`).
+- [ ] Every card of the run, each under its outcome: right, almost, wrong, skipped, saved for later (old `run-summary.tsx:52-74`).
 - [ ] Each card's tries, and the time of its first try (old `run-summary.tsx:110-135`).
 - [ ] For a choice card, what was picked, what was missed, and the wrong picks (old `run-summary.tsx:143-173`).
 - [ ] The saved-for-later count.
-- [ ] Studying the whole run again, as well as the misses (old `run-summary.tsx:79`).
+- [ ] Studying every card of the run again, beside studying the misses again (old `run-summary.tsx:79`).
 - [ ] Confetti on a run with every card right the first time (old `run-summary.tsx:41`).
 
 ## Deck page and its cards
@@ -47,10 +47,10 @@ Each screen is a commit, with `pnpm check` green, the audit walk clean, and the 
 
 ## Stats and deck stats
 
-- [ ] The totals: decks, cards, runs, total time, as one line, not tiles (old `stats.tsx:38-53`).
+- [ ] The totals in one line: decks, cards, runs, total time (old `stats.tsx:38-53`).
 - [ ] History before this month, with the cards studied each day: the month calendar steps back through earlier months, and each day names its count (old `study-heatmap.tsx`, 13 weeks). This serves home's last week too.
 - [ ] The empty stats screen says there are no decks yet (old `stats.tsx:62-63`).
-- [ ] Deck stats: total runs, total time, cards studied, due and weak; average, fastest and slowest run, and time per card (old `deck-stats.tsx:44-73`).
+- [ ] Deck stats: total runs, total time, cards studied, due and weak. Also the average, fastest and slowest run, and the time per card (old `deck-stats.tsx:44-73`).
 - [ ] Deck stats: each card's accuracy, times studied, average time, due date and interval history, those under 50 % marked (old `deck-stats.tsx:88-97, 156-221`).
 - [ ] Inside a run: each card's difficulty and first-try time, and the skipped count in the run's line (old `deck-stats.tsx:111, 141, 145`).
 
@@ -59,7 +59,7 @@ Each screen is a commit, with `pnpm check` green, the audit walk clean, and the 
 - [ ] Home's tag filter (old `home.tsx:119-137`), and the deck search whenever there are decks (old `home.tsx:113-118`).
 - [ ] Each deck row on home names its tags (old `home.tsx:175-179`).
 - [ ] The daily goal changed in one step from the sheet (old `home.tsx:242-250`).
-- [ ] Theme and language reachable from a shared link's page, not only home (old `page.tsx:11-14`).
+- [ ] Theme and language reachable from a shared link's page as well as from home (old `page.tsx:11-14`).
 - [ ] The shared deck lists each card's difficulty, kind and tags (old `shared-deck.tsx:65-71`).
 - [ ] The Anki import names the total cards across its decks.
 
