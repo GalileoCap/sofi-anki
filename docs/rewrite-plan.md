@@ -5,7 +5,7 @@ The owner chose on 2026-11-15 to take `CODE.md` with a full rewrite, using `neve
 ## What does not change
 
 - Every feature the app has today, screen by screen, in English and Spanish.
-- What is stored and how it reads: the `localStorage` keys and their JSON, the backup file, the share link, `.apkg` import. Data written by any earlier version decodes (`O1`). Old card shapes are the risk: decks from before choice cards have no `type`, and fields were added over time (`git log -p src/types.ts` shows each). A decoder accepts every shape the history shows, and fills a field it lacks with a declared default.
+- What is stored and how it reads: the `localStorage` keys and their JSON, the backup file, the share link, `.apkg` import. Data written by any earlier version decodes (`O1`). Decks from before choice cards have no `type`, and other fields were added over time (`git log -p src/types.ts` shows each). A decoder accepts every shape the history shows, and fills a field it lacks with a declared default.
 - The deploy: GitHub Pages under `/sofi-anki/`, as a PWA.
 
 ## Layers
@@ -18,7 +18,7 @@ The owner chose on 2026-11-15 to take `CODE.md` with a full rewrite, using `neve
 
 ## Failures
 
-A function that can fail returns a `Result` from `neverthrow`, with its errors as a union of tagged objects. The boundaries are the event handlers in pages and dialogs, which show the error's message from the translations. No `throw` outside a boundary. `JSON.parse` goes through `Result.fromThrowable` and a zod schema, never a cast.
+A function that can fail returns a `Result` from `neverthrow`, with its errors as a union of tagged objects. The boundaries are the event handlers in pages and dialogs, which show the error's message from the translations. No `throw` outside a boundary. `JSON.parse` goes through `Result.fromThrowable` and a zod schema.
 
 ## Tests
 
