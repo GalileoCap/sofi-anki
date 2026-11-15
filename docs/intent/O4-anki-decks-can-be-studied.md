@@ -2,12 +2,12 @@
 id: O4
 from: [G1]
 source: inferred
-status: proposed 2026-11-15
+status: approved 2026-11-15
 ---
 
 # O4 A deck made in Anki can be studied here
 
-Inferred on 2026-11-15 from the `.apkg` import the app already has: friends who used Anki bring their decks.
+Inferred on 2026-11-15 from the `.apkg` import the app already has: friends who used Anki bring their decks. Approved by the owner on 2026-11-15: "Approve all five".
 
 ## Changes
 

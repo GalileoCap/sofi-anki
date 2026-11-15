@@ -2,12 +2,12 @@
 id: O1
 from: [G1]
 source: inferred
-status: proposed 2026-11-15
+status: approved 2026-11-15
 ---
 
 # O1 Nobody loses their decks or their study history to the app
 
-Inferred on 2026-11-15 from where the data lives: only in each person's browser, with no copy anywhere else unless they download a backup.
+Inferred on 2026-11-15 from where the data lives: only in each person's browser, with no copy anywhere else unless they download a backup. Approved by the owner on 2026-11-15: "Approve all five".
 
 ## Changes
 

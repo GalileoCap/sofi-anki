@@ -2,12 +2,12 @@
 id: O2
 from: [G1]
 source: inferred
-status: proposed 2026-11-15
+status: approved 2026-11-15
 ---
 
 # O2 A friend can study a deck someone else made
 
-Inferred on 2026-11-15 from "for me and my friends" and the share links and deck files the app already has.
+Inferred on 2026-11-15 from "for me and my friends" and the share links and deck files the app already has. Approved by the owner on 2026-11-15: "Approve all five".
 
 ## Changes
 

@@ -14,11 +14,11 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 
 - `G1` An Anki-like study app for the owner and their friends.
 - `C1` Keep it simple: no accounts, no server.
-- `O1` Nobody loses their decks or their study history to the app (proposed).
-- `O2` A friend can study a deck someone else made (proposed).
-- `O3` Cards come back for study around when they would be forgotten (proposed).
-- `O4` A deck made in Anki can be studied here (proposed).
-- `O5` A session can change the app unobserved without breaking what people rely on (proposed).
+- `O1` Nobody loses their decks or their study history to the app (approved).
+- `O2` A friend can study a deck someone else made (approved).
+- `O3` Cards come back for study around when they would be forgotten (approved).
+- `O4` A deck made in Anki can be studied here (approved).
+- `O5` A session can change the app unobserved without breaking what people rely on (approved).
 
 ## Environment
 
