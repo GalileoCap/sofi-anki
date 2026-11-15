@@ -1,5 +1,3 @@
-import { MoreVerticalIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
 
@@ -7,6 +5,7 @@ import { BackupDialog } from "@/components/backup-dialog";
 import { DeckForm } from "@/components/deck-form";
 import { ImportApkgDialog } from "@/components/import-apkg-dialog";
 import { ImportDeckDialog } from "@/components/import-dialog";
+import { OverflowMenu } from "@/components/overflow-menu";
 import { StudyHeatmap } from "@/components/study-heatmap";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,26 +73,17 @@ export function Home({ store, update, now, onOpenDeck, onOpenStats }: HomeProps)
               update(withDecks((d) => addDeck(d, newDeck(newId(), { title, tags, color, emoji }, clockNow()))))
             }
           />
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label={t("deckList.moreOptions")}>
-                <HugeiconsIcon icon={MoreVerticalIcon} size={16} strokeWidth={2} />
-              </Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
-                <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("json")}>
-                  {t("deckList.importJson")}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("apkg")}>
-                  {t("deckList.importApkg")}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("backup")}>
-                  {t("deckList.backupRestore")}
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+          <OverflowMenu size="icon-sm">
+            <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("json")}>
+              {t("deckList.importJson")}
+            </DropdownMenu.Item>
+            <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("apkg")}>
+              {t("deckList.importApkg")}
+            </DropdownMenu.Item>
+            <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("backup")}>
+              {t("deckList.backupRestore")}
+            </DropdownMenu.Item>
+          </OverflowMenu>
         </div>
       </div>
 

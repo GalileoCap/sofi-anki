@@ -1,4 +1,5 @@
 import {
+  type Card,
   type CardDisposition,
   type CardRunResult,
   type CardSchedule,
@@ -202,6 +203,22 @@ export function cardPerformance(
     }),
   );
 }
+
+/**
+ * Where a card comes in a deck's list. Due cards whose last answer was wrong come first, then
+ * the other due cards, the cards with no answer yet, and the rest by last answer from wrong to correct.
+ */
+function listRank(record: CardPerformance | undefined, now: Millis): number {
+  if (record === undefined || record.runs === 0) return 2;
+  const last = record.schedule?.lastResult;
+  const due = record.schedule !== undefined && record.schedule.dueAt <= now;
+  if (due) return last === "wrong" ? 0 : 1;
+  return last === "wrong" ? 3 : last === "approximate" ? 4 : 5;
+}
+
+/** `cards` in the order a deck lists them, the ones most in need of study first. */
+export const studyOrder = (cards: readonly Card[], byCard: ReadonlyMap<string, CardPerformance>, now: Millis): Card[] =>
+  [...cards].sort((a, b) => listRank(byCard.get(a.id), now) - listRank(byCard.get(b.id), now));
 
 export type DeckRow = {
   readonly deck: Deck;

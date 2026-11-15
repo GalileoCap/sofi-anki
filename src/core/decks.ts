@@ -1,4 +1,4 @@
-import type { Card, CardSchedule, Deck, Store } from "@/core/model";
+import type { Card, CardSchedule, Complexity, Deck, Store } from "@/core/model";
 import { indexSchedules } from "@/core/scheduler";
 
 /** What a person sets on a deck in its form. An empty color or emoji is none. */
@@ -67,8 +67,36 @@ export function receiveDeck(decks: readonly Deck[], incoming: Deck, how: Arrival
   });
 }
 
-/** Every tag on a deck, sorted, each once. */
-export const allTags = (decks: readonly Deck[]): string[] => [...new Set(decks.flatMap((deck) => deck.tags))].sort();
+/** Every tag on `items` (decks or cards), sorted, each once. */
+export const allTags = (items: readonly { readonly tags: readonly string[] }[]): string[] =>
+  [...new Set(items.flatMap((item) => item.tags))].sort();
+
+/** How many of `cards` are of each complexity. */
+export function complexityCounts(cards: readonly Card[]): Record<Complexity, number> {
+  const counts: Record<Complexity, number> = { easy: 0, medium: 0, hard: 0 };
+  for (const card of cards) counts[card.complexity]++;
+  return counts;
+}
+
+/** What a deck's card list is narrowed to. An empty set or a blank search narrows nothing. */
+export type CardFilter = {
+  readonly search: string;
+  readonly complexities: ReadonlySet<Complexity>;
+  readonly tags: ReadonlySet<string>;
+};
+
+/** The cards of one of the filter's complexities and tags, whose title or a tag holds the search. */
+export function matchingCards(cards: readonly Card[], filter: CardFilter): Card[] {
+  const query = filter.search.trim().toLowerCase();
+  return cards.filter(
+    (card) =>
+      (filter.complexities.size === 0 || filter.complexities.has(card.complexity)) &&
+      (filter.tags.size === 0 || card.tags.some((tag) => filter.tags.has(tag))) &&
+      (query === "" ||
+        card.title.toLowerCase().includes(query) ||
+        card.tags.some((tag) => tag.toLowerCase().includes(query))),
+  );
+}
 
 /**
  * The decks that carry one of `tags`, when any is given, and match `search`, when it is not
