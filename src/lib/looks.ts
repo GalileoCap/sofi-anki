@@ -6,6 +6,8 @@ export const looks = {
   toolbar: "flex justify-end mb-4",
   /** Small text that says less than what is around it. */
   muted: "text-sm text-muted-foreground",
+  /** A message that something failed. */
+  error: "text-sm text-destructive",
   /** A screen's title. */
   title: "text-2xl font-medium text-foreground",
   /** A dropdown menu's panel. */

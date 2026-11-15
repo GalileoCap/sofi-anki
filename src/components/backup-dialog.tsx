@@ -14,6 +14,7 @@ import { dayKey } from "@/core/stats";
 import type { Store } from "@/core/model";
 import { now } from "@/effects/clock";
 import { download, readFileText } from "@/effects/files";
+import { looks } from "@/lib/looks";
 
 interface BackupDialogProps {
   trigger?: React.ReactNode;
@@ -109,7 +110,7 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
 
           {confirmReplace && (
             <div className="flex flex-col gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-              <p className="text-sm text-destructive">
+              <p className={looks.error}>
                 {t("backup.confirmReplace")}
               </p>
               <div className="flex gap-2">
@@ -123,7 +124,7 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
             </div>
           )}
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p className={looks.error}>{error}</p>}
           {success && <p className="text-sm text-green-600 dark:text-green-400">{success}</p>}
         </div>
       </DialogContent>

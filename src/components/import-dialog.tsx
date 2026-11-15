@@ -1,145 +1,111 @@
+import type { Result } from "neverthrow";
 import { useState } from "react";
-import { useLanguage } from "@/contexts/language-context";
+
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import type { DeckImport, DeckImportCard } from "@/types";
+import { Textarea } from "@/components/ui/textarea";
+import { useLanguage } from "@/contexts/language-context";
+import type { DecodeError } from "@/core/decode";
+import { type DeckImport, type ImportCard, readCardsJson, readDeckJson } from "@/core/deck-json";
+import { copyText } from "@/effects/files";
+import { looks } from "@/lib/looks";
+import type { TranslationKey } from "@/lib/translations";
 
-function isValidCard(c: unknown): c is DeckImportCard {
-  if (typeof c !== "object" || c === null) return false;
-  const obj = c as Record<string, unknown>;
-  if (typeof obj.title !== "string") return false;
-  // Choice card
-  if (obj.type === "choice") {
-    if (!Array.isArray(obj.options)) return false;
-    return obj.options.every(
-      (o: unknown) =>
-        typeof o === "object" &&
-        o !== null &&
-        typeof (o as Record<string, unknown>).text === "string" &&
-        typeof (o as Record<string, unknown>).correct === "boolean",
-    );
-  }
-  // Standard card
-  return typeof obj.response === "string";
-}
+const DECK_EXAMPLE = '{\n  "title": "My Deck",\n  "cards": [\n    { "title": "Q1", "response": "A1" }\n  ]\n}';
 
-interface ImportDeckDialogProps {
-  trigger?: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  onImport: (data: DeckImport) => void;
-}
+const CARDS_EXAMPLE =
+  '{\n  "cards": [\n    { "title": "Q1", "response": "A1" },\n    { "type": "choice", "title": "Q2", "options": [\n      { "text": "A", "correct": true },\n      { "text": "B", "correct": false }\n    ]}\n  ]\n}';
 
-export function ImportDeckDialog({
-  trigger,
-  open: controlledOpen,
-  onOpenChange: controlledOnOpenChange,
-  onImport,
-}: ImportDeckDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const open = controlledOpen ?? internalOpen;
-  const [json, setJson] = useState("");
-  const [error, setError] = useState("");
-  const [copiedSchema, setCopiedSchema] = useState(false);
+const decodeMessage: Record<DecodeError["kind"], TranslationKey> = {
+  notJson: "importDialog.invalidJson",
+  badShape: "importDialog.invalidFormat",
+};
+
+type Copy = "idle" | "copied" | "refused";
+const copyLabel: Record<Copy, TranslationKey> = { idle: "common.copy", copied: "common.copied", refused: "common.copyRefused" };
+
+type DialogProps<T> = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onImport: (data: T) => void;
+};
+
+type JsonImportDialogProps<T> = DialogProps<T> & {
+  title: TranslationKey;
+  description: TranslationKey;
+  prompt: TranslationKey;
+  example: string;
+  read: (text: string) => Result<T, DecodeError>;
+};
+
+/** Pasted JSON read by `read`, with a prompt to copy for a language model that writes it. */
+function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description, prompt, example, read }: JsonImportDialogProps<T>) {
   const { t } = useLanguage();
+  const [json, setJson] = useState("");
+  const [error, setError] = useState<DecodeError | null>(null);
+  const [copy, setCopy] = useState<Copy>("idle");
 
-  function handleOpenChange(next: boolean) {
-    setInternalOpen(next);
-    controlledOnOpenChange?.(next);
+  function changeOpen(next: boolean) {
+    onOpenChange(next);
     if (next) {
       setJson("");
-      setError("");
+      setError(null);
     }
   }
 
-  function handleImport() {
-    try {
-      const parsed = JSON.parse(json);
-      if (
-        typeof parsed.title !== "string" ||
-        !Array.isArray(parsed.cards) ||
-        parsed.cards.some((c: unknown) => !isValidCard(c))
-      ) {
-        setError(t("importDialog.invalidFormat"));
-        return;
-      }
-      onImport(parsed as DeckImport);
-      handleOpenChange(false);
-    } catch {
-      setError(t("importDialog.invalidJson"));
-    }
+  function importJson() {
+    read(json).match(
+      (data) => {
+        onImport(data);
+        changeOpen(false);
+      },
+      setError,
+    );
   }
 
-  async function copySchema() {
-    await navigator.clipboard.writeText(t("import.deck.schemaPrompt"));
-    setCopiedSchema(true);
-    setTimeout(() => setCopiedSchema(false), 2000);
+  /** The label says for two seconds whether the prompt was copied. */
+  function copyPrompt() {
+    void copyText(t(prompt)).match(
+      () => setCopy("copied"),
+      () => setCopy("refused"),
+    );
+    setTimeout(() => setCopy("idle"), 2000);
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+    <Dialog open={open} onOpenChange={changeOpen}>
       <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{t("importDialog.importDeckTitle")}</DialogTitle>
-          <DialogDescription>
-            Paste a JSON object with a{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code>{" "}
-            and an array of{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">cards</code>.
-            Cards can be standard (with{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              response
-            </code>
-            ) or choice (with{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              options
-            </code>
-            ).
-          </DialogDescription>
+          <DialogTitle>{t(title)}</DialogTitle>
+          <DialogDescription>{t(description)}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">
-              {t("importDialog.llmPromptTemplate")}
-            </p>
-            <Button variant="outline" size="sm" onClick={copySchema}>
-              {copiedSchema ? t("common.copied") : t("common.copy")}
+            <p className="text-sm font-medium">{t("importDialog.llmPromptTemplate")}</p>
+            <Button variant="outline" size="sm" onClick={copyPrompt}>
+              {t(copyLabel[copy])}
             </Button>
           </div>
-          <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">
-            {t("import.deck.schemaPrompt")}
-          </pre>
+          <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{t(prompt)}</pre>
         </div>
 
         <Separator />
 
         <Textarea
-          placeholder={
-            '{\n  "title": "My Deck",\n  "cards": [\n    { "title": "Q1", "response": "A1" }\n  ]\n}'
-          }
+          placeholder={example}
           value={json}
           onChange={(e) => {
             setJson(e.target.value);
-            setError("");
+            setError(null);
           }}
           rows={8}
           className="font-mono text-xs"
         />
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className={looks.error}>{t(decodeMessage[error.kind])}</p>}
         <DialogFooter>
-          <Button onClick={handleImport} disabled={!json.trim()}>
+          <Button onClick={importJson} disabled={!json.trim()}>
             {t("common.import")}
           </Button>
         </DialogFooter>
@@ -148,121 +114,30 @@ export function ImportDeckDialog({
   );
 }
 
-interface ImportCardsDialogProps {
-  trigger?: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  onImport: (cards: DeckImportCard[]) => void;
+/** A new deck from pasted JSON. */
+export function ImportDeckDialog(props: DialogProps<DeckImport>) {
+  return (
+    <JsonImportDialog
+      {...props}
+      title="importDialog.importDeckTitle"
+      description="importDialog.deckDescription"
+      prompt="import.deck.schemaPrompt"
+      example={DECK_EXAMPLE}
+      read={readDeckJson}
+    />
+  );
 }
 
-export function ImportCardsDialog({
-  trigger,
-  open: controlledOpen,
-  onOpenChange: controlledOnOpenChange,
-  onImport,
-}: ImportCardsDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  const open = controlledOpen ?? internalOpen;
-  const [json, setJson] = useState("");
-  const [error, setError] = useState("");
-  const [copiedSchema, setCopiedSchema] = useState(false);
-  const { t } = useLanguage();
-
-  function handleOpenChange(next: boolean) {
-    setInternalOpen(next);
-    controlledOnOpenChange?.(next);
-    if (next) {
-      setJson("");
-      setError("");
-    }
-  }
-
-  function handleImport() {
-    try {
-      const parsed = JSON.parse(json);
-      const cards = Array.isArray(parsed) ? parsed : parsed.cards;
-      if (
-        !Array.isArray(cards) ||
-        cards.some((c: unknown) => !isValidCard(c))
-      ) {
-        setError(t("importDialog.invalidFormat"));
-        return;
-      }
-      onImport(cards as DeckImportCard[]);
-      handleOpenChange(false);
-    } catch {
-      setError(t("importDialog.invalidJson"));
-    }
-  }
-
-  async function copySchema() {
-    await navigator.clipboard.writeText(t("import.cards.schemaPrompt"));
-    setCopiedSchema(true);
-    setTimeout(() => setCopiedSchema(false), 2000);
-  }
-
+/** Cards for a deck from pasted JSON: an array of cards, or an object with one under `cards`. */
+export function ImportCardsDialog(props: DialogProps<ImportCard[]>) {
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{t("importDialog.importCardsTitle")}</DialogTitle>
-          <DialogDescription>
-            Paste a JSON object with a{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">cards</code>{" "}
-            array. Standard cards need{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">title</code>{" "}
-            and{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              response
-            </code>
-            . Choice cards need{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              type: "choice"
-            </code>{" "}
-            and{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              options
-            </code>
-            .
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">
-              {t("importDialog.llmPromptTemplate")}
-            </p>
-            <Button variant="outline" size="sm" onClick={copySchema}>
-              {copiedSchema ? t("common.copied") : t("common.copy")}
-            </Button>
-          </div>
-          <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">
-            {t("import.cards.schemaPrompt")}
-          </pre>
-        </div>
-
-        <Separator />
-
-        <Textarea
-          placeholder={
-            '{\n  "cards": [\n    { "title": "Q1", "response": "A1" },\n    { "type": "choice", "title": "Q2", "options": [\n      { "text": "A", "correct": true },\n      { "text": "B", "correct": false }\n    ]}\n  ]\n}'
-          }
-          value={json}
-          onChange={(e) => {
-            setJson(e.target.value);
-            setError("");
-          }}
-          rows={8}
-          className="font-mono text-xs"
-        />
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        <DialogFooter>
-          <Button onClick={handleImport} disabled={!json.trim()}>
-            {t("common.import")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <JsonImportDialog
+      {...props}
+      title="importDialog.importCardsTitle"
+      description="importDialog.cardsDescription"
+      prompt="import.cards.schemaPrompt"
+      example={CARDS_EXAMPLE}
+      read={readCardsJson}
+    />
   );
 }

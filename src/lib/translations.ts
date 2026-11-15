@@ -32,6 +32,7 @@ const en_translations = {
   "common.show": "Show",
   "common.copy": "Copy",
   "common.copied": "Copied!",
+  "common.copyRefused": "The browser refused to copy",
   "common.import": "Import",
   "common.merge": "Merge",
   "common.overwrite": "Overwrite",
@@ -233,6 +234,10 @@ const en_translations = {
     'Invalid format. Each card needs "title" + "response", or "type": "choice" + "options".',
   "importDialog.invalidJson":
     "Invalid JSON. Please check the format and try again.",
+  "importDialog.deckDescription":
+    'Paste a JSON object with a "title" and a "cards" array. A card is standard, with a "response", or a choice, with "options".',
+  "importDialog.cardsDescription":
+    'Paste a JSON array of cards, or an object with a "cards" array. A standard card needs a "title" and a "response", a choice card "type": "choice", a "title" and "options".',
   // Import .apkg dialog
   "importApkg.title": "Import Anki Deck",
   "importApkg.parsing": "Parsing…",
@@ -369,6 +374,7 @@ const translations: Record<Lang, Translation> = {
     "common.show": "Mostrar",
     "common.copy": "Copiar",
     "common.copied": "¡Copiado!",
+    "common.copyRefused": "El navegador no dejó copiar",
     "common.import": "Importar",
     "common.merge": "Combinar",
     "common.overwrite": "Sobrescribir",
@@ -557,6 +563,10 @@ const translations: Record<Lang, Translation> = {
       'Formato inválido. Cada carta necesita "title" + "response", o "type": "choice" + "options".',
     "importDialog.invalidJson":
       "JSON inválido. Comprueba el formato e inténtalo de nuevo.",
+    "importDialog.deckDescription":
+      'Pegá un objeto JSON con un "title" y un array "cards". Una carta es estándar, con "response", o de opción, con "options".',
+    "importDialog.cardsDescription":
+      'Pegá un array JSON de cartas, o un objeto con un array "cards". Una carta estándar necesita "title" y "response"; una de opción, "type": "choice", "title" y "options".',
     "importApkg.title": "Importar mazo Anki",
     "importApkg.parsing": "Procesando…",
     "importApkg.browseFile": "Buscar archivo",
@@ -622,7 +632,7 @@ const translations: Record<Lang, Translation> = {
 
 Todas las cartas tienen "title", "response", "complexity", opcional "tags", y opcional "hint".
 Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", y "options" (array de { "text", "correct" }).
-Devolvé solo el el JSON, sin texto extra.`,
+Devolvé solo el JSON, sin texto extra.`,
     "import.cards.schemaPrompt": `Generá 50 tarjetas tipo anki sobre "" en el siguiente formato JSON:
 
 
@@ -651,7 +661,7 @@ Devolvé solo el el JSON, sin texto extra.`,
 
 Todas las cartas tienen "title", "response", "complexity", opcional "tags", y opcional "hint".
 Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", y "options" (array de { "text", "correct" }).
-Devolvé solo el el JSON, sin texto extra.`,
+Devolvé solo el JSON, sin texto extra.`,
   },
 } satisfies Record<Lang, Translation>;
 

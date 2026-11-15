@@ -42,6 +42,14 @@ export type DeckImport = z.infer<typeof deckImportSchema>;
 
 export const readDeckJson = (text: string): Result<DeckImport, DecodeError> => decodeJson(deckImportSchema, text);
 
+/** Cards to add to a deck, as an array or as an object holding one under `cards`, a deck's JSON included. */
+const cardsImportSchema = z.union([
+  z.array(importCardSchema),
+  z.object({ cards: z.array(importCardSchema) }).transform((data) => data.cards),
+]);
+
+export const readCardsJson = (text: string): Result<ImportCard[], DecodeError> => decodeJson(cardsImportSchema, text);
+
 /** A card from its JSON, with ids from `newId`. A choice card without `multiSelect` is one when more than one option is correct. */
 export function cardFromJson(card: ImportCard, newId: () => string): Card {
   const common = {

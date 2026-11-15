@@ -12,6 +12,7 @@ import {
 import type { CardSchedule, Deck } from "@/core/model";
 import { now } from "@/effects/clock";
 import { readFileBytes } from "@/effects/files";
+import { looks } from "@/lib/looks";
 
 type ParsedApkg = { decks: Deck[]; schedules: CardSchedule[] };
 
@@ -132,7 +133,7 @@ export function ImportApkgDialog({
         )}
 
         {state.kind === "error" && (
-          <p className="text-sm text-destructive">{state.message}</p>
+          <p className={looks.error}>{state.message}</p>
         )}
 
         {state.kind === "parsed" && (
