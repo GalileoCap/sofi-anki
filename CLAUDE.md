@@ -39,7 +39,7 @@ Before calling a change done: `pnpm check`, the tests, and the flows it touches 
 
 ## Branches
 
-Work happens on `dev`. A push to `main` deploys the site, so merging `dev` into `main` and pushing it is one action, taken only on the owner's word each time (owner, 2026-11-15).
+Work happens on `dev`. A push to `main` deploys the site, so merging `dev` into `main` and pushing it is one action, taken only on the owner's word each time (owner, 2026-11-15). The session manages `dev` and pushes it whenever it commits, without asking (owner, 2026-11-15).
 
 ## Stored data
 
