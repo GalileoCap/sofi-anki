@@ -110,14 +110,17 @@
   .turn { display: none; min-height: 56px; border: 0; border-radius: var(--r-md); background: var(--primary); color: var(--primary-foreground); font: inherit; font-weight: 600; cursor: pointer; }
   .closed .answer, .closed .marks { display: none; }
   .closed .turn { display: block; }
+  /* Home, behind the Decks button: each deck as an index card, ranked by due. */
+  .deckcard .head { height: 40px; }
+  .deckcard .ruled { padding-bottom: 4px; }
 </style>
 </head>
 <body>
 <div class="page">
   <div class="bar">
-    <h1>Direction 2 of 3: the index card</h1>
+    <h1>Direction 2 of 4: the index card</h1>
     <button type="button" onclick="document.body.classList.toggle('dark-page'); document.querySelectorAll('.theme').forEach((e) => e.classList.toggle('dark'))">Light / dark</button>
-    <nav><a href="index.html">All three</a><a href="1-leitner-box.html">1</a><a href="2-index-card.html" aria-current="page">2</a><a href="3-reading-room.html">3</a></nav>
+    <nav><a href="index.html">All four</a><a href="1-leitner-box.html">1</a><a href="2-index-card.html" aria-current="page">2</a><a href="3-reading-room.html">3</a><a href="4-sticker-chart.html">4</a></nav>
   </div>
 
   <p class="bet"><strong>The bet:</strong> the card is the app. Opening it on a phone shows the next due card, from whichever deck it is in, and a grade brings the next one. Decks, stats and making cards sit one tap behind it.</p>
@@ -210,6 +213,25 @@ inc(); // 1</pre>
       </div>
       <button class="turn" type="button">Turn the card</button>
     </div>
+  </div>
+</template>
+
+<template id="home">
+  <div class="study" style="gap: 14px;">
+    <div class="top"><button type="button">Back to the card</button><span></span><button type="button" aria-label="More: new deck, import, back up">More</button></div>
+    <div>
+      <h1 style="margin: 0; font-size: var(--2xl); font-weight: 650;">Decks</h1>
+      <p style="margin: 2px 0 0; font-size: var(--sm); color: var(--muted-foreground);"><span class="figure">0 of 20</span> cards today, <span class="figure">10</span> days in a row</p>
+    </div>
+    <div class="card deckcard" style="--deck: #f59e0b; flex: none;">
+      <div class="head"><span>⚡ 12 cards</span><span class="figure" style="color: var(--foreground); font-weight: 600;">5 due</span></div>
+      <div class="ruled" style="flex: none;"><h2>JavaScript Fundamentals</h2><p style="font-size: var(--sm); color: var(--muted-foreground);">Studied yesterday, 48% right</p></div>
+    </div>
+    <div class="card deckcard" style="--deck: #863bff; flex: none;">
+      <div class="head"><span>📖 12 cards</span><span class="figure" style="color: var(--foreground); font-weight: 600;">1 due</span></div>
+      <div class="ruled" style="flex: none;"><h2>sofi-anki Guide</h2><p style="font-size: var(--sm); color: var(--muted-foreground);">Studied yesterday, 60% right</p></div>
+    </div>
+    <button class="turn" type="button" style="display: block; margin-top: auto;">Study 6 due</button>
   </div>
 </template>
 

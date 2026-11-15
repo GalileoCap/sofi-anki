@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 4: the sticker chart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="frame.css">
+<style>
+  /* The direction's tokens. Pink sticker-sheet paper for the neutrals, berry ink for the text and the accent. */
+  .dir {
+    --background: oklch(0.97 0.012 10);
+    --card: oklch(0.995 0.004 10);
+    --muted: oklch(0.94 0.02 10);
+    --border: oklch(0.88 0.035 10);
+    --foreground: oklch(0.3 0.06 350);
+    --muted-foreground: oklch(0.52 0.05 350);
+    --primary: oklch(0.45 0.14 352);
+    --primary-foreground: oklch(0.985 0.008 10);
+    --positive: oklch(0.52 0.13 150);
+    --positive-soft: oklch(0.95 0.035 150);
+    --caution: oklch(0.56 0.13 65);
+    --caution-soft: oklch(0.95 0.04 75);
+    --negative: oklch(0.52 0.18 27);
+    --negative-soft: oklch(0.95 0.025 25);
+    --shadow-sm: 0 1px 2px oklch(0.3 0.06 350 / 0.25);
+    --shadow-md: 0 8px 20px -6px oklch(0.3 0.06 350 / 0.22);
+    --xs: 13.5px; --sm: 15.75px; --base: 18px; --lg: 20.25px; --xl: 22.5px; --2xl: 27px;
+    --r-md: 12px; --r-xl: 22px;
+    font-family: "M PLUS Rounded 1c", sans-serif;
+    font-size: var(--base);
+    line-height: 1.55;
+    background: var(--background);
+    color: var(--foreground);
+  }
+  .dark .dir {
+    --background: oklch(0.2 0.025 350);
+    --card: oklch(0.25 0.03 350);
+    --muted: oklch(0.3 0.035 350);
+    --border: oklch(0.38 0.04 350);
+    --foreground: oklch(0.95 0.015 10);
+    --muted-foreground: oklch(0.76 0.03 10);
+    --primary: oklch(0.82 0.1 355);
+    --primary-foreground: oklch(0.22 0.04 350);
+    --positive: oklch(0.78 0.14 150);
+    --positive-soft: oklch(0.3 0.05 150);
+    --caution: oklch(0.82 0.13 75);
+    --caution-soft: oklch(0.3 0.05 70);
+    --negative: oklch(0.72 0.16 25);
+    --negative-soft: oklch(0.3 0.06 25);
+    --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.5);
+    --shadow-md: 0 8px 20px -6px oklch(0 0 0 / 0.6);
+  }
+  .dir code, .dir pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .dir code { font-size: 0.85em; }
+  .dir .figure { font-variant-numeric: tabular-nums; }
+
+  .home, .run { padding: 18px 16px 24px; display: flex; flex-direction: column; gap: 16px; min-height: min(100vh, 780px); }
+  .home h1 { margin: 0; font-size: var(--2xl); font-weight: 800; }
+  .home .sub { margin: 0; color: var(--muted-foreground); font-size: var(--sm); }
+  .top { display: flex; justify-content: space-between; align-items: center; font-size: var(--sm); color: var(--muted-foreground); }
+  .pill { min-height: 54px; border: 0; border-radius: 999px; background: var(--primary); color: var(--primary-foreground); font: inherit; font-weight: 800; font-size: var(--base); cursor: pointer; }
+
+  /* The sticker sheet: the daily goal as twenty spots, each card studied fills one in its deck's colour. */
+  .sheet { background: var(--card); border: 2px dashed var(--border); border-radius: var(--r-xl); padding: 14px 16px; }
+  .sheet .label { display: flex; justify-content: space-between; font-size: var(--sm); font-weight: 700; margin-bottom: 10px; }
+  .sheet .label span:last-child { color: var(--muted-foreground); font-weight: 500; }
+  .spots { display: grid; grid-template-columns: repeat(10, 1fr); gap: 7px; }
+  .spot { aspect-ratio: 1; border-radius: 50%; border: 2px dotted var(--border); }
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: var(--xs); color: var(--muted-foreground); margin-top: 14px; }
+  .week i { display: block; width: 28px; height: 28px; margin: 0 auto 2px; border-radius: 50%; background: #f59e0b; border: 3px solid var(--card); box-shadow: var(--shadow-sm); }
+  .week .today i { background: none; border: 2px dotted var(--border); box-shadow: none; }
+
+  /* Decks as notebook covers: the deck's colour, its emoji as a sticker, a label block with what is due. */
+  .covers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cover { border-radius: 8px var(--r-xl) var(--r-xl) 8px; padding: 14px 12px 12px; display: flex; flex-direction: column; gap: 14px; min-height: 170px; }
+  .cover .sticker { width: 48px; height: 48px; border-radius: 50%; background: var(--card); display: grid; place-items: center; font-size: 26px; box-shadow: var(--shadow-sm); }
+  .cover .labelblock { margin-top: auto; background: var(--card); border-radius: var(--r-md); padding: 8px 10px; }
+  .cover .labelblock b { display: block; font-size: var(--sm); font-weight: 700; line-height: 1.3; }
+  .cover .labelblock span { font-size: var(--xs); color: var(--muted-foreground); }
+
+  /* Study: the card, and grades as round rubber stamps. */
+  .mini { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
+  .studycard { flex: 1; background: var(--card); border-radius: var(--r-xl); box-shadow: var(--shadow-md); padding: 18px; }
+  .studycard .deck { display: flex; align-items: center; gap: 8px; font-size: var(--xs); color: var(--muted-foreground); }
+  .studycard .deck .sticker { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; border: 3px solid var(--card); box-shadow: var(--shadow-sm); }
+  .studycard h2 { margin: 10px 0 10px; font-size: var(--xl); font-weight: 800; }
+  .studycard p { margin: 0 0 10px; }
+  .studycard pre { margin: 0 0 10px; padding: 10px 12px; background: var(--muted); border-radius: var(--r-md); font-size: var(--sm); }
+  .stamps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; justify-items: center; }
+  .stamp { width: 86px; height: 86px; border-radius: 50%; border: 3px solid currentColor; background: var(--card); display: grid; place-items: center; font: inherit; font-weight: 800; font-size: var(--sm); cursor: pointer; position: relative; }
+  .stamp::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: 1.5px dashed currentColor; opacity: 0.6; }
+  .stamp.wrong { color: var(--negative); }
+  .stamp.almost { color: var(--caution); }
+  .stamp.right { color: var(--positive); }
+
+  /* Laptop: the sheet beside the covers. */
+  .laptop .home { display: grid; grid-template-columns: 380px 1fr; gap: 20px 40px; padding: 32px 48px; align-content: start; }
+  .laptop .home > header, .laptop .home > .pill { grid-column: 1; }
+  .laptop .home > .covers { grid-column: 2; grid-row: 1 / span 4; grid-template-columns: repeat(3, 1fr); align-content: start; }
+  .laptop .pill { justify-self: start; padding: 0 32px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bar">
+    <h1>Direction 4 of 4: the sticker chart</h1>
+    <button type="button" onclick="document.body.classList.toggle('dark-page'); document.querySelectorAll('.theme').forEach((e) => e.classList.toggle('dark'))">Light / dark</button>
+    <nav><a href="index.html">All four</a><a href="1-leitner-box.html">1</a><a href="2-index-card.html">2</a><a href="3-reading-room.html">3</a><a href="4-sticker-chart.html" aria-current="page">4</a></nav>
+  </div>
+
+  <p class="bet"><strong>The bet:</strong> studying fills a sticker sheet. The daily goal is twenty spots, and each card studied puts down a sticker in its deck's colour, so the cute part is the progress itself.</p>
+  <div class="notes">
+    <p>The one bold element is the sticker sheet, from the reward charts of a classroom. It shows real data: today's twenty spots are the daily goal, and the week's row is the streak, a sticker for each day studied, in the colour of the deck studied that day. Decks are notebook covers in their own colour, the emoji they chose set on them as a sticker. Grades are round rubber stamps, the kind a teacher presses on homework.</p>
+    <p>What it changes: home opens on today's sheet and one big Study button, then the covers ranked by due. Studying fills a spot after each grade, which is the feedback the brief allows. Everything cute carries something the person did or chose: no mascots, no props, no confetti.</p>
+    <p>References: a classroom sticker chart, a teacher's rubber stamps, school notebook covers, Japanese school stationery for the rounded type.</p>
+  </div>
+
+  <section class="part">
+    <h2>The default check</h2>
+    <table class="check">
+      <tr><th>Decision</th><td class="generic">The generic choice</td><td>This direction</td></tr>
+      <tr><th>Colour</th><td class="generic">Grey shadcn neutrals and one saturated accent; cream with terracotta for cozy</td><td>Neutrals tinted from pink sticker-sheet paper (hue 10, chroma under 0.04), text and the accent in berry ink. Saturated colour only in the decks' covers and stickers and the three stamps.</td></tr>
+      <tr><th>Type</th><td class="generic">Inter or Figtree; Fredoka or Nunito for cute</td><td>M PLUS Rounded 1c, a rounded face drawn in the tradition of Japanese school signage, steady enough to read card text at length. Code in the system's monospace. Spanish accents covered.</td></tr>
+      <tr><th>Layout</th><td class="generic">A grid of deck covers over a row of stat tiles</td><td>Today's sheet and the Study button first. Covers ranked by due, two to a row on a phone.</td></tr>
+      <tr><th>Shape</th><td class="generic">One radius and one soft shadow on every box</td><td>Large radii and pill buttons. Stickers have the small shadow of a thing stuck on, the card in study the larger one.</td></tr>
+      <tr><th>Decoration</th><td class="generic">Emoji, gradients, props, a mascot</td><td>No mascot, no props. The stickers are the goal, the streak and the decks' own emoji.</td></tr>
+      <tr><th>Motion</th><td class="generic">Fades and lifts on every element</td><td>A sticker pressed onto its spot after each grade, and the card turning.</td></tr>
+    </table>
+  </section>
+
+  <section class="part theme">
+    <h2>Type specimen</h2>
+    <div class="dir" style="padding: 20px; border-radius: 10px;">
+      <div style="font-size: var(--2xl); font-weight: 800;">Today, 2xl 27 px</div>
+      <div style="font-size: var(--xl); font-weight: 800;">What is a closure? xl 22.5 px</div>
+      <div style="font-size: var(--lg); font-weight: 700;">6 cards to study, lg 20.25 px</div>
+      <p style="margin: 6px 0;">A function that retains access to its enclosing scope's variables even after the outer function has returned. Base 18 px.</p>
+      <p style="margin: 6px 0;">¿Cuál es la diferencia entre <code>let</code> y <code>const</code>? Las dos tienen ámbito de bloque; sólo <code>let</code> admite reasignación. Ñandú, pingüino, acción.</p>
+      <pre style="margin: 8px 0; font-size: var(--sm); background: var(--muted); padding: 12px; border-radius: 12px;">const inc = makeCounter();
+inc(); // 1</pre>
+      <div style="font-size: var(--sm);">Labels and list lines, sm 15.75 px. <span class="figure">0 of 20, 10 days, 5 due</span></div>
+      <div style="font-size: var(--xs); color: var(--muted-foreground);">Fine print and counts, xs 13.5 px</div>
+    </div>
+  </section>
+
+  <section class="part">
+    <h2>Tokens (each chip: light on the left, dark on the right)</h2>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section class="part">
+    <h2>Home, and study with the answer shown</h2>
+    <div class="devices">
+      <div><p class="device-label">Phone, home</p><div class="device phone theme"><div class="dir" data-screen data-template="home"></div></div></div>
+      <div><p class="device-label">Phone, study</p><div class="device phone theme"><div class="dir" data-screen data-template="grade"></div></div></div>
+      <div><p class="device-label">Laptop, home</p><div class="device laptop theme"><div class="dir" data-screen data-template="home"></div></div></div>
+    </div>
+  </section>
+</div>
+
+<template id="home">
+  <div class="home">
+    <header>
+      <div class="top"><span></span><span>Stats&nbsp;&nbsp;&nbsp;More</span></div>
+      <h1>Today</h1>
+      <p class="sub"><span class="figure">6</span> cards are waiting, from <span class="figure">2</span> decks</p>
+    </header>
+    <div class="sheet">
+      <div class="label"><span>Today's sheet</span><span class="figure">0 of 20</span></div>
+      <div class="spots" data-spots="20"></div>
+      <div class="week"><span><i></i>M</span><span><i></i>T</span><span><i></i>W</span><span><i></i>T</span><span><i></i>F</span><span><i></i>S</span><span class="today"><i></i>Today</span></div>
+      <div style="text-align: center; font-size: var(--xs); color: var(--muted-foreground); margin-top: 6px;"><span class="figure">10</span> days in a row</div>
+    </div>
+    <button class="pill" type="button">Study 6 cards</button>
+    <div class="covers">
+      <div class="cover" style="background: #f59e0b;"><span class="sticker">⚡</span><div class="labelblock"><b>JavaScript Fundamentals</b><span><span class="figure">5</span> due of 12</span></div></div>
+      <div class="cover" style="background: #863bff;"><span class="sticker">📖</span><div class="labelblock"><b>sofi-anki Guide</b><span><span class="figure">1</span> due of 12</span></div></div>
+    </div>
+  </div>
+</template>
+
+<template id="grade">
+  <div class="run">
+    <div class="top"><span>Leave</span><span class="figure">1 of 6</span><span>More</span></div>
+    <div class="mini" data-spots="20" aria-label="0 of 20 today"></div>
+    <div class="studycard">
+      <div class="deck"><span class="sticker" style="background: #f59e0b">⚡</span>JavaScript Fundamentals</div>
+      <h2>What is a closure?</h2>
+      <p>A function that <strong>retains access</strong> to its enclosing scope's variables even after the outer function has returned.</p>
+      <pre>function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}
+const inc = makeCounter();
+inc(); // 1</pre>
+      <p>Closures power data privacy, partial application, and memoization.</p>
+    </div>
+    <div class="stamps">
+      <button class="stamp wrong" type="button">Wrong</button>
+      <button class="stamp almost" type="button">Almost</button>
+      <button class="stamp right" type="button">Right</button>
+    </div>
+  </div>
+</template>
+
+<script src="frame.js"></script>
+<script>
+  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById(screen.dataset.template ?? "home").content.cloneNode(true));
+  for (const host of document.querySelectorAll("[data-spots], [data-mini]")) {
+    host.innerHTML = '<i class="spot"></i>'.repeat(Number(host.dataset.spots ?? 10));
+  }
+  const roles = ["background", "card", "muted", "border", "foreground", "muted-foreground", "primary", "primary-foreground", "positive", "positive-soft", "caution", "caution-soft", "negative", "negative-soft"];
+  const light = document.createElement("div"); light.className = "dir"; document.body.append(light);
+  const darkHost = document.createElement("div"); darkHost.className = "dark"; const dark = document.createElement("div"); dark.className = "dir"; darkHost.append(dark); document.body.append(darkHost);
+  const read = (el, role) => getComputedStyle(el).getPropertyValue(`--${role}`).trim();
+  document.getElementById("swatches").innerHTML = roles.map((role) => `<div class="swatch"><div class="chip"><span style="background:${read(light, role)}"></span><span style="background:${read(dark, role)}"></span></div><b>${role}</b><code>${read(light, role)}</code></div>`).join("");
+  light.remove(); darkHost.remove();
+</script>
+</body>
+</html>

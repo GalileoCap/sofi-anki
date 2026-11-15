@@ -3,69 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Three directions for sofi-anki</title>
+<title>Four directions for sofi-anki</title>
 <link rel="stylesheet" href="frame.css">
 <style>
-  .page { max-width: 1260px; }
-  .compare { display: grid; grid-template-columns: repeat(3, 375px); gap: 28px; justify-content: center; margin-top: 20px; }
-  .compare h2 { margin: 0; font-size: 17px; }
-  .compare .one { margin: 4px 0 12px; min-height: 4.5em; font-size: 14px; }
-  .moment { font-size: 13px; opacity: 0.7; margin: 14px 0 6px; }
-  iframe { display: block; width: 375px; height: 700px; border: 1px solid rgb(127 127 127 / 0.35); border-radius: 10px; background: #fff; }
-  .lead { max-width: 52em; margin: 16px auto 0; }
+  .page { max-width: 1340px; }
+  .compare { display: grid; grid-template-columns: repeat(4, 300px); gap: 24px; justify-content: center; margin-top: 20px; }
+  .compare h2 { margin: 0; font-size: 16px; }
+  .compare .one { margin: 4px 0 8px; min-height: 6.2em; font-size: 13.5px; }
+  .moment { font-size: 13px; opacity: 0.7; margin: 12px 0 6px; }
+  /* Each screen is drawn at 375 px and shown at four fifths, so four fit across a laptop. */
+  .frame { width: 300px; height: 600px; border: 1px solid rgb(127 127 127 / 0.35); border-radius: 10px; overflow: hidden; }
+  iframe { display: block; width: 375px; height: 750px; border: 0; transform: scale(0.8); transform-origin: 0 0; }
+  .lead { max-width: 56em; margin: 16px auto 0; }
   .lead p { margin: 0 0 8px; }
-  table.check { margin-top: 8px; }
+  @media (max-width: 1320px) { .compare { grid-template-columns: repeat(2, 300px); } }
 </style>
 </head>
 <body>
 <div class="page">
   <div class="bar">
-    <h1>Three directions for sofi-anki</h1>
+    <h1>Four directions for sofi-anki</h1>
     <button type="button" id="dark">Light / dark</button>
   </div>
   <div class="lead">
-    <p>Each direction is a different answer to one question: <strong>what do you see when you open the app, and how do you get to studying?</strong> Below, the same two moments on a phone, for each: opening the app, and grading the same card. The palette and type differ too, but the arrangement is what you are choosing.</p>
+    <p>Each direction is a different answer to one question: <strong>what do you see when you open the app, and how do you get to studying?</strong> Below, the same two screens on a phone for each: home, and studying a due card with its answer shown. The card is the same in all four.</p>
   </div>
 
   <div class="compare">
     <div>
       <h2><a href="1-leitner-box.html">1. The Leitner box</a></h2>
-      <p class="one">You open on your schedule, drawn as a box: every card from every deck, sorted into today, tomorrow, this week. Study takes what is due today. Each grade says where the card goes next.</p>
-      <p class="moment">Opening the app</p>
-      <iframe data-src="1-leitner-box.html?only=home" title="Leitner box, opening the app"></iframe>
-      <p class="moment">Grading a card</p>
-      <iframe data-src="1-leitner-box.html?only=grade" title="Leitner box, grading a card"></iframe>
+      <p class="one">Home is your schedule drawn as a box: every card from every deck, sorted into today, tomorrow, this week. Each grade says where the card goes next.</p>
+      <p class="moment">Home</p>
+      <div class="frame"><iframe data-src="1-leitner-box.html?only=home" title="Leitner box, home"></iframe></div>
+      <p class="moment">Study, the one screen: a due card, answer shown</p>
+      <div class="frame"><iframe data-src="1-leitner-box.html?only=grade" title="Leitner box, study"></iframe></div>
     </div>
     <div>
       <h2><a href="2-index-card.html">2. The index card</a></h2>
-      <p class="one">You open straight on the next due card. There is no home screen to read first: decks, stats and editing sit behind a button. A grade brings the next card at once.</p>
-      <p class="moment">Opening the app</p>
-      <iframe data-src="2-index-card.html?only=screen&amp;state=closed" title="Index card, opening the app"></iframe>
-      <p class="moment">Grading a card</p>
-      <iframe data-src="2-index-card.html?only=screen" title="Index card, grading a card"></iframe>
+      <p class="one">The app opens straight on the next due card. Home is behind its Decks button: each deck as an index card. Grades are a tick, half tick and cross.</p>
+      <p class="moment">Home</p>
+      <div class="frame"><iframe data-src="2-index-card.html?only=home" title="Index card, home"></iframe></div>
+      <p class="moment">Study, the one screen: a due card, answer shown</p>
+      <div class="frame"><iframe data-src="2-index-card.html?only=screen" title="Index card, study"></iframe></div>
     </div>
     <div>
       <h2><a href="3-reading-room.html">3. The reading room</a></h2>
-      <p class="one">You open on a table of your decks, and a deck opens in place into its cards with their due dates. Studying happens inside that same table, one row at a time. Built for the laptop and the keyboard.</p>
-      <p class="moment">Opening the app</p>
-      <iframe data-src="3-reading-room.html?only=screen" title="Reading room, opening the app"></iframe>
-      <p class="moment">Grading a card</p>
-      <iframe data-src="3-reading-room.html?only=grade" title="Reading room, grading a card"></iframe>
+      <p class="one">Home is a table of decks; a deck opens in place into its cards with their due dates. Studying happens in that same table, one row at a time. Laptop first.</p>
+      <p class="moment">Home</p>
+      <div class="frame"><iframe data-src="3-reading-room.html?only=screen" title="Reading room, home"></iframe></div>
+      <p class="moment">Study, the one screen: a due card, answer shown</p>
+      <div class="frame"><iframe data-src="3-reading-room.html?only=grade" title="Reading room, study"></iframe></div>
+    </div>
+    <div>
+      <h2><a href="4-sticker-chart.html">4. The sticker chart</a> (cutesy)</h2>
+      <p class="one">Home is today's sticker sheet: the daily goal as twenty spots, filled by each card studied in its deck's colour. Decks are notebook covers. Grades are round rubber stamps.</p>
+      <p class="moment">Home</p>
+      <div class="frame"><iframe data-src="4-sticker-chart.html?only=home" title="Sticker chart, home"></iframe></div>
+      <p class="moment">Study, the one screen: a due card, answer shown</p>
+      <div class="frame"><iframe data-src="4-sticker-chart.html?only=grade" title="Sticker chart, study"></iframe></div>
     </div>
   </div>
 
   <section class="part lead">
     <h2>How they differ</h2>
     <table class="check">
-      <tr><th></th><td>1. Leitner box</td><td>2. Index card</td><td>3. Reading room</td></tr>
-      <tr><th>First screen</th><td>The schedule, as a box</td><td>The next card</td><td>A table of decks</td></tr>
-      <tr><th>To start studying</th><td>One tap</td><td>None, it is already there</td><td>One tap, or <code>s</code></td></tr>
-      <tr><th>Where decks live</th><td>A list under the box</td><td>Behind a button</td><td>The main table</td></tr>
-      <tr><th>Studying</th><td>A card on its own screen, grades show where it goes</td><td>A ruled card, graded with a tick, half tick or cross</td><td>Inside the table, in the card's row</td></tr>
-      <tr><th>Made for</th><td>Phone and laptop alike</td><td>The phone first</td><td>The laptop first</td></tr>
-      <tr><th>Look</th><td>Beech wood, Atkinson Hyperlegible</td><td>Card stock and pencil, Literata serif</td><td>Linen and stamp ink, Recursive</td></tr>
+      <tr><th></th><td>1. Leitner box</td><td>2. Index card</td><td>3. Reading room</td><td>4. Sticker chart</td></tr>
+      <tr><th>First screen</th><td>The schedule, as a box</td><td>The next card</td><td>A table of decks</td><td>Today's sticker sheet</td></tr>
+      <tr><th>To start studying</th><td>One tap</td><td>None, it is already there</td><td>One tap, or <code>s</code></td><td>One tap</td></tr>
+      <tr><th>Where decks live</th><td>A list under the box</td><td>Behind a button, as index cards</td><td>The main table</td><td>Notebook covers under the sheet</td></tr>
+      <tr><th>Grading</th><td>Buttons that say where the card goes</td><td>A tick, half tick or cross</td><td>Inside the card's row, keys 1 to 3</td><td>Round rubber stamps, and a sticker fills a spot</td></tr>
+      <tr><th>Made for</th><td>Phone and laptop alike</td><td>The phone first</td><td>The laptop first</td><td>The phone first</td></tr>
+      <tr><th>Feel</th><td>Calm, wooden</td><td>Paper and pencil</td><td>Quiet, dense</td><td>Cute, playful</td></tr>
+      <tr><th>Look</th><td>Beech wood, Atkinson Hyperlegible</td><td>Card stock, Literata serif</td><td>Linen and stamp ink, Recursive</td><td>Pink paper and berry ink, M PLUS Rounded</td></tr>
     </table>
-    <p style="margin-top: 12px;">Each name opens that direction's page, with its reasoning, its type, its colours and the laptop screen. Parts can be combined, for example the index card's study screen with the Leitner box's home. Every figure and card is the demo decks' own.</p>
+    <p style="margin-top: 12px;">Each name opens that direction's page, with its reasoning, type, colours and the laptop screen. Parts can be combined, for example the sticker sheet on the Leitner box's home. Every figure and card is the demo decks' own.</p>
   </section>
 </div>
 <script>
