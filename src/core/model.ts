@@ -144,3 +144,6 @@ export type Store = {
   readonly schedules: readonly CardSchedule[];
   readonly settings: Settings;
 };
+
+/** The theme the toggle moves to: light, dark, the system's, and round again. */
+export const nextTheme = (theme: Theme): Theme => themes[(themes.indexOf(theme) + 1) % themes.length];

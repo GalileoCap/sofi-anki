@@ -1,44 +1,26 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-type Theme = "light" | "dark" | "system";
+import { type Theme, nextTheme } from "@/core/model";
+import { readTheme } from "@/core/stored";
+import { readStoredValue, writeStored } from "@/effects/storage";
+import { onSystemThemeChange, showDark, systemPrefersDark } from "@/effects/theme";
 
-function getSystemTheme(): "light" | "dark" {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
-
-function applyTheme(theme: Theme) {
-  const resolved = theme === "system" ? getSystemTheme() : theme;
-  document.documentElement.classList.toggle("dark", resolved === "dark");
-}
-
+/** The theme picked, shown on the page and kept for the next visit. */
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    return (localStorage.getItem("anki-theme") as Theme) ?? "system";
-  });
+  const [theme, setTheme] = useState<Theme>(() => readTheme(readStoredValue("theme")));
 
   useEffect(() => {
-    applyTheme(theme);
-    localStorage.setItem("anki-theme", theme);
+    const show = () => showDark(theme === "dark" || (theme === "system" && systemPrefersDark()));
+    show();
+    return theme === "system" ? onSystemThemeChange(show) : undefined;
   }, [theme]);
 
-  // Listen for system theme changes when in "system" mode
-  useEffect(() => {
-    if (theme !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => applyTheme("system");
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, [theme]);
-
+  /** A theme the browser refuses to keep still shows for this visit. */
   function cycleTheme() {
-    setThemeState((prev) => {
-      if (prev === "light") return "dark";
-      if (prev === "dark") return "system";
-      return "light";
-    });
+    const next = nextTheme(theme);
+    setTheme(next);
+    writeStored("theme", next);
   }
 
-  return { theme, setTheme: setThemeState, cycleTheme };
+  return { theme, cycleTheme };
 }

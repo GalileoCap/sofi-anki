@@ -57,3 +57,9 @@ export const readLang = (text: string | null): Lang =>
 /** The stored theme, or `DEFAULT_THEME` when none or an unknown one is stored. */
 export const readTheme = (text: string | null): Theme =>
   themes.find((theme) => theme === text) ?? DEFAULT_THEME;
+
+const storeKeys: readonly StoreKey[] = ["decks", "runs", "schedules", "settings"];
+
+/** The text to store under each key whose value changed from `before` to `after`. */
+export const changedText = (before: Store, after: Store): [StoreKey, string][] =>
+  storeKeys.filter((key) => before[key] !== after[key]).map((key) => [key, JSON.stringify(after[key])]);
