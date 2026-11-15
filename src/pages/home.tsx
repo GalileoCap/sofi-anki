@@ -49,7 +49,7 @@ type HomeProps = {
 export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStudy }: HomeProps) {
   const { t, tp } = useLanguage();
   const { decks, runs } = store;
-  const [dialog, setDialog] = useState<"json" | "apkg" | "backup" | "goal" | null>(null);
+  const [dialog, setDialog] = useState<"newDeck" | "json" | "apkg" | "backup" | "goal" | null>(null);
   const [search, setSearch] = useState("");
   const schedules = indexSchedules(store.schedules);
   const due = dueItems(
@@ -71,9 +71,10 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
     onOpenChange: (open: boolean) => setDialog(open ? name : null),
   });
 
-  const newDeckForm = (trigger: React.ReactNode) => (
+  const newDeckForm = (trigger?: React.ReactNode) => (
     <DeckForm
       trigger={trigger}
+      {...(trigger === undefined && dialogProps("newDeck"))}
       onSubmit={(title, tags, color, emoji) => update(withDecks((d) => addDeck(d, newDeck(newId(), { title, tags, color, emoji }, clockNow()))))}
     />
   );
@@ -101,9 +102,10 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
             {t("common.stats")}
           </Button>
         )}
-        <HomeMenu onDialog={setDialog} newDeckForm={newDeckForm} />
+        <HomeMenu onDialog={setDialog} />
       </div>
 
+      {dialog === "newDeck" && newDeckForm()}
       <ImportDeckDialog {...dialogProps("json")} onImport={(data) => update(withDecks((d) => addDeck(d, deckFromJson(data, clockNow(), newId))))} />
       <ImportApkgDialog {...dialogProps("apkg")} onImport={(parsed) => update((s) => receiveAnkiDecks(s, parsed.decks, parsed.schedules))} />
       <BackupDialog {...dialogProps("backup")} store={store} onRestore={(restored) => update(() => restored)} />
@@ -207,12 +209,11 @@ function TodaySheet({ store, now, goal }: { store: Store; now: Millis; goal: num
 }
 
 type HomeMenuProps = {
-  onDialog: (dialog: "json" | "apkg" | "backup" | "goal") => void;
-  newDeckForm: (trigger: React.ReactNode) => React.ReactNode;
+  onDialog: (dialog: "newDeck" | "json" | "apkg" | "backup" | "goal") => void;
 };
 
 /** Home's menu: what is done now and then, from a new deck to the theme and the language. */
-function HomeMenu({ onDialog, newDeckForm }: HomeMenuProps) {
+function HomeMenu({ onDialog }: HomeMenuProps) {
   const { t, lang, setLang } = useLanguage();
   const { theme, cycleTheme } = useTheme();
   const item = (label: string, onSelect: () => void) => (
@@ -227,11 +228,7 @@ function HomeMenu({ onDialog, newDeckForm }: HomeMenuProps) {
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
-          {newDeckForm(
-            <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => e.preventDefault()}>
-              {t("home.newDeck")}
-            </DropdownMenu.Item>,
-          )}
+          {item(t("home.newDeck"), () => onDialog("newDeck"))}
           {item(t("home.fromAnki"), () => onDialog("apkg"))}
           {item(t("home.fromJson"), () => onDialog("json"))}
           {item(t("home.backup"), () => onDialog("backup"))}

@@ -109,7 +109,7 @@ const results = [];
 let violations = 0;
 
 /** Audits one screen, the element `screen`, and keeps its result and screenshot. */
-async function audit(page, screen, { id, name, mode, isPhone }) {
+async function audit(page, screen, { id, name, mode, isPhone, whole }) {
   await page.evaluate(() => document.fonts.ready);
   await screen.evaluate((e, i) => e.setAttribute("data-audit", i), id);
   const axe = await new AxeBuilder({ page })
@@ -125,7 +125,8 @@ async function audit(page, screen, { id, name, mode, isPhone }) {
   violations += found.reduce((sum, v) => sum + v.nodes.length, 0);
   const dom = await screen.evaluate(inspect, isPhone);
   const shot = join(out, `${id}-${mode}.png`);
-  await screen.screenshot({ path: shot });
+  // A whole page is shot as the viewport shows it, since a dialog is fixed over a body that may be shorter.
+  await (whole ? page.screenshot({ path: shot, fullPage: true }) : screen.screenshot({ path: shot }));
   results.push({ screen: id, name, mode, phone: isPhone, shot, axe: found, ...dom });
 }
 
@@ -148,7 +149,7 @@ if (values.walk) {
         const height = await page.evaluate(() => document.documentElement.scrollHeight);
         await page.setViewportSize({ width: viewport.width, height: Math.max(viewport.height, height) });
         // A dialog or menu renders outside the root, so the screen is the body.
-        await audit(page, page.locator("body"), { id: `${device}-${String(i).padStart(2, "0")}`, name, mode, isPhone: device === "phone" });
+        await audit(page, page.locator("body"), { id: `${device}-${String(i).padStart(2, "0")}`, name, mode, isPhone: device === "phone", whole: true });
         await context.close();
       }
     }

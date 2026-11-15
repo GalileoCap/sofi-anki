@@ -59,7 +59,7 @@ export function MonthSheet({ runs, decks, now }: { runs: readonly RunRecord[]; d
 
 /** Each run's first tries as a bar of right, almost and wrong, oldest first, with the run's deck under it when the runs span decks. */
 export function FirstTriesChart({ runs, decks }: { runs: readonly RunRecord[]; decks: readonly Deck[] }) {
-  const { t, tp, lang } = useLanguage();
+  const { t, lang } = useLanguage();
   const shown = [...runs].sort((a, b) => a.completedAt - b.completedAt).slice(-SHOWN_RUNS);
   const counts = shown.map((run) => firstTries(run));
   const top = Math.max(1, ...counts.map((c) => c.correct + c.approximate + c.wrong));
@@ -74,9 +74,7 @@ export function FirstTriesChart({ runs, decks }: { runs: readonly RunRecord[]; d
     <div>
       <div className="flex items-baseline justify-between gap-3">
         <h2 className={looks.sectionTitle}>{t("stats.firstTries")}</h2>
-        <span className={looks.fineFigure}>
-          {shown.length} {tp(shown.length, "stats.runOne", "stats.runMany")}
-        </span>
+        {runs.length > SHOWN_RUNS && <span className={looks.fineFigure}>{t("stats.lastRuns").replace("{n}", String(SHOWN_RUNS))}</span>}
       </div>
       <div className="mt-1 grid grid-cols-[auto_1fr] gap-1.5">
         <div className="flex h-24 flex-col justify-between text-right text-xs text-muted-foreground tabular-nums" aria-hidden="true">

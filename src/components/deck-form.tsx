@@ -21,7 +21,10 @@ const swatch = (picked: boolean): string =>
   cn("size-10 cursor-pointer rounded-full border-[3px] transition-colors", picked ? "border-foreground" : "border-card hover:border-border");
 
 interface DeckFormProps {
-  trigger: React.ReactNode;
+  /** What opens the form; without one, the form is opened by `open`. */
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onSubmit: (title: string, tags: string[], color?: string, emoji?: string) => void;
   initialTitle?: string;
   initialTags?: string[];
@@ -33,6 +36,8 @@ interface DeckFormProps {
 
 export function DeckForm({
   trigger,
+  open: controlledOpen,
+  onOpenChange,
   onSubmit,
   initialTitle = "",
   initialTags = [],
@@ -44,14 +49,16 @@ export function DeckForm({
   const { t } = useLanguage();
   const resolvedTitle = dialogTitle ?? t("deckForm.newDeck");
   const resolvedSubmit = submitLabel ?? t("common.create");
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+  const open = controlledOpen ?? ownOpen;
   const [title, setTitle] = useState(initialTitle);
   const [tags, setTags] = useState<string[]>(initialTags);
   const [color, setColor] = useState<string | undefined>(initialColor);
   const [emoji, setEmoji] = useState(initialEmoji ?? "");
 
   function handleOpenChange(next: boolean) {
-    setOpen(next);
+    setOwnOpen(next);
+    onOpenChange?.(next);
     if (next) {
       setTitle(initialTitle);
       setTags(initialTags);
@@ -69,12 +76,12 @@ export function DeckForm({
     setTags([]);
     setColor(undefined);
     setEmoji("");
-    setOpen(false);
+    handleOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{resolvedTitle}</DialogTitle>

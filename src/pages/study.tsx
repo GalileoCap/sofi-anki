@@ -1,7 +1,7 @@
 import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
 
-import { Key, Sheet, Spots } from "@/components/sticker";
+import { EmojiSticker, Key, Sheet, Spots } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import type { CardRunResult, Deck, SessionGoal, Store } from "@/core/model";
@@ -137,21 +137,33 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
   const inRun = new Map<string, number>();
   for (const item of items) inRun.set(item.deckId, (inRun.get(item.deckId) ?? 0) + 1);
 
+  const sheetValue = t("home.ofGoal").replace("{n}", String(stickers.length)).replace("{goal}", String(dailyGoal));
+
   return (
     <main className={cn(looks.page, "grid min-h-dvh gap-x-10 gap-y-4 lg:grid-cols-[17.5rem_minmax(0,45rem)]")}>
       <aside className="hidden flex-col gap-4 pt-15 lg:flex">
-        <Sheet label={t("home.sheet")} value={t("home.ofGoal").replace("{n}", String(stickers.length)).replace("{goal}", String(dailyGoal))}>
+        <Sheet label={t("home.sheet")} value={sheetValue}>
           <Spots stickers={stickers} goal={dailyGoal} decks={before.decks} />
         </Sheet>
         <div>
           <h2 className={looks.sectionTitle}>{t("study.inThisRun")}</h2>
           <div className={looks.list}>
-            {[...inRun].map(([deckId, count]) => (
-              <div key={deckId} className={looks.listRow}>
-                <span>{before.decks.find((deck) => deck.id === deckId)?.title}</span>
-                <span className="tabular-nums">{count}</span>
-              </div>
-            ))}
+            {[...inRun].flatMap(([deckId, count]) => {
+              const deck = before.decks.find((d) => d.id === deckId);
+              return deck === undefined
+                ? []
+                : [
+                    <div key={deckId} className={looks.listRow}>
+                      <span className={cn(looks.row, "min-w-0")}>
+                        <EmojiSticker deck={deck} />
+                        <span className="truncate" title={deck.title}>
+                          {deck.title}
+                        </span>
+                      </span>
+                      <span className={looks.figure}>{count}</span>
+                    </div>,
+                  ];
+            })}
           </div>
         </div>
         <p className={looks.fine}>{t("study.keys")}</p>
@@ -169,6 +181,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
           <StudyMenu paused={paused} canUndo={run.undo.length > 0} onPostpone={postpone} onSkip={skip} onPause={togglePause} onUndo={undo} />
         </div>
         <div className="lg:hidden">
+          <p className="sr-only">{`${t("home.sheet")}: ${sheetValue}`}</p>
           <Spots stickers={stickers} goal={dailyGoal} decks={before.decks} />
         </div>
         {goal && (

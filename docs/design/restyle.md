@@ -32,3 +32,39 @@ The owner approved the mock, which leaves these out of the screens. Each is reco
 - The confetti goes. The sheet filling is the feedback for the daily goal.
 - Stats measure accuracy as right on the first try, as the run's end does, and rank the decks by it, the lowest first. The stat tiles (decks, cards, sessions, total time) go (`data-2`).
 - A deck's stats are its line of runs, average time and first tries, its month, its chart, and its runs, each opening to its cards' tries. Each card's accuracy, time and interval history go, since the deck page's table shows each card's last grade, how often it was right and when it comes back.
+
+## Step 10: T4 and T5 on the app
+
+On 2026-11-15, `pnpm design:audit <url> --walk scripts/app-screens.mjs` audited 16 screens of the running app (home and its five dialogs, stats, the deck page and its three dialogs, deck stats, study before and after the answer, the run's end, a shared link), each at 375 and 1280 px, light and dark. It found no contrast failure. It found these, now fixed:
+
+- No main landmark.
+- A cut question with no ellipsis, since inline Markdown rendered a block.
+- Truncated deck names without their full text.
+- Study's topbar 14 px wider than the column.
+- Pills of 41 px and a tag field of 27 px.
+- Dialog text under 16 px on a phone.
+- Scrolling JSON blocks that took no focus.
+
+It now finds nothing.
+
+A fresh subagent answered the checklist from those screenshots. Fixed from its answers:
+
+- The new-deck form opened from home's menu left the menu open behind it. It now closes the menu and opens on its own.
+- `sp-6`: the decks in a run, on the laptop's study aside, were names alone. They carry their stickers.
+- `data-4`, `type-6`, `sp-6`: a deck's runs read as absolute dates and clock faces ("Nov 14, 07:12 PM 03:02"). They read "Yesterday, 07:12 PM" or the weekday within a week, with the full date on hover, and the time in units ("3m 2s") aligned right. The run's end and the deck's average use the same units.
+- `data-2`: the chart repeated the run count shown above it. It names a count only when it shows the last 20 of more.
+- `data-2`, `col-6`: the sheet's spots on a phone in study had no label. They carry "Today's sheet: n of 20" for a screen reader.
+- Driving the dialogs found that the Anki import, JSON import and backup dialogs reopened on their last file. Their state now lives inside the dialog, which closing unmounts.
+
+Kept, each for the owner to overrule:
+
+- `type-4`: form labels are bold over regular values, as the mock's fields are.
+- `pro-5`, `col-2`, `hi-5`: the first-tries chart is the loudest thing on stats, in the grades' full colours, as in the mock.
+- `sp-5`: the card as it will study inside the card form, the option buttons of "Choose cards to study", the drop zone, the code blocks, and the decks as rows.
+- `sp-6`: a deck's line under its name says what matters on each screen (last studied, due, tags).
+- `data-3`: the run's end is one bar of proportions with its counts beneath, as in the mock.
+- `dec-3`: the stamps' dashed inner ring, the mock's rubber stamp.
+- `data-1`: the deck's cards keep their written order, and difficulty stays quiet text.
+- The rest of the mock's "Kept" list in [audit.md](../../mocks/sticker-chart/audit.md) stands.
+
+`hi-4` and `st-4` could not be answered from stills. Driven by hand, every error shown says what happened, and the Anki import's also says what to do. The backup's says nothing changed but not which file to choose.

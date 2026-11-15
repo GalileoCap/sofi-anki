@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/language-context";
 import type { Deck, Millis, RunRecord, Store } from "@/core/model";
 import { isAnswer } from "@/core/scheduler";
 import { firstTries, firstTryRight, newestFirst, totals } from "@/core/stats";
-import { clockFace } from "@/core/time";
+import { shortDuration } from "@/core/time";
 import type { TranslationKey } from "@/lib/translations";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ export function DeckStatsPage({ deck, store, now, onBack }: DeckStatsPageProps) 
   const right = firstTryRight(runs);
   const line = [
     `${runs.length} ${tp(runs.length, "stats.runOne", "stats.runMany")}`,
-    runs.length > 0 && t("deckStats.average").replace("{time}", clockFace(totals(runs).timeMs / runs.length)),
+    runs.length > 0 && t("deckStats.average").replace("{time}", shortDuration(totals(runs).timeMs / runs.length)),
     right !== null && t("stats.firstRight").replace("{p}", String(right)),
   ]
     .filter(Boolean)
@@ -63,7 +63,7 @@ export function DeckStatsPage({ deck, store, now, onBack }: DeckStatsPageProps) 
           <h2 className={looks.sectionTitle}>{t("deckStats.runs")}</h2>
           <div className={looks.list}>
             {runs.map((run) => (
-              <RunRow key={run.id} run={run} />
+              <RunRow key={run.id} run={run} now={now} />
             ))}
           </div>
         </div>
@@ -72,12 +72,26 @@ export function DeckStatsPage({ deck, store, now, onBack }: DeckStatsPageProps) 
   );
 }
 
+/** A run's day near now in words, today, yesterday or the weekday, and its date from a week back. */
+function runDay(at: Millis, now: Millis, lang: string): string {
+  const midnight = (moment: Millis) => new Date(moment).setHours(0, 0, 0, 0);
+  const days = Math.round((midnight(now) - midnight(at)) / 86_400_000);
+  const word =
+    days < 2
+      ? new Intl.RelativeTimeFormat(lang, { numeric: "auto" }).format(-days, "day")
+      : days < 7
+        ? new Date(at).toLocaleDateString(lang, { weekday: "long" })
+        : new Date(at).toLocaleDateString(lang, { month: "short", day: "numeric" });
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
 /** A run: when, how long, and its first tries, opening to each card with its tries. */
-function RunRow({ run }: { run: RunRecord }) {
+function RunRow({ run, now }: { run: RunRecord; now: Millis }) {
   const { t, lang } = useLanguage();
   const [open, setOpen] = useState(false);
   const counts = firstTries(run);
-  const when = new Date(run.completedAt).toLocaleDateString(lang, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  const time = new Date(run.completedAt).toLocaleTimeString(lang, { hour: "2-digit", minute: "2-digit" });
+  const full = new Date(run.completedAt).toLocaleDateString(lang, { dateStyle: "full" });
 
   return (
     <div className="border-b-[1.5px] border-border last:border-b-0">
@@ -87,8 +101,11 @@ function RunRow({ run }: { run: RunRecord }) {
         onClick={() => setOpen(!open)}
         className="flex min-h-11 w-full cursor-pointer flex-col gap-0.5 py-2.5 text-left transition-colors hover:bg-muted"
       >
-        <span>
-          {when} <span className={looks.figure}>{clockFace(run.totalTimeMs)}</span>
+        <span className={looks.spread}>
+          <span title={full}>
+            {runDay(run.completedAt, now, lang)}, {time}
+          </span>
+          <span className={looks.figure}>{shortDuration(run.totalTimeMs)}</span>
         </span>
         <span className="text-xs">
           {countWords

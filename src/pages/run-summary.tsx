@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/language-context";
 import type { CardRunResult, Deck } from "@/core/model";
 import { type RunItem, byFirstTry, isPerfect } from "@/core/run";
 import { scheduleKey } from "@/core/scheduler";
-import { clockFace } from "@/core/time";
+import { shortDuration } from "@/core/time";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
@@ -53,7 +53,7 @@ export function RunSummary({ results, items, decks, totalTimeMs, onRestart, onEx
           {results.length} {tp(results.length, "runEnd.cardStudied", "runEnd.cardsStudied")}
         </h1>
         <p className={looks.muted}>
-          {t("runEnd.fromIn").replace("{from}", from).replace("{time}", clockFace(totalTimeMs))}
+          {t("runEnd.fromIn").replace("{from}", from).replace("{time}", shortDuration(totalTimeMs))}
           {isPerfect(results) && ` ${t("runEnd.perfect")}`}
         </p>
       </div>
