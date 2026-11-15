@@ -14,7 +14,7 @@ import { dayKey } from "@/core/stats";
 import type { Store } from "@/core/model";
 import { now } from "@/effects/clock";
 import { download, readFileText } from "@/effects/files";
-import { looks } from "@/lib/looks";
+import { looks } from "@/lib/ui-looks";
 
 interface BackupDialogProps {
   trigger?: React.ReactNode;
@@ -74,8 +74,8 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
           <DialogTitle>{t("backup.title")}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">
+        <div className={looks.stack}>
+          <p className={looks.muted}>
             {t("backup.exportDesc")}
           </p>
           <Button variant="outline" onClick={handleExport}>
@@ -85,8 +85,8 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
 
         <Separator />
 
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">
+        <div className={looks.stack}>
+          <p className={looks.muted}>
             {t("backup.restoreDesc")}
           </p>
           <input
@@ -98,7 +98,7 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
           />
 
           {pending && !confirmReplace && (
-            <div className="flex gap-2">
+            <div className={looks.buttons}>
               <Button size="sm" variant="outline" onClick={() => doRestore("merge")}>
                 {t("backup.mergeKeep")}
               </Button>
@@ -113,7 +113,7 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
               <p className={looks.error}>
                 {t("backup.confirmReplace")}
               </p>
-              <div className="flex gap-2">
+              <div className={looks.buttons}>
                 <Button size="sm" variant="destructive" onClick={() => doRestore("replace")}>
                   {t("backup.yesReplace")}
                 </Button>

@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { storageKeys, type StoredError } from "@/core/stored";
 import { download } from "@/effects/files";
 import { type StorageError, readStoredText } from "@/effects/storage";
-import { looks } from "@/lib/looks";
+import { looks } from "@/lib/ui-looks";
 
 /** What shows instead of the app when the stored data does not read: the part that failed, and a way to keep a copy. */
 export function UnreadableStore({ error }: { error: StoredError | StorageError }) {
@@ -19,7 +19,7 @@ export function UnreadableStore({ error }: { error: StoredError | StorageError }
 
   return (
     <Page>
-      <div className="flex flex-col gap-4">
+      <div className={looks.form}>
         <h1 className={looks.title}>{t("store.unreadableTitle")}</h1>
         {error.kind === "unreadable" ? (
           <>

@@ -8,6 +8,7 @@ import { deckToJson } from "@/core/deck-json";
 import type { Deck } from "@/core/model";
 import { shareUrl } from "@/core/share";
 import { pageBase } from "@/effects/page";
+import { looks } from "@/lib/ui-looks";
 
 type ExportDialogProps = {
   deck: Deck;
@@ -36,7 +37,7 @@ export function ExportDialog({ deck, trigger, open: controlledOpen, onOpenChange
   return (
     <Dialog open={open} onOpenChange={changeOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-h-[85vh] overflow-y-auto overflow-x-hidden sm:max-w-2xl">
+      <DialogContent className={looks.wideDialog}>
         <DialogHeader>
           <DialogTitle>{t("exportDialog.title")}</DialogTitle>
         </DialogHeader>
@@ -44,11 +45,11 @@ export function ExportDialog({ deck, trigger, open: controlledOpen, onOpenChange
         {includeShareUrl && (
           <>
             <div className="flex min-w-0 flex-col gap-2">
-              <p className="text-sm font-medium">{t("exportDialog.shareLink")}</p>
+              <p className={looks.label}>{t("exportDialog.shareLink")}</p>
               {link === null ? (
-                <p className="text-xs text-muted-foreground">{t("exportDialog.tooLarge")}</p>
+                <p className={looks.fine}>{t("exportDialog.tooLarge")}</p>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className={looks.row}>
                   <p className="flex-1 truncate rounded bg-muted px-2 py-1 font-mono text-xs">{link}</p>
                   <CopyButton text={link} />
                 </div>
@@ -59,8 +60,8 @@ export function ExportDialog({ deck, trigger, open: controlledOpen, onOpenChange
         )}
 
         <div className="flex min-w-0 flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">{t("exportDialog.deckData")}</p>
+          <div className={looks.spread}>
+            <p className={looks.label}>{t("exportDialog.deckData")}</p>
             <CopyButton text={deckJson} />
           </div>
           <pre className="max-h-60 min-w-0 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{deckJson}</pre>

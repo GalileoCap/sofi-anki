@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/language-context";
 import type { DecodeError } from "@/core/decode";
 import { type DeckImport, type ImportCard, readCardsJson, readDeckJson } from "@/core/deck-json";
-import { looks } from "@/lib/looks";
+import { looks } from "@/lib/ui-looks";
 import type { TranslationKey } from "@/lib/translations";
 
 const DECK_EXAMPLE = '{\n  "title": "My Deck",\n  "cards": [\n    { "title": "Q1", "response": "A1" }\n  ]\n}';
@@ -62,15 +62,15 @@ function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description,
 
   return (
     <Dialog open={open} onOpenChange={changeOpen}>
-      <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl">
+      <DialogContent className={looks.wideDialog}>
         <DialogHeader>
           <DialogTitle>{t(title)}</DialogTitle>
           <DialogDescription>{t(description)}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">{t("importDialog.llmPromptTemplate")}</p>
+        <div className={looks.column}>
+          <div className={looks.spread}>
+            <p className={looks.label}>{t("importDialog.llmPromptTemplate")}</p>
             <CopyButton text={t(prompt)} />
           </div>
           <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{t(prompt)}</pre>
@@ -86,7 +86,7 @@ function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description,
             setError(null);
           }}
           rows={8}
-          className="font-mono text-xs"
+          className={looks.code}
         />
         {error && <p className={looks.error}>{t(decodeMessage[error.kind])}</p>}
         <DialogFooter>

@@ -1,15 +1,14 @@
-import { AccuracyTrend } from "@/components/accuracy-trend";
+import { ActivityCards } from "@/components/activity-cards";
+import { ScreenHeader } from "@/components/screen-header";
 import { StatTile } from "@/components/stat-tile";
-import { StudyHeatmap } from "@/components/study-heatmap";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle, Card as UiCard } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import type { Millis, Store } from "@/core/model";
 import { indexSchedules } from "@/core/scheduler";
 import { type DeckRow, accuracy, daysSince, deckRows, newestFirst, streak, totals } from "@/core/stats";
 import { longClockFace } from "@/core/time";
-import { accuracyLook, looks } from "@/lib/looks";
+import { accuracyLook, looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 /** A week of a streak, the length that shows in green. */
@@ -33,13 +32,8 @@ export function StatsPage({ store, now, onBack, onOpenDeck }: StatsPageProps) {
   const rows = deckRows(decks, runs, indexSchedules(store.schedules), now);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          {t("common.back")}
-        </Button>
-        <h1 className={looks.title}>{t("globalStats.title")}</h1>
-      </div>
+    <div className={looks.sections}>
+      <ScreenHeader onBack={onBack}>{t("globalStats.title")}</ScreenHeader>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatTile label={t("globalStats.decks")} value={String(decks.length)} />
@@ -58,34 +52,13 @@ export function StatsPage({ store, now, onBack, onOpenDeck }: StatsPageProps) {
         />
       </div>
 
-      {runs.length > 0 && (
-        <div className={cn("grid gap-3", runs.length > 1 ? "grid-cols-1 lg:grid-cols-[1fr_auto]" : "grid-cols-1")}>
-          <UiCard size="sm">
-            <CardHeader>
-              <CardTitle>{t("globalStats.studyActivity")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StudyHeatmap runs={runs} now={now} />
-            </CardContent>
-          </UiCard>
-          {runs.length > 1 && (
-            <UiCard size="sm" className="lg:w-64">
-              <CardHeader>
-                <CardTitle>{t("globalStats.accuracyTrend")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AccuracyTrend runs={newestFirst(runs)} />
-              </CardContent>
-            </UiCard>
-          )}
-        </div>
-      )}
+      {runs.length > 0 && <ActivityCards runs={newestFirst(runs)} now={now} />}
 
       <UiCard size="sm">
         <CardHeader>
           <CardTitle>{t("globalStats.decks")}</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-0.5">
+        <CardContent className={looks.rows}>
           {rows.length === 0 ? (
             <p className={cn(looks.muted, "py-4 text-center")}>{t("deckList.noDecks")}</p>
           ) : (
@@ -108,18 +81,18 @@ function DeckLine({ row, now, onOpen }: { row: DeckRow; now: Millis; onOpen: () 
       className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted/50"
     >
       <span className="min-w-0 flex-1 truncate font-medium text-foreground">{deck.title}</span>
-      <span className="shrink-0 text-xs text-muted-foreground">
+      <span className={looks.fineAside}>
         {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
       </span>
       {due > 0 && (
-        <Badge variant="outline" className={cn("shrink-0 text-xs", looks.caution)}>
+        <Badge variant="outline" className={cn(looks.endBadge, looks.caution)}>
           {due} {tp(due, "globalStats.dueOne", "globalStats.dueMany")}
         </Badge>
       )}
       {row.accuracy !== null && (
         <span className={cn("shrink-0 font-mono text-xs font-medium", accuracyLook(row.accuracy))}>{row.accuracy}%</span>
       )}
-      <span className="shrink-0 text-xs text-muted-foreground">
+      <span className={looks.fineAside}>
         {lastRun === null ? t("globalStats.neverStudied") : <LastStudied at={lastRun} now={now} />}
       </span>
     </button>

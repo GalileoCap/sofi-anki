@@ -1,6 +1,7 @@
 import { useLanguage } from "@/contexts/language-context";
 import type { Millis, RunRecord } from "@/core/model";
 import { cardsByDay, dayKey, heatmapWeeks } from "@/core/stats";
+import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 /** The days the heatmap shows: thirteen weeks. */
@@ -28,7 +29,7 @@ export function StudyHeatmap({ runs, now }: { runs: readonly RunRecord[]; now: M
   const weeks = heatmapWeeks(now, DAYS);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={looks.column}>
       <div className="flex gap-[3px]">
         <div className="flex flex-col gap-[3px] pr-1">
           {DAY_LABELS.map((label, i) => (

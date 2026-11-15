@@ -3,7 +3,9 @@ import { useState } from "react";
 
 import { BackupDialog } from "@/components/backup-dialog";
 import { DeckForm } from "@/components/deck-form";
+import { EmptyState, NoMatch } from "@/components/empty-state";
 import { ImportApkgDialog } from "@/components/import-apkg-dialog";
+import { GoalBar } from "@/components/goal-bar";
 import { ImportDeckDialog } from "@/components/import-dialog";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { StudyHeatmap } from "@/components/study-heatmap";
@@ -17,7 +19,7 @@ import { addDeck, allTags, matchingDecks, newDeck, receiveAnkiDecks } from "@/co
 import type { Deck, Millis, RunRecord, Store } from "@/core/model";
 import { cardsToday, streak } from "@/core/stats";
 import { newId, now as clockNow } from "@/effects/clock";
-import { looks } from "@/lib/looks";
+import { chipState, looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 type Change = (change: (store: Store) => Store) => void;
@@ -58,10 +60,10 @@ export function Home({ store, update, now, onOpenDeck, onOpenStats }: HomeProps)
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={looks.sections}>
       <div className="flex items-center justify-between gap-2">
         <h1 className={looks.title}>{t("deckList.title")}</h1>
-        <div className="flex items-center gap-2">
+        <div className={looks.row}>
           {runs.length > 0 && (
             <Button variant="ghost" size="sm" onClick={onOpenStats}>
               {t("common.stats")}
@@ -107,7 +109,7 @@ export function Home({ store, update, now, onOpenDeck, onOpenStats }: HomeProps)
       )}
 
       {decks.length > 0 && (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className={looks.filters}>
           <Input
             placeholder={t("deckList.searchPlaceholder")}
             value={search}
@@ -115,18 +117,13 @@ export function Home({ store, update, now, onOpenDeck, onOpenStats }: HomeProps)
             className="max-w-xs"
           />
           {tags.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className={looks.chips}>
               {tags.map((tag) => (
                 <button
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
-                  className={cn(
-                    "inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-medium transition-all",
-                    tagFilter.has(tag)
-                      ? "border-foreground/20 bg-foreground/5 text-foreground"
-                      : "border-transparent text-muted-foreground hover:bg-muted",
-                  )}
+                  className={cn(looks.chip, chipState(tagFilter.has(tag)))}
                 >
                   {tag}
                 </button>
@@ -142,12 +139,9 @@ export function Home({ store, update, now, onOpenDeck, onOpenStats }: HomeProps)
       )}
 
       {decks.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <p className="text-muted-foreground">{t("deckList.noDecks")}</p>
-          <p className={looks.muted}>{t("deckList.noDecksHint")}</p>
-        </div>
+        <EmptyState message={t("deckList.noDecks")} hint={t("deckList.noDecksHint")} />
       ) : shown.length === 0 ? (
-        <p className={cn(looks.muted, "py-8 text-center")}>{t("deckList.noMatch")}</p>
+        <NoMatch message={t("deckList.noMatch")} />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((deck) => (
@@ -174,7 +168,7 @@ function DeckTile({ deck, onOpen }: { deck: Deck; onOpen: () => void }) {
         )}
         <CardHeader>
           <CardTitle>{deck.title}</CardTitle>
-          <CardDescription className="flex flex-wrap items-center gap-1.5">
+          <CardDescription className={looks.chips}>
             <Badge variant="secondary">
               {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
             </Badge>
@@ -215,19 +209,16 @@ function TodayCard({ runs, now, goal, onGoal }: TodayCardProps) {
     <Card size="sm">
       <CardHeader>
         <div className="flex flex-wrap items-center gap-4 text-sm">
-          <div className="flex items-center gap-1.5">
+          <div className={looks.pair}>
             <span className="text-muted-foreground">{t("deckList.streak")}</span>
             <span className="font-mono font-medium text-foreground">
               {days} {tp(days, "common.day", "common.days")}
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className={looks.pair}>
             <span className="text-muted-foreground">{t("deckList.today")}</span>
             <span
-              className={cn(
-                "font-mono font-medium",
-                goal > 0 && today >= goal ? "text-green-600 dark:text-green-400" : "text-foreground",
-              )}
+              className={cn(looks.value, goal > 0 && today >= goal ? looks.positive : "text-foreground")}
             >
               {today}
             </span>
@@ -235,7 +226,7 @@ function TodayCard({ runs, now, goal, onGoal }: TodayCardProps) {
               <>
                 <span className="text-muted-foreground">/</span>
                 {goalInput !== null ? (
-                  <span className="flex items-center gap-1">
+                  <span className={looks.tightRow}>
                     <input
                       type="number"
                       value={goalInput}
@@ -263,12 +254,7 @@ function TodayCard({ runs, now, goal, onGoal }: TodayCardProps) {
           </div>
           {goal > 0 && (
             <div className="min-w-20 flex-1">
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-green-500 transition-all"
-                  style={{ width: `${Math.min(100, (today / goal) * 100)}%` }}
-                />
-              </div>
+              <GoalBar share={today / goal} />
             </div>
           )}
         </div>

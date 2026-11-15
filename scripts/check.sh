@@ -5,6 +5,7 @@ cd "$(dirname "$0")/.."
 
 tsc -b
 eslint . --max-warnings 0
+session-codeintel looks .
 session-suppressions check
 session-docs check
 session-intent check

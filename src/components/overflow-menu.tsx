@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
-import { looks } from "@/lib/looks";
+import { looks } from "@/lib/ui-looks";
 
 const icons = { "icon-sm": 16, "icon-xs": 14 } as const;
 

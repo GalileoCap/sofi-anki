@@ -1,6 +1,7 @@
 import { useLanguage } from "@/contexts/language-context";
 import type { RunRecord } from "@/core/model";
 import { firstTries } from "@/core/stats";
+import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 /** How many runs the trend shows, the newest. */
@@ -23,7 +24,7 @@ export function AccuracyTrend({ runs }: { runs: readonly RunRecord[] }) {
   const shown = runs.slice(0, SHOWN).reverse();
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={looks.column}>
       <div className="flex h-20 items-end gap-1">
         {shown.map((run) => {
           const counts = firstTries(run);
@@ -49,13 +50,13 @@ export function AccuracyTrend({ runs }: { runs: readonly RunRecord[] }) {
         })}
       </div>
       <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1">
+        <span className={looks.tightRow}>
           <span className={cn(swatch, colors.correct)} /> {t("common.correct")}
         </span>
-        <span className="flex items-center gap-1">
+        <span className={looks.tightRow}>
           <span className={cn(swatch, colors.approximate)} /> {t("globalStats.approx")}
         </span>
-        <span className="flex items-center gap-1">
+        <span className={looks.tightRow}>
           <span className={cn(swatch, colors.wrong)} /> {t("common.wrong")}
         </span>
       </div>

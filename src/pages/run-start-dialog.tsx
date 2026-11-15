@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/language-context";
 import type { RunMode, SessionGoal } from "@/core/model";
+import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 /** The goal a run is offered before anyone changes it. */
@@ -14,7 +15,7 @@ const DEFAULT_GOAL: SessionGoal = { type: "cards", value: 20 };
 const choice = (chosen: boolean) =>
   cn(
     "rounded-lg border px-3 py-2 text-sm font-medium transition-all",
-    chosen ? "border-foreground/20 bg-foreground/5 text-foreground" : "border-border text-muted-foreground hover:bg-muted/50",
+    chosen ? looks.chosen : "border-border text-muted-foreground hover:bg-muted/50",
   );
 
 type RunStartDialogProps = {
@@ -65,11 +66,11 @@ export function RunStartDialog({ open, onOpenChange, mode, counts, onStart }: Ru
         <DialogHeader>
           <DialogTitle>{mode ? `${t("runStart.titleFor")}: ${mode.label}` : t("runStart.title")}</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
+        <div className={looks.form}>
           {mode === null && (
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-muted-foreground">{t("runStart.studyMode")}</p>
-              <div className="flex flex-col gap-1.5">
+            <div className={looks.column}>
+              <p className={looks.muted}>{t("runStart.studyMode")}</p>
+              <div className={looks.wide}>
                 {modes.map((m) => (
                   <button
                     key={m.mode}
@@ -90,12 +91,12 @@ export function RunStartDialog({ open, onOpenChange, mode, counts, onStart }: Ru
             </div>
           )}
 
-          <label className="flex items-center gap-2 text-sm">
+          <label className={looks.check}>
             <input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} className="rounded" />
             {t("runStart.shuffleCards")}
           </label>
 
-          <label className="flex items-center gap-2 text-sm">
+          <label className={looks.check}>
             <input
               type="checkbox"
               checked={goal !== null}
@@ -107,16 +108,16 @@ export function RunStartDialog({ open, onOpenChange, mode, counts, onStart }: Ru
 
           {goal && (
             <div className="flex flex-col gap-3 rounded-lg border p-3">
-              <div className="flex gap-2">
+              <div className={looks.buttons}>
                 {(["cards", "minutes"] as const).map((type) => (
                   <button key={type} type="button" onClick={() => setGoal({ ...goal, type })} className={cn(choice(goal.type === type), "flex-1")}>
                     {t(type === "cards" ? "runStart.cards" : "runStart.minutes")}
                   </button>
                 ))}
               </div>
-              <div className="flex items-center gap-2">
+              <div className={looks.row}>
                 <Input type="number" min={1} value={goal.value} onChange={(e) => setGoalValue(e.target.value)} className="w-24" />
-                <span className="text-sm text-muted-foreground">{t(goal.type === "cards" ? "runStart.cards" : "runStart.minutes")}</span>
+                <span className={looks.muted}>{t(goal.type === "cards" ? "runStart.cards" : "runStart.minutes")}</span>
               </div>
             </div>
           )}

@@ -12,7 +12,7 @@ import {
 import type { CardSchedule, Deck } from "@/core/model";
 import { now } from "@/effects/clock";
 import { readFileBytes } from "@/effects/files";
-import { looks } from "@/lib/looks";
+import { looks } from "@/lib/ui-looks";
 
 type ParsedApkg = { decks: Deck[]; schedules: CardSchedule[] };
 
@@ -107,10 +107,10 @@ export function ImportApkgDialog({
             onDrop={handleDrop}
           >
             {state.kind === "loading" ? (
-              <p className="text-sm text-muted-foreground">{t("importApkg.parsing")}</p>
+              <p className={looks.muted}>{t("importApkg.parsing")}</p>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground">
+                <p className={looks.muted}>
                   {t("importApkg.dropZone")}
                 </p>
                 <Button
@@ -137,24 +137,24 @@ export function ImportApkgDialog({
         )}
 
         {state.kind === "parsed" && (
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-muted-foreground">
+          <div className={looks.stack}>
+            <p className={looks.muted}>
               Found <strong>{state.result.decks.length}</strong>{" "}
               {tp(state.result.decks.length, "common.deck", "common.decks")} with{" "}
               <strong>{totalCards}</strong> {t("common.cards")} total in{" "}
-              <span className="font-mono text-xs">{state.fileName}</span>
+              <span className={looks.code}>{state.fileName}</span>
             </p>
             <ul className="flex flex-col gap-1 rounded-md border bg-muted/40 p-3">
               {state.result.decks.map((d) => (
                 <li key={d.id} className="flex items-center justify-between gap-2 text-sm">
                   <span className="truncate font-medium">{d.title}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground">
+                  <span className={looks.fineAside}>
                     {d.cards.length} {tp(d.cards.length, "common.card", "common.cards")}
                   </span>
                 </li>
               ))}
             </ul>
-            <div className="flex items-center gap-2">
+            <div className={looks.row}>
               <Button
                 variant="outline"
                 size="sm"

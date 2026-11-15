@@ -1,12 +1,11 @@
 import { useState } from "react";
 
-import { AccuracyTrend } from "@/components/accuracy-trend";
+import { ActivityCards } from "@/components/activity-cards";
 import { ComplexityBadge } from "@/components/complexity-badge";
 import { DispositionBadge } from "@/components/disposition-badge";
+import { ScreenHeader } from "@/components/screen-header";
 import { StatTile } from "@/components/stat-tile";
-import { StudyHeatmap } from "@/components/study-heatmap";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle, Card as UiCard } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/contexts/language-context";
@@ -14,7 +13,7 @@ import type { CardSchedule, Deck, Millis, RunRecord, Store } from "@/core/model"
 import { deckSchedules, dueCards, indexSchedules, weakCards } from "@/core/scheduler";
 import { type CardStat, cardStats, cardTimeline, daysUntil, firstTries, newestFirst, timing, totals } from "@/core/stats";
 import { clockFace, longClockFace, shortDuration } from "@/core/time";
-import { accuracyLook, looks } from "@/lib/looks";
+import { accuracyLook, looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 const tableRow = "flex w-full items-center rounded-lg px-3 py-2 text-sm";
@@ -37,15 +36,10 @@ export function DeckStatsPage({ deck, store, now, onBack }: DeckStatsPageProps) 
   const times = timing(runs);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          {t("common.back")}
-        </Button>
-        <h1 className={looks.title}>
-          {deck.title} <span className="text-muted-foreground">· {t("common.stats")}</span>
-        </h1>
-      </div>
+    <div className={looks.sections}>
+      <ScreenHeader onBack={onBack}>
+        {deck.title} <span className="text-muted-foreground">· {t("common.stats")}</span>
+      </ScreenHeader>
 
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
         <StatTile label={t("deckStats.totalRuns")} value={String(runs.length)} />
@@ -70,7 +64,7 @@ export function DeckStatsPage({ deck, store, now, onBack }: DeckStatsPageProps) 
               ].map(([label, value]) => (
                 <div key={label}>
                   <p className="text-muted-foreground">{label}</p>
-                  <p className="font-mono font-medium">{value}</p>
+                  <p className={looks.value}>{value}</p>
                 </div>
               ))}
             </div>
@@ -78,32 +72,13 @@ export function DeckStatsPage({ deck, store, now, onBack }: DeckStatsPageProps) 
         </UiCard>
       )}
 
-      <div className={cn("grid gap-3", runs.length > 1 ? "grid-cols-1 lg:grid-cols-[1fr_auto]" : "grid-cols-1")}>
-        <UiCard size="sm">
-          <CardHeader>
-            <CardTitle>{t("deckStats.studyActivity")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StudyHeatmap runs={runs} now={now} />
-          </CardContent>
-        </UiCard>
-        {runs.length > 1 && (
-          <UiCard size="sm" className="lg:w-64">
-            <CardHeader>
-              <CardTitle>{t("deckStats.accuracyTrend")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AccuracyTrend runs={runs} />
-            </CardContent>
-          </UiCard>
-        )}
-      </div>
+      <ActivityCards runs={runs} now={now} />
 
       <UiCard size="sm">
         <CardHeader>
           <CardTitle>{t("deckStats.runHistory")}</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-1">
+        <CardContent className={looks.lines}>
           {runs.map((run) => (
             <RunLine key={run.id} run={run} />
           ))}
@@ -114,7 +89,7 @@ export function DeckStatsPage({ deck, store, now, onBack }: DeckStatsPageProps) 
         <CardHeader>
           <CardTitle>{t("deckStats.cardPerformance")}</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-1">
+        <CardContent className={looks.lines}>
           {cardStats(deck, runs, deckSchedules(schedules, deck.id)).map((stat) => (
             <CardLine key={stat.cardId} stat={stat} runs={runs} now={now} />
           ))}
@@ -139,12 +114,12 @@ function RunLine({ run }: { run: RunRecord }) {
   return (
     <div>
       <button type="button" onClick={() => setOpen(!open)} className={cn(tableRow, "gap-3 transition-colors hover:bg-muted/50")}>
-        <span className="shrink-0 text-muted-foreground">
+        <span className={looks.aside}>
           {new Date(run.completedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
         </span>
-        <span className="font-mono text-xs text-muted-foreground">{clockFace(run.totalTimeMs)}</span>
+        <span className={looks.fineFigure}>{clockFace(run.totalTimeMs)}</span>
         <span className="flex-1" />
-        <span className="flex items-center gap-2 text-xs">
+        <span className={looks.smallRow}>
           {parts.map(
             (part) =>
               part.n > 0 && (
@@ -162,12 +137,12 @@ function RunLine({ run }: { run: RunRecord }) {
           <div className={cn(nested, "ml-3 flex flex-col gap-0.5 pl-3")}>
             {run.results.map((result) => (
               <div key={result.card.id} className="flex flex-wrap items-center gap-2 rounded-md px-2 py-1 text-xs">
-                <span className="flex-1 truncate text-foreground">{result.card.title}</span>
+                <span className={looks.lineTitle}>{result.card.title}</span>
                 <ComplexityBadge complexity={result.card.complexity} />
                 {result.attempts.map((attempt, i) => (
                   <DispositionBadge key={i} disposition={attempt.result} />
                 ))}
-                <span className="font-mono text-muted-foreground">{shortDuration(result.attempts[0].durationMs)}</span>
+                <span className={looks.figure}>{shortDuration(result.attempts[0].durationMs)}</span>
               </div>
             ))}
           </div>
@@ -195,22 +170,22 @@ function CardLine({ stat, runs, now }: { stat: CardStat; runs: readonly RunRecor
           "flex-wrap gap-x-3 gap-y-1",
           !studied && "bg-muted/30",
           poor && "bg-red-50/50 dark:bg-red-950/20",
-          studied && "cursor-pointer hover:bg-muted/50",
+          studied && looks.clickable,
         )}
       >
         <span className="min-w-0 flex-1 truncate text-left text-foreground">{stat.title}</span>
         <ComplexityBadge complexity={stat.complexity} />
         {studied ? (
           <>
-            <span className="font-mono text-xs text-muted-foreground">{stat.timesStudied}x</span>
+            <span className={looks.fineFigure}>{stat.timesStudied}x</span>
             <span className={cn("font-mono text-xs font-medium", stat.accuracy !== null && accuracyLook(stat.accuracy))}>
               {stat.accuracy !== null ? `${stat.accuracy}%` : "–"}
             </span>
-            <span className="font-mono text-xs text-muted-foreground">~{shortDuration(stat.averageMs)}</span>
+            <span className={looks.fineFigure}>~{shortDuration(stat.averageMs)}</span>
             <DueBadge schedule={stat.schedule} now={now} />
           </>
         ) : (
-          <Badge variant="outline" className="text-xs text-muted-foreground">
+          <Badge variant="outline" className={looks.fine}>
             {t("deckStats.notStudied")}
           </Badge>
         )}
@@ -218,16 +193,16 @@ function CardLine({ stat, runs, now }: { stat: CardStat; runs: readonly RunRecor
 
       {history.length > 0 && (
         <div className={cn(nested, "ml-6 pt-1 pl-3")}>
-          <div className="flex flex-col gap-1">
+          <div className={looks.lines}>
             {history.map((entry, i) => {
               const before = history[i - 1]?.intervalAfter;
               return (
-                <div key={i} className="flex items-center gap-2 text-xs">
-                  <span className="shrink-0 text-muted-foreground">
+                <div key={i} className={looks.smallRow}>
+                  <span className={looks.aside}>
                     {new Date(entry.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                   </span>
                   <DispositionBadge disposition={entry.result} />
-                  <span className="font-mono text-muted-foreground">
+                  <span className={looks.figure}>
                     {entry.intervalAfter === 0 ? t("deckStats.dueNow") : `${entry.intervalAfter}d`}
                   </span>
                   {before !== undefined && (

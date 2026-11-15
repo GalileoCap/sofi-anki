@@ -3,17 +3,17 @@ import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
 
 import { CardForm } from "@/components/card-form";
-import { ComplexityBadge } from "@/components/complexity-badge";
+import { CardHeading } from "@/components/card-heading";
 import { Markdown } from "@/components/markdown";
 import { OverflowMenu } from "@/components/overflow-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CardAction, CardHeader, CardTitle, Card as UiCard } from "@/components/ui/card";
+import { CardAction, CardHeader, Card as UiCard } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import type { CardDraft } from "@/core/decks";
 import type { AnswerResult, Card, Millis } from "@/core/model";
 import { type CardPerformance, daysUntil } from "@/core/stats";
-import { looks } from "@/lib/looks";
+import { accuracyLook, looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 const lastAnswerDot: Record<AnswerResult, string> = {
@@ -21,9 +21,6 @@ const lastAnswerDot: Record<AnswerResult, string> = {
   approximate: "bg-yellow-400",
   wrong: "bg-red-500",
 };
-
-const scoreColor = (score: number): string =>
-  score >= 0.8 ? "text-green-600 dark:text-green-400" : score >= 0.5 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400";
 
 const sectionLabel = "mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground";
 
@@ -122,42 +119,30 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
   return (
     <UiCard size="sm" className="cursor-pointer" onClick={onToggle}>
       <CardHeader>
-        <div className="flex min-w-0 items-center gap-2">
-          <span className={cn("shrink-0 text-[10px] text-muted-foreground transition-transform duration-150", open && "rotate-90")}>▶</span>
-          <CardTitle className="truncate text-sm">{card.title}</CardTitle>
-          <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-            <ComplexityBadge complexity={card.complexity} />
-            {card.type === "choice" && (
-              <Badge variant="outline" className="text-xs">
-                {card.multiSelect ? t("deckDetail.multi") : t("deckDetail.single")}
-              </Badge>
-            )}
-            {card.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {!studied ? (
-              <Badge variant="outline" className="text-xs text-muted-foreground">
-                {t("deckStats.new")}
-              </Badge>
-            ) : due ? (
-              <Badge
-                variant="outline"
-                className="border-amber-400/60 bg-amber-50 text-xs text-amber-700 dark:border-amber-700/60 dark:bg-amber-950 dark:text-amber-400"
-              >
-                {t("common.due")}
-              </Badge>
-            ) : (
-              last !== null && (
-                <span
-                  title={`${Math.round(performance.score * 100)}% · ${performance.runs} ${tp(performance.runs, "common.session", "common.sessions")}`}
-                  className={cn("flex h-2 w-2 shrink-0 rounded-full", lastAnswerDot[last])}
-                />
-              )
-            )}
-          </div>
-        </div>
+        <CardHeading
+          card={card}
+          before={<span className={cn("shrink-0 text-[10px] text-muted-foreground transition-transform duration-150", open && "rotate-90")}>▶</span>}
+        >
+          {!studied ? (
+            <Badge variant="outline" className={looks.fine}>
+              {t("deckStats.new")}
+            </Badge>
+          ) : due ? (
+            <Badge
+              variant="outline"
+              className="border-amber-400/60 bg-amber-50 text-xs text-amber-700 dark:border-amber-700/60 dark:bg-amber-950 dark:text-amber-400"
+            >
+              {t("common.due")}
+            </Badge>
+          ) : (
+            last !== null && (
+              <span
+                title={`${Math.round(performance.score * 100)}% · ${performance.runs} ${tp(performance.runs, "common.session", "common.sessions")}`}
+                className={cn("flex h-2 w-2 shrink-0 rounded-full", lastAnswerDot[last])}
+              />
+            )
+          )}
+        </CardHeading>
         <CardAction onClick={(e) => e.stopPropagation()}>
           <div className="hidden gap-1 sm:flex">
             <CardForm
@@ -171,7 +156,7 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
               dialogTitle={t("cardForm.editCard")}
               submitLabel={t("common.save")}
             />
-            <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive" onClick={onDelete}>
+            <Button variant="ghost" size="xs" className={looks.danger} onClick={onDelete}>
               {t("common.delete")}
             </Button>
           </div>
@@ -203,7 +188,7 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
           ) : (
             <div>
               <p className={sectionLabel}>{t("common.options")}</p>
-              <div className="flex flex-col gap-1">
+              <div className={looks.lines}>
                 {card.options.map((option) => (
                   <div
                     key={option.id}
@@ -237,14 +222,14 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
                 <>
                   <span>
                     {t("deckDetail.accuracy")}{" "}
-                    <span className={cn("font-medium", scoreColor(performance.score))}>{Math.round(performance.score * 100)}%</span> (
+                    <span className={cn("font-medium", accuracyLook(Math.round(performance.score * 100)))}>{Math.round(performance.score * 100)}%</span> (
                     {performance.runs} {tp(performance.runs, "common.session", "common.sessions")})
                   </span>
                   {schedule && (
                     <>
                       <span>
                         {t("deckDetail.interval")}{" "}
-                        <span className="font-medium text-foreground">
+                        <span className={looks.strong}>
                           {schedule.intervalDays === 0 ? t("deckDetail.review") : `${schedule.intervalDays}d`}
                         </span>
                       </span>
@@ -255,7 +240,7 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
                         </span>
                       </span>
                       <span>
-                        {t("deckDetail.ease")} <span className="font-medium text-foreground">{schedule.easeFactor.toFixed(1)}</span>
+                        {t("deckDetail.ease")} <span className={looks.strong}>{schedule.easeFactor.toFixed(1)}</span>
                       </span>
                     </>
                   )}

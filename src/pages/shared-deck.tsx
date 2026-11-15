@@ -1,13 +1,13 @@
 import { useState } from "react";
 
-import { ComplexityBadge } from "@/components/complexity-badge";
+import { CardHeading } from "@/components/card-heading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CardHeader, CardTitle, Card as UiCard } from "@/components/ui/card";
+import { CardHeader, Card as UiCard } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import { type Arrival, receiveDeck, unknownCards } from "@/core/decks";
 import type { Deck, Store } from "@/core/model";
-import { looks } from "@/lib/looks";
+import { looks } from "@/lib/ui-looks";
 import { SharedMergeDialog } from "@/pages/shared-merge-dialog";
 
 type SharedDeckPageProps = {
@@ -31,8 +31,8 @@ export function SharedDeckPage({ deck, store, update, onGoHome }: SharedDeckPage
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className={looks.sections}>
+      <div className={looks.spread}>
         <div>
           <p className={looks.muted}>{t("sharedDeck.label")}</p>
           <h1 className={looks.title}>{deck.title}</h1>
@@ -50,7 +50,7 @@ export function SharedDeckPage({ deck, store, update, onGoHome }: SharedDeckPage
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={looks.actions}>
         <Badge variant="secondary">
           {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
         </Badge>
@@ -61,26 +61,11 @@ export function SharedDeckPage({ deck, store, update, onGoHome }: SharedDeckPage
         ))}
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className={looks.column}>
         {deck.cards.map((card) => (
           <UiCard key={card.id} size="sm">
             <CardHeader>
-              <div className="flex min-w-0 items-center gap-2">
-                <CardTitle className="truncate text-sm">{card.title}</CardTitle>
-                <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-                  <ComplexityBadge complexity={card.complexity} />
-                  {card.type === "choice" && (
-                    <Badge variant="outline" className="text-xs">
-                      {card.multiSelect ? t("deckDetail.multi") : t("deckDetail.single")}
-                    </Badge>
-                  )}
-                  {card.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              <CardHeading card={card} />
             </CardHeader>
           </UiCard>
         ))}

@@ -1,6 +1,7 @@
 import { Tooltip } from "radix-ui";
 import { useState } from "react";
 
+import { GoalBar } from "@/components/goal-bar";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import type { Card, CardRunResult, Deck, SessionGoal, Store } from "@/core/model";
@@ -22,7 +23,7 @@ import { clockFace, elapsed, pauseStopwatch, resumeStopwatch, startStopwatch } f
 import { newId, now, randoms } from "@/effects/clock";
 import { useKeys } from "@/hooks/use-keys";
 import { useNow } from "@/hooks/use-now";
-import { looks } from "@/lib/looks";
+import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 import { RunSummary } from "@/pages/run-summary";
 import { Shortcut, StudyCard } from "@/pages/study-card";
@@ -116,9 +117,9 @@ function Run({ deck, cards, goal, shuffle, update, onExit, onRestart }: StudyPag
   return (
     <div className={cn(looks.page, "flex flex-col items-center gap-6")}>
       <div className="flex w-full flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center justify-between">
+        <div className={looks.spread}>
           {confirmExit ? (
-            <div className="flex items-center gap-1">
+            <div className={looks.tightRow}>
               <Button variant="destructive" size="sm" onClick={leave}>
                 {t("studySession.exit")}
               </Button>
@@ -132,7 +133,7 @@ function Run({ deck, cards, goal, shuffle, update, onExit, onRestart }: StudyPag
               <Shortcut>Esc</Shortcut>
             </Button>
           )}
-          <div className="flex items-center gap-2">
+          <div className={looks.row}>
             <Button
               variant="ghost"
               size="xs"
@@ -157,7 +158,7 @@ function Run({ deck, cards, goal, shuffle, update, onExit, onRestart }: StudyPag
           </div>
         </div>
         <div className="flex justify-center sm:hidden">
-          <span className="font-mono text-xs text-muted-foreground">{clockFace(spent)}</span>
+          <span className={looks.fineFigure}>{clockFace(spent)}</span>
         </div>
       </div>
 
@@ -167,7 +168,7 @@ function Run({ deck, cards, goal, shuffle, update, onExit, onRestart }: StudyPag
       {showGoal && !paused && (
         <div className="flex w-full items-center justify-between rounded-lg border border-green-300 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950">
           <p className="text-sm font-medium text-green-700 dark:text-green-300">{t("studySession.youReachedGoal")}</p>
-          <div className="flex gap-2">
+          <div className={looks.buttons}>
             <Button size="sm" variant="outline" onClick={() => setGoalDismissed(true)}>
               {t("common.continue")}
             </Button>
@@ -237,25 +238,25 @@ function RunProgress({ run }: { run: RunState }) {
   const { done, redo, pending, total } = progress(run);
   const share = (n: number) => `${total > 0 ? (n / total) * 100 : 0}%`;
   return (
-    <div className="flex w-full flex-col gap-1.5">
+    <div className={looks.wide}>
       <div className="flex h-3 w-full overflow-hidden rounded-full bg-muted">
         <div className="h-full shrink-0 bg-primary/60 transition-all duration-300" style={{ width: share(done) }} />
         <div className="h-full shrink-0 bg-amber-400/80 transition-all duration-300 dark:bg-amber-500/70" style={{ width: share(redo) }} />
       </div>
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1">
+        <span className={looks.tightRow}>
           <span className={cn(dot, "bg-primary/60")} />
           {done}
           {t("studySession.done")}
         </span>
         {redo > 0 && (
-          <span className="flex items-center gap-1">
+          <span className={looks.tightRow}>
             <span className={cn(dot, "bg-amber-400/80 dark:bg-amber-500/70")} />
             {redo}
             {t("studySession.redoLater")}
           </span>
         )}
-        <span className="flex items-center gap-1">
+        <span className={looks.tightRow}>
           <span className={cn(dot, "bg-muted-foreground/30")} />
           {pending}
           {t("studySession.pending")}
@@ -280,11 +281,9 @@ function GoalProgress({ goal, completed, spent, reached }: GoalProgressProps) {
             ? `${Math.min(completed, goal.value)} / ${goal.value} ${t("common.cards")}`
             : `${clockFace(Math.min(spent, goalMs))} / ${clockFace(goalMs)}`}
         </span>
-        {reached && <span className="font-medium text-green-600 dark:text-green-400">{t("studySession.goalReached")}</span>}
+        {reached && <span className={cn("font-medium", looks.positive)}>{t("studySession.goalReached")}</span>}
       </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-green-500 transition-all duration-300" style={{ width: `${Math.min(100, share * 100)}%` }} />
-      </div>
+      <GoalBar share={share} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 interface MarkdownProps {
@@ -33,7 +34,7 @@ export function Markdown({ children, className, inline }: MarkdownProps) {
         code: ({ className: cls, children }) => {
           const isBlock = cls?.startsWith("language-");
           return isBlock ? (
-            <code className={cn("font-mono text-xs", cls)}>{children}</code>
+            <code className={cn(looks.code, cls)}>{children}</code>
           ) : (
             <code className="rounded border border-border/50 bg-muted/80 px-1 py-0.5 font-mono text-[0.82em]">
               {children}

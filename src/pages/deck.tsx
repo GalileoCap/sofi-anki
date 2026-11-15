@@ -3,6 +3,7 @@ import { type ReactNode, useState } from "react";
 
 import { CardForm } from "@/components/card-form";
 import { DeckForm } from "@/components/deck-form";
+import { EmptyState, NoMatch } from "@/components/empty-state";
 import { ExportDialog } from "@/components/export-dialog";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { OverflowMenu } from "@/components/overflow-menu";
@@ -34,7 +35,7 @@ import { cardPerformance, studyOrder } from "@/core/stats";
 import { newId, now as clockNow } from "@/effects/clock";
 import { copyText, download } from "@/effects/files";
 import { pageBase } from "@/effects/page";
-import { looks } from "@/lib/looks";
+import { chipState, looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 import { CardList } from "@/pages/deck-card-list";
 
@@ -54,10 +55,6 @@ const toggled = <T,>(set: ReadonlySet<T>, item: T): Set<T> => {
   if (!next.delete(item)) next.add(item);
   return next;
 };
-
-const chip = "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-all";
-const chipState = (on: boolean) =>
-  on ? "border-foreground/20 bg-foreground/5 text-foreground" : "border-transparent text-muted-foreground hover:bg-muted";
 
 /** One deck: how to study it, its cards, and what can be done with it. */
 export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }: DeckPageProps) {
@@ -134,8 +131,8 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className={looks.sections}>
+      <div className={looks.spread}>
         <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="sm" onClick={onBack}>
             {t("common.back")}
@@ -156,7 +153,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
       </div>
 
       <UiCard size="sm">
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className={looks.form}>
           <p className="text-sm font-medium text-foreground">{t("deckDetail.study")}</p>
           <Button className="w-full sm:hidden" onClick={() => setStartDialog("pick")} disabled={deck.cards.length === 0}>
             {t("common.start")}
@@ -195,7 +192,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
         onStart={start}
       />
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={looks.actions}>
         <CardForm
           trigger={
             <Button variant="outline" size="sm">
@@ -244,7 +241,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
 
         <div className="flex-1" />
         {confirmDelete ? (
-          <div className="flex items-center gap-2">
+          <div className={looks.row}>
             <Button variant="destructive" size="sm" onClick={deleteDeck}>
               {t("common.confirm")}
             </Button>
@@ -253,7 +250,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
             </Button>
           </div>
         ) : (
-          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setConfirmDelete(true)}>
+          <Button variant="ghost" size="sm" className={looks.danger} onClick={() => setConfirmDelete(true)}>
             {t("deckDetail.deleteDeck")}
           </Button>
         )}
@@ -262,27 +259,27 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
       <Separator />
 
       {deck.cards.length > 0 && (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className={looks.filters}>
           <Input
             placeholder={t("deckDetail.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-xs"
           />
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className={looks.chips}>
             {complexities.map((c) => (
               <button
                 key={c}
                 type="button"
                 onClick={() => setComplexityFilter(toggled(complexityFilter, c))}
-                className={cn(chip, chipState(complexityFilter.has(c)))}
+                className={cn(looks.chip, chipState(complexityFilter.has(c)))}
               >
                 {t(`complexity.${c}`)}
-                <span className="font-mono text-muted-foreground">{cardCounts[c]}</span>
+                <span className={looks.figure}>{cardCounts[c]}</span>
               </button>
             ))}
             {allTags(deck.cards).map((tag) => (
-              <button key={tag} type="button" onClick={() => setTagFilter(toggled(tagFilter, tag))} className={cn(chip, chipState(tagFilter.has(tag)))}>
+              <button key={tag} type="button" onClick={() => setTagFilter(toggled(tagFilter, tag))} className={cn(looks.chip, chipState(tagFilter.has(tag)))}>
                 {tag}
               </button>
             ))}
@@ -306,12 +303,9 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
       )}
 
       {deck.cards.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <p className="text-lg text-muted-foreground">{t("deckDetail.noCards")}</p>
-          <p className={looks.muted}>{t("deckDetail.noCardsHint")}</p>
-        </div>
+        <EmptyState message={t("deckDetail.noCards")} hint={t("deckDetail.noCardsHint")} />
       ) : shown.length === 0 ? (
-        <p className={cn(looks.muted, "py-8 text-center")}>{t("deckDetail.noMatch")}</p>
+        <NoMatch message={t("deckDetail.noMatch")} />
       ) : (
         <CardList
           cards={shown}

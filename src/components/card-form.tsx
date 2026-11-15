@@ -13,11 +13,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { TagInput } from "@/components/tag-input";
+import { Field } from "@/components/field";
 import { Markdown } from "@/components/markdown";
 import type { CardDraft } from "@/core/decks";
 import type { Card, CardType, Complexity } from "@/core/model";
 import { newId } from "@/effects/clock";
+import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
+
+/** Buttons that pick one of a few values, sharing a line. */
+const segments = "flex gap-1.5";
 
 const COMPLEXITIES: { value: Complexity; key: TranslationKey }[] = [
   { value: "easy", key: "complexity.easy" },
@@ -169,11 +174,9 @@ export function CardForm({
         <DialogHeader>
           <DialogTitle>{resolvedTitle}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Card type selector */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">{t("common.type")}</label>
-            <div className="flex gap-1.5">
+        <form onSubmit={handleSubmit} className={looks.form}>
+          <Field label={t("common.type")}>
+            <div className={segments}>
               {CARD_TYPES.map((ct) => (
                 <Button
                   key={ct.value}
@@ -187,7 +190,7 @@ export function CardForm({
                 </Button>
               ))}
             </div>
-          </div>
+          </Field>
 
           <Input
             placeholder={t("cardForm.questionPlaceholder")}
@@ -197,9 +200,9 @@ export function CardForm({
           />
 
           {cardType === "standard" ? (
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-muted-foreground">{t("common.answer")}</label>
+            <Field
+              label={t("common.answer")}
+              action={
                 <button
                   type="button"
                   onClick={() => setPreviewResponse((v) => !v)}
@@ -212,7 +215,8 @@ export function CardForm({
                 >
                   {previewResponse ? t("common.edit") : t("common.preview")}
                 </button>
-              </div>
+              }
+            >
               {previewResponse ? (
                 <div className="min-h-[96px] rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
                   {response.trim() ? (
@@ -229,14 +233,14 @@ export function CardForm({
                   rows={4}
                 />
               )}
-            </div>
+            </Field>
           ) : (
-            <div className="flex flex-col gap-2">
-              <label className="text-sm text-muted-foreground">
+            <div className={looks.column}>
+              <label className={looks.muted}>
                 {t("cardForm.optionsLabel")}
               </label>
               {options.map((opt, i) => (
-                <div key={opt.id} className="flex items-center gap-2">
+                <div key={opt.id} className={looks.row}>
                   <input
                     type="checkbox"
                     checked={opt.correct}
@@ -271,7 +275,7 @@ export function CardForm({
                 {t("cardForm.addOption")}
               </Button>
               {options.some((o) => o.correct) && (
-                <p className="text-xs text-muted-foreground">
+                <p className={looks.fine}>
                   {options.filter((o) => o.correct).length > 1
                     ? t("cardForm.multipleCorrect")
                     : t("cardForm.singleCorrect")}
@@ -282,9 +286,9 @@ export function CardForm({
 
           {/* The hint, which folds away */}
           {showHintInput ? (
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-muted-foreground">{t("common.hint")}</label>
+            <Field
+              label={t("common.hint")}
+              action={
                 <button
                   type="button"
                   onClick={() => { setShowHintInput(false); setHint(""); }}
@@ -292,14 +296,15 @@ export function CardForm({
                 >
                   {t("common.remove")}
                 </button>
-              </div>
+              }
+            >
               <Textarea
                 placeholder={t("cardForm.hintPlaceholder")}
                 value={hint}
                 onChange={(e) => setHint(e.target.value)}
                 rows={2}
               />
-            </div>
+            </Field>
           ) : (
             <button
               type="button"
@@ -310,9 +315,8 @@ export function CardForm({
             </button>
           )}
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">{t("common.complexity")}</label>
-            <div className="flex gap-1.5">
+          <Field label={t("common.complexity")}>
+            <div className={segments}>
               {COMPLEXITIES.map((c) => (
                 <Button
                   key={c.value}
@@ -326,11 +330,10 @@ export function CardForm({
                 </Button>
               ))}
             </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-muted-foreground">{t("common.tags")}</label>
+          </Field>
+          <Field label={t("common.tags")}>
             <TagInput tags={tags} onChange={setTags} placeholder={t("deckForm.tagsPlaceholder")} />
-          </div>
+          </Field>
           <DialogFooter>
             <Button type="submit" disabled={!isValid}>
               {resolvedSubmit}

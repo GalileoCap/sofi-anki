@@ -10,7 +10,7 @@ import { useLanguage } from "@/contexts/language-context";
 import type { AnswerResult, Card } from "@/core/model";
 import { gradeChoice } from "@/core/run";
 import { useKeys } from "@/hooks/use-keys";
-import { looks } from "@/lib/looks";
+import { looks } from "@/lib/ui-looks";
 import type { TranslationKey } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 
@@ -105,7 +105,7 @@ export function StudyCard({ card, paused, onSkip, onPostpone, onAnswer }: StudyC
   const face = (below: React.ReactNode, className: string) => (
     <UiCard className={className}>
       <CardContent className="flex flex-col items-center gap-6 text-center">
-        <Markdown className="text-2xl font-medium text-foreground">{card.title}</Markdown>
+        <Markdown className={looks.title}>{card.title}</Markdown>
         {complexityShown ? (
           <ComplexityBadge complexity={card.complexity} />
         ) : (
@@ -168,7 +168,7 @@ export function StudyCard({ card, paused, onSkip, onPostpone, onAnswer }: StudyC
         </div>
       )}
       <div className="flex w-full flex-col items-center gap-4">
-        <div className="flex w-full flex-col gap-1.5">
+        <div className={looks.wide}>
           <p className={looks.muted}>{card.type === "choice" ? t("studyCard.autoGraded") : t("studyCard.howDidYouDo")}</p>
           <div className="flex justify-center gap-2">
             {grades.map((g) => (
@@ -232,7 +232,7 @@ function ChoiceOptions({ card, selected, revealed, onPick }: ChoiceOptionsProps)
         <Badge variant="outline" className="text-xs">
           {card.multiSelect ? t("studyCard.multiSelect") : t("studyCard.singleSelect")}
         </Badge>
-        <span className="text-xs text-muted-foreground">
+        <span className={looks.fine}>
           {card.multiSelect ? t("studyCard.checkAllCorrect") : t("studyCard.pickOne")}
         </span>
       </div>

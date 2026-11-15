@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/language-context";
 import type { Deck } from "@/core/model";
-import { looks } from "@/lib/looks";
+import { looks } from "@/lib/ui-looks";
 
 type SharedMergeDialogProps = {
   open: boolean;
@@ -32,7 +32,7 @@ export function SharedMergeDialog({ open, onOpenChange, here, incoming, added, o
         </DialogHeader>
         <div className="flex flex-col gap-3 text-sm">
           <p className="text-muted-foreground">
-            <span className="font-medium text-foreground">{here.title}</span>{" "}
+            <span className={looks.strong}>{here.title}</span>{" "}
             {t("importMerge.existsWith").replace("{n}", cards(here.cards.length)).replace("{m}", cards(incoming.cards.length))}
           </p>
           {added > 0 && <p className={looks.muted}>{t("importMerge.mergeAdds").replace("{n}", cards(added))}</p>}
