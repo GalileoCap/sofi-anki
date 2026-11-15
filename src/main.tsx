@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import App from "@/App";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/language-provider";
 import { isDark } from "@/core/model";
 import { demoStore } from "@/core/seed";
@@ -20,10 +21,12 @@ if (root) {
   createRoot(root).render(
     <StrictMode>
       <LanguageProvider>
-        {openStore(() => demoStore(now())).match(
-          (store) => <App initial={store} />,
-          (error) => <UnreadableStore error={error} />,
-        )}
+        <TooltipProvider delayDuration={300}>
+          {openStore(() => demoStore(now())).match(
+            (store) => <App initial={store} />,
+            (error) => <UnreadableStore error={error} />,
+          )}
+        </TooltipProvider>
       </LanguageProvider>
     </StrictMode>,
   );

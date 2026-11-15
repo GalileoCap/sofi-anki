@@ -78,3 +78,14 @@ On 2026-11-15 the owner found dark mode hard to read, the More menus too full, t
 - The deck page shows Stats in its top bar and Choose cards and Share a link beside Add a card. Its More menu keeps the exports, bringing cards in, the cover and deletion.
 - Study shows Pause in the phone's top bar, with Undo, Skip and Save for later in its More menu. On a laptop the side panel holds the sheet, the run's time, its first tries so far, and each action as a button with its key, in place of the run's decks.
 - The card form's hint is a text box again, so a hint of several lines keeps its lines.
+
+## After the owner's second review
+
+On 2026-11-15 the owner found dark mode readable, asked for icons on the buttons, with some (Add a card, Share a link) as icons alone so that more comes out of the More menus, and found stats too narrow on a laptop. Changed:
+
+- One icon library, hugeicons, at the text's size (`dec-2`). A button that is an icon alone is an `IconButton`: its label is its accessible name and a tooltip on hover and focus, through shadcn's tooltip (`hi-6`). Stats and Pause show their word beside the icon from a phone's width up.
+- Back, Leave and Close carry an arrow or a cross. The language switch carries a translate icon. The deck page's way back reads "Today" beside its arrow, so its top bar fits a phone.
+- Home's top bar shows the theme as an icon that steps light, dark and system, out of the More menu. More keeps bringing decks in, the backup and the daily goal.
+- The deck page's top bar holds Stats, Edit the cover and More as icons. Add a card and Share a link are icons beside Choose cards to study. More keeps the exports, bringing cards in and deletion.
+- More is an icon on every screen, and study's Pause an icon on a phone.
+- Stats and deck stats take home's two columns on a laptop: the totals and the month on the left, the chart and the lists on the right.

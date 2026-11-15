@@ -1,13 +1,15 @@
+import { ChartColumnIcon, MoreHorizontalIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
 
 import { BackupDialog } from "@/components/backup-dialog";
 import { DeckForm } from "@/components/deck-form";
 import { FilterFold } from "@/components/filter-fold";
+import { Icon, IconButton } from "@/components/icon-button";
 import { ImportApkgDialog } from "@/components/import-apkg-dialog";
 import { ImportDeckDialog } from "@/components/import-dialog";
 import { LastStudied } from "@/components/last-studied";
-import { LanguageSwitch } from "@/components/preferences";
+import { LanguageSwitch, ThemeSwitch } from "@/components/preferences";
 import { Chip, DayStickers, DeckRow, Key, Sheet, Spots, Toggle } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,7 +23,6 @@ import { indexSchedules } from "@/core/scheduler";
 import { comingUp, deckRows, lastWeek, stickersOn, streak } from "@/core/stats";
 import { newId, now as clockNow } from "@/effects/clock";
 import { useKeys } from "@/hooks/use-keys";
-import { useTheme } from "@/hooks/use-theme";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
@@ -99,11 +100,10 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
     <div className={looks.form}>
       <div className={cn(looks.topbar, "justify-end")}>
         {runs.length > 0 && (
-          <Button variant="ghost" onClick={onOpenStats}>
-            {t("common.stats")}
-          </Button>
+          <IconButton variant="ghost" icon={ChartColumnIcon} label={t("common.stats")} words="sm" onClick={onOpenStats} />
         )}
         <LanguageSwitch />
+        <ThemeSwitch />
         <HomeMenu onDialog={setDialog} />
       </div>
 
@@ -113,7 +113,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
       <BackupDialog {...dialogProps("backup")} store={store} onRestore={(restored) => update(() => restored)} />
       <GoalDialog {...dialogProps("goal")} goal={goal} onGoal={(next) => update((s) => ({ ...s, settings: { ...s.settings, dailyCardGoal: next } }))} />
 
-      <div className="grid gap-x-12 gap-y-4 lg:grid-cols-[24rem_1fr]">
+      <div className={looks.split}>
         <div className={looks.form}>
           <div>
             <h1 className={looks.title}>{t("home.today")}</h1>
@@ -146,6 +146,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
               <h2 className="flex-1 text-lg font-bold">{t("home.decks")}</h2>
               {newDeckForm(
                 <Button variant="outline">
+                  <Icon icon={PlusSignIcon} />
                   {t("home.newDeck")}
                 </Button>,
               )}
@@ -237,10 +238,9 @@ type HomeMenuProps = {
   onDialog: (dialog: "newDeck" | "json" | "apkg" | "backup" | "goal") => void;
 };
 
-/** Home's menu: what is done now and then, from bringing decks in to the theme. */
+/** Home's menu: what is done now and then, bringing decks in, the backup and the daily goal. */
 function HomeMenu({ onDialog }: HomeMenuProps) {
   const { t } = useLanguage();
-  const { theme, cycleTheme } = useTheme();
   const item = (label: string, onSelect: () => void) => (
     <DropdownMenu.Item className={looks.menuItem} onSelect={onSelect}>
       {label}
@@ -249,7 +249,7 @@ function HomeMenu({ onDialog }: HomeMenuProps) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <Button variant="ghost">{t("home.more")}</Button>
+        <IconButton variant="ghost" icon={MoreHorizontalIcon} label={t("home.more")} />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
@@ -258,9 +258,6 @@ function HomeMenu({ onDialog }: HomeMenuProps) {
           {item(t("home.backup"), () => onDialog("backup"))}
           <DropdownMenu.Separator className={looks.menuRule} />
           {item(t("home.dailyGoal"), () => onDialog("goal"))}
-          <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => (e.preventDefault(), cycleTheme())}>
-            {t("theme.label")}: {t(`theme.${theme}`)}
-          </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

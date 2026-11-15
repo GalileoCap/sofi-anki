@@ -1,7 +1,10 @@
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
+
 import { Fold } from "@/components/fold";
 import { Markdown } from "@/components/markdown";
 import { GradeMark, Sheet } from "@/components/sticker";
 import { StickerShower } from "@/components/sticker-shower";
+import { Icon } from "@/components/icon-button";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import type { AnswerResult, CardAttempt, CardDisposition, CardRunResult, Deck } from "@/core/model";
@@ -55,6 +58,7 @@ export function RunSummary({ results, items, decks, totalTimeMs, onRestart, onEx
       {perfect && <StickerShower decks={studiedDecks} />}
       <div className={cn(looks.topbar, "justify-end")}>
         <Button variant="ghost" onClick={onExit}>
+          <Icon icon={Cancel01Icon} />
           {t("common.close")}
         </Button>
       </div>

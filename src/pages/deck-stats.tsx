@@ -1,3 +1,4 @@
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 
 import { Fold } from "@/components/fold";
@@ -5,6 +6,7 @@ import { LastStudied } from "@/components/last-studied";
 import { Markdown } from "@/components/markdown";
 import { Chip, ComesBack, DeckRow, GradeChip, GradeMark } from "@/components/sticker";
 import { FirstTriesChart, MonthSheet } from "@/components/study-charts";
+import { Icon } from "@/components/icon-button";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import type { Deck, Millis, RunRecord, Store } from "@/core/model";
@@ -62,47 +64,54 @@ export function DeckStatsPage({ deck, store, now, onBack }: DeckStatsPageProps) 
   );
 
   return (
-    <div className={looks.narrow}>
+    <div className={looks.form}>
       <div className={looks.topbar}>
         <Button variant="ghost" onClick={onBack}>
+          <Icon icon={ArrowLeft01Icon} />
           {t("deckStats.back")}
         </Button>
       </div>
-      <DeckRow deck={deck} meta={meta} head />
-      <div className={looks.tight}>
-        <p className={looks.lead}>{line}</p>
-        {times && (
-          <p className={looks.lead}>
-            {t("deckStats.timing")
-              .replace("{average}", shortDuration(times.average))
-              .replace("{fastest}", shortDuration(times.fastest))
-              .replace("{slowest}", shortDuration(times.slowest))
-              .replace("{card}", shortDuration(times.perCard))}
-          </p>
-        )}
+      <div className={looks.split}>
+        <div className={cn(looks.form, "lg:self-start")}>
+          <DeckRow deck={deck} meta={meta} head />
+          <div className={looks.tight}>
+            <p className={looks.lead}>{line}</p>
+            {times && (
+              <p className={looks.lead}>
+                {t("deckStats.timing")
+                  .replace("{average}", shortDuration(times.average))
+                  .replace("{fastest}", shortDuration(times.fastest))
+                  .replace("{slowest}", shortDuration(times.slowest))
+                  .replace("{card}", shortDuration(times.perCard))}
+              </p>
+            )}
+          </div>
+          <MonthSheet runs={runs} decks={[deck]} now={now} />
+        </div>
+        <div className={looks.form}>
+          {runs.length > 0 && <FirstTriesChart runs={runs} decks={[deck]} />}
+          {runs.length > 0 && (
+            <div>
+              <h2 className={looks.sectionTitle}>{t("deckStats.runs")}</h2>
+              <div className={looks.list}>
+                {runs.map((run) => (
+                  <RunRow key={run.id} run={run} now={now} />
+                ))}
+              </div>
+            </div>
+          )}
+          {runs.length > 0 && (
+            <div>
+              <h2 className={looks.sectionTitle}>{t("deckStats.cards")}</h2>
+              <div className={looks.list}>
+                {cardStats(deck, runs, deckSchedules(schedules, deck.id)).map((stat) => (
+                  <CardRow key={stat.card.id} stat={stat} runs={runs} now={now} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-      <MonthSheet runs={runs} decks={[deck]} now={now} />
-      {runs.length > 0 && <FirstTriesChart runs={runs} decks={[deck]} />}
-      {runs.length > 0 && (
-        <div>
-          <h2 className={looks.sectionTitle}>{t("deckStats.runs")}</h2>
-          <div className={looks.list}>
-            {runs.map((run) => (
-              <RunRow key={run.id} run={run} now={now} />
-            ))}
-          </div>
-        </div>
-      )}
-      {runs.length > 0 && (
-        <div>
-          <h2 className={looks.sectionTitle}>{t("deckStats.cards")}</h2>
-          <div className={looks.list}>
-            {cardStats(deck, runs, deckSchedules(schedules, deck.id)).map((stat) => (
-              <CardRow key={stat.card.id} stat={stat} runs={runs} now={now} />
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

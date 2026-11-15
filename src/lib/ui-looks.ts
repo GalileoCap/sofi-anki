@@ -29,6 +29,8 @@ export const looks = {
   /** A dialog wide enough for JSON. */
   wideDialog: "max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl",
 
+  /** A screen in two columns on a laptop: the day or the totals in a narrow one, the lists and charts in the rest. */
+  split: "grid gap-x-12 gap-y-4 lg:grid-cols-[24rem_minmax(0,1fr)]",
   /** A screen read in one column, such as the run's end, narrower than the page. */
   narrow: "mx-auto flex max-w-xl flex-col gap-4",
   /** The bar at a screen's top: a way back or out, where the screen is, and its menu. */

@@ -1,3 +1,4 @@
+import { ArrowLeft01Icon, ChartColumnIcon, Link01Icon, MoreHorizontalIcon, PencilEdit02Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { DropdownMenu } from "radix-ui";
 import { type ReactNode, useState } from "react";
 
@@ -7,6 +8,7 @@ import { DeckForm } from "@/components/deck-form";
 import { EmptyState, NoMatch } from "@/components/empty-state";
 import { FilterFold } from "@/components/filter-fold";
 import { ExportDialog } from "@/components/export-dialog";
+import { Icon, IconButton } from "@/components/icon-button";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { DeckRow, Key, Segmented, Toggle } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
@@ -131,13 +133,36 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
       <div className={cn(looks.form, "lg:self-start")}>
         <div className={looks.topbar}>
           <Button variant="ghost" onClick={onBack}>
+            <Icon icon={ArrowLeft01Icon} />
             {t("deck.back")}
           </Button>
-          {hasRuns && (
-            <Button variant="ghost" onClick={onStats}>
-              {t("common.stats")}
-            </Button>
-          )}
+          <span className={looks.row}>
+            {hasRuns && <IconButton variant="ghost" icon={ChartColumnIcon} label={t("common.stats")} words="sm" onClick={onStats} />}
+            <DeckForm
+              trigger={<IconButton variant="ghost" icon={PencilEdit02Icon} label={t("deck.editCover")} />}
+              onSubmit={(title, tags, color, emoji) => change((d) => restyleDeck(d, deck.id, { title, tags, color, emoji }))}
+              initialTitle={deck.title}
+              initialTags={deck.tags}
+              initialColor={deck.color}
+              initialEmoji={deck.emoji}
+              dialogTitle={t("deck.editCover")}
+              submitLabel={t("common.save")}
+            />
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <IconButton variant="ghost" icon={MoreHorizontalIcon} label={t("home.more")} />
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
+                  {item(t("deck.exportFile"), () => setDialog("export"))}
+                  {item(t("deck.exportAnki"), exportApkg)}
+                  {item(t("deck.bringIn"), () => setDialog("import"))}
+                  <DropdownMenu.Separator className={looks.menuRule} />
+                  {item(t("deck.delete"), () => setDialog("delete"), looks.menuDanger)}
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
+          </span>
         </div>
         <DeckRow deck={deck} meta={meta} head />
         <Button size="lg" className="w-full" onClick={studyNow} disabled={deck.cards.length === 0}>
@@ -146,46 +171,12 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
             : t("deck.studyAll").replace("{n}", String(deck.cards.length))}
           <Key>S</Key>
         </Button>
-        <div className={cn(looks.buttons, "flex-wrap")}>
-          {addCard(
-            <Button variant="outline" className="grow">
-              {t("deck.addCard")}
-            </Button>,
-          )}
+        <div className={looks.buttons}>
           <Button variant="outline" className="grow" onClick={() => setDialog("choose")}>
             {t("deck.chooseCards")}
           </Button>
-          <Button variant="outline" className="grow" onClick={share}>
-            {t("deck.shareLink")}
-          </Button>
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <Button variant="outline">{t("home.more")}</Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
-                {item(t("deck.exportFile"), () => setDialog("export"))}
-                {item(t("deck.exportAnki"), exportApkg)}
-                {item(t("deck.bringIn"), () => setDialog("import"))}
-                <DeckForm
-                  trigger={
-                    <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => e.preventDefault()}>
-                      {t("deck.editCover")}
-                    </DropdownMenu.Item>
-                  }
-                  onSubmit={(title, tags, color, emoji) => change((d) => restyleDeck(d, deck.id, { title, tags, color, emoji }))}
-                  initialTitle={deck.title}
-                  initialTags={deck.tags}
-                  initialColor={deck.color}
-                  initialEmoji={deck.emoji}
-                  dialogTitle={t("deck.editCover")}
-                  submitLabel={t("common.save")}
-                />
-                <DropdownMenu.Separator className={looks.menuRule} />
-                {item(t("deck.delete"), () => setDialog("delete"), looks.menuDanger)}
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+          {addCard(<IconButton variant="outline" icon={PlusSignIcon} label={t("deck.addCard")} />)}
+          <IconButton variant="outline" icon={Link01Icon} label={t("deck.shareLink")} onClick={share} />
         </div>
         {notice !== null && (
           <p role="status" className={looks.muted}>

@@ -1,7 +1,9 @@
+import { Cancel01Icon, MoreHorizontalIcon, PauseIcon, PlayIcon } from "@hugeicons/core-free-icons";
 import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Icon, IconButton } from "@/components/icon-button";
 import { Bar, GradeMark, Key, Sheet, Spots } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
@@ -187,6 +189,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
       <div className={looks.form}>
         <div className={looks.topbar}>
           <Button variant="ghost" onClick={() => setLeaving(true)}>
+            <Icon icon={Cancel01Icon} />
             {t("study.leave")}
             <Key>Esc</Key>
           </Button>
@@ -194,9 +197,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
             {t("study.position").replace("{n}", String(Math.min(run.index + 1, run.queue.length))).replace("{total}", String(run.queue.length))}
           </span>
           <span className={cn(looks.row, "lg:hidden")}>
-            <Button variant="ghost" onClick={togglePause}>
-              {paused ? t("common.resume") : t("common.pause")}
-            </Button>
+            <IconButton variant="ghost" icon={paused ? PlayIcon : PauseIcon} label={paused ? t("common.resume") : t("common.pause")} words="sm" onClick={togglePause} />
             <StudyMenu actions={[...actions.filter((action) => action.key !== "P"), toggleTime]} />
           </span>
         </div>
@@ -339,7 +340,7 @@ function StudyMenu({ actions }: { actions: readonly StudyAction[] }) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <Button variant="ghost">{t("home.more")}</Button>
+        <IconButton variant="ghost" icon={MoreHorizontalIcon} label={t("home.more")} />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
