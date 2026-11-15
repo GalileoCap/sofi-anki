@@ -1,10 +1,8 @@
-import { LanguageContext } from "@/contexts/language-context";
+import { LanguageContext, languageValue } from "@/contexts/language-context";
 import { useLang } from "@/hooks/use-lang";
-import { type TranslationKey, translate } from "@/lib/translations";
 
+/** The interface's language for everything under it, kept where `useLang` keeps it. */
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const { lang, setLang } = useLang();
-  const t = (key: TranslationKey) => translate(lang, key);
-  const tp = (n: number, oneKey: TranslationKey, otherKey: TranslationKey) => translate(lang, n === 1 ? oneKey : otherKey);
-  return <LanguageContext.Provider value={{ lang, setLang, t, tp }}>{children}</LanguageContext.Provider>;
+  return <LanguageContext.Provider value={languageValue(lang, setLang)}>{children}</LanguageContext.Provider>;
 }
