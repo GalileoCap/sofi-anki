@@ -166,8 +166,8 @@ function Run({ deck, cards, goal, shuffle, update, onExit, onRestart }: StudyPag
       {goal && <GoalProgress goal={goal} completed={run.completed} spent={spent} reached={showGoal} />}
 
       {showGoal && !paused && (
-        <div className="flex w-full items-center justify-between rounded-lg border border-green-300 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950">
-          <p className="text-sm font-medium text-green-700 dark:text-green-300">{t("studySession.youReachedGoal")}</p>
+        <div className="flex w-full items-center justify-between rounded-lg border border-positive/40 bg-positive-soft px-4 py-3">
+          <p className="text-sm font-medium text-positive">{t("studySession.youReachedGoal")}</p>
           <div className={looks.buttons}>
             <Button size="sm" variant="outline" onClick={() => setGoalDismissed(true)}>
               {t("common.continue")}
@@ -240,10 +240,10 @@ function RunProgress({ run }: { run: RunState }) {
   return (
     <div className={looks.wide}>
       <div className="flex h-3 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full shrink-0 bg-primary/60 transition-all duration-300" style={{ width: share(done) }} />
-        <div className="h-full shrink-0 bg-amber-400/80 transition-all duration-300 dark:bg-amber-500/70" style={{ width: share(redo) }} />
+        <div className="h-full shrink-0 bg-primary/60 transition-[width] duration-300" style={{ width: share(done) }} />
+        <div className="h-full shrink-0 bg-caution/80 transition-[width] duration-300" style={{ width: share(redo) }} />
       </div>
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+      <div className={looks.legend}>
         <span className={looks.tightRow}>
           <span className={cn(dot, "bg-primary/60")} />
           {done}
@@ -251,7 +251,7 @@ function RunProgress({ run }: { run: RunState }) {
         </span>
         {redo > 0 && (
           <span className={looks.tightRow}>
-            <span className={cn(dot, "bg-amber-400/80 dark:bg-amber-500/70")} />
+            <span className={cn(dot, "bg-caution/80")} />
             {redo}
             {t("studySession.redoLater")}
           </span>

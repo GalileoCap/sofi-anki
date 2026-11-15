@@ -1,3 +1,5 @@
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
@@ -18,9 +20,9 @@ import { accuracyLook, looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 const lastAnswerDot: Record<AnswerResult, string> = {
-  correct: "bg-green-500",
-  approximate: "bg-yellow-400",
-  wrong: "bg-red-500",
+  correct: "bg-positive",
+  approximate: "bg-caution",
+  wrong: "bg-negative",
 };
 
 const sectionLabel = "mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground";
@@ -122,7 +124,15 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
       <CardHeader>
         <CardHeading
           card={card}
-          before={<span className={cn("shrink-0 text-[10px] text-muted-foreground transition-transform duration-150", open && "rotate-90")}>▶</span>}
+          before={
+            <HugeiconsIcon
+              icon={ArrowRight01Icon}
+              size={14}
+              strokeWidth={2}
+              aria-hidden="true"
+              className={cn("shrink-0 text-muted-foreground transition-transform duration-150", open && "rotate-90")}
+            />
+          }
         >
           {!studied ? (
             <Badge variant="outline" className={looks.fine}>
@@ -131,7 +141,7 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
           ) : due ? (
             <Badge
               variant="outline"
-              className="border-amber-400/60 bg-amber-50 text-xs text-amber-700 dark:border-amber-700/60 dark:bg-amber-950 dark:text-amber-400"
+              className="border-caution/40 bg-caution-soft text-xs text-caution"
             >
               {t("common.due")}
             </Badge>
@@ -195,7 +205,7 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
                     key={option.id}
                     className={cn(
                       "flex items-start gap-2 rounded-md px-2 py-1.5 text-sm",
-                      option.correct ? "bg-green-50 text-green-800 dark:bg-green-950/50 dark:text-green-300" : "text-muted-foreground",
+                      option.correct ? "bg-positive-soft text-positive" : "text-muted-foreground",
                     )}
                   >
                     <span className="mt-0.5 shrink-0 font-mono text-xs">{option.correct ? "✓" : "·"}</span>
@@ -236,7 +246,7 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
                       </span>
                       <span>
                         {t("deckDetail.due")}{" "}
-                        <span className={cn("font-medium", due ? "text-amber-600 dark:text-amber-400" : "text-foreground")}>
+                        <span className={cn("font-medium", due ? "text-caution" : "text-foreground")}>
                           <DueLabel dueAt={dueTime(schedule)} now={now} />
                         </span>
                       </span>

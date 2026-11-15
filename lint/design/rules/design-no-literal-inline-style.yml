@@ -1,0 +1,25 @@
+id: design-no-literal-inline-style
+language: tsx
+severity: error
+message: >-
+  sp-1: a fixed value in an inline style escapes the tokens. Write it as a class; an inline
+  style carries only what the data computes (a width from a share, a deck's colour).
+files:
+  - src/components/**/*.tsx
+  - src/pages/**/*.tsx
+  - src/App.tsx
+ignores:
+  - src/components/ui/**
+rule:
+  kind: pair
+  has:
+    field: value
+    any:
+      - kind: string
+      - kind: number
+  inside:
+    kind: jsx_attribute
+    stopBy: end
+    has:
+      kind: property_identifier
+      regex: "^style$"

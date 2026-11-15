@@ -13,3 +13,6 @@ session-docs check
 session-intent check
 ast-grep test -c sgconfig.yml --skip-snapshot-tests
 ast-grep scan -c sgconfig.yml --error
+# The design gate's source rules (lint/design), apart from the layer rules above.
+ast-grep test -c lint/design/sgconfig.yml --skip-snapshot-tests
+ast-grep scan -c lint/design/sgconfig.yml --error

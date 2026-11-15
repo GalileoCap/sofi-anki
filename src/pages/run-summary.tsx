@@ -155,7 +155,7 @@ function Picked({ card, attempt }: { card: Extract<CardRunResult["card"], { type
               className={cn(
                 "shrink-0",
                 option.correct && chosen && looks.positive,
-                !option.correct && chosen && "text-red-600 dark:text-red-400",
+                !option.correct && chosen && "text-negative",
                 option.correct && !chosen && looks.caution,
                 !option.correct && !chosen && "text-muted-foreground/50",
               )}

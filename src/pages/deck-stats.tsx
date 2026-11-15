@@ -169,7 +169,7 @@ function CardLine({ stat, runs, now }: { stat: CardStat; runs: readonly RunRecor
           tableRow,
           "flex-wrap gap-x-3 gap-y-1",
           !studied && "bg-muted/30",
-          poor && "bg-red-50/50 dark:bg-red-950/20",
+          poor && "bg-negative-soft",
           studied && looks.clickable,
         )}
       >

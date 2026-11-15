@@ -1,0 +1,17 @@
+id: design-no-emoji-in-markup
+language: tsx
+severity: error
+message: >-
+  dec-1: an emoji in the app's own markup is decoration or an icon. Use an icon from
+  @hugeicons; the emoji people choose for their decks are their data and stay.
+files:
+  - src/components/**/*.tsx
+  - src/pages/**/*.tsx
+  - src/App.tsx
+ignores:
+  - src/components/ui/**
+rule:
+  any:
+    - kind: jsx_text
+    - kind: string_fragment
+  regex: "\\p{Extended_Pictographic}"

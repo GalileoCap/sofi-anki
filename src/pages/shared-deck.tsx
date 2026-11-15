@@ -45,7 +45,7 @@ export function SharedDeckPage({ deck, store, update, onGoHome }: SharedDeckPage
       </div>
 
       {received && (
-        <div className="rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300">
+        <div className="rounded-lg border border-positive/40 bg-positive-soft px-4 py-3 text-sm text-positive">
           {t("sharedDeck.importedSuccess")}
         </div>
       )}

@@ -34,5 +34,17 @@
         "marked"
       ]
     }
+  },
+  "design": {
+    "register": "personal",
+    "entry": "src/index.css",
+    "css": "dist/assets",
+    "budgets": {
+      "colors": 31,
+      "fontSizes": 12,
+      "fontFamilies": 3,
+      "radii": 6,
+      "shadows": 3
+    }
   }
 }

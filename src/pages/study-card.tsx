@@ -20,21 +20,21 @@ const grades: { result: AnswerResult; label: TranslationKey; key: string; classN
     label: "common.wrong",
     key: "1",
     className:
-      "border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900",
+      "border-negative/40 bg-negative-soft text-negative hover:bg-negative/15",
   },
   {
     result: "approximate",
     label: "common.approximate",
     key: "2",
     className:
-      "border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-400 dark:hover:bg-yellow-900",
+      "border-caution/40 bg-caution-soft text-caution hover:bg-caution/15",
   },
   {
     result: "correct",
     label: "common.correct",
     key: "3",
     className:
-      "border-green-300 bg-green-50 text-green-700 hover:bg-green-100 dark:border-green-800 dark:bg-green-950 dark:text-green-400 dark:hover:bg-green-900",
+      "border-positive/40 bg-positive-soft text-positive hover:bg-positive/15",
   },
 ];
 
@@ -177,7 +177,7 @@ export function StudyCard({ card, paused, onSkip, onPostpone, onAnswer }: StudyC
                 type="button"
                 onClick={() => pickGrade(g.result)}
                 className={cn(
-                  "flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-all",
+                  "flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
                   g.className,
                   grade === g.result && "ring-2 ring-ring ring-offset-2",
                 )}
@@ -202,14 +202,17 @@ export function StudyCard({ card, paused, onSkip, onPostpone, onAnswer }: StudyC
   );
 
   return (
-    <div className="card-flip-container mx-auto w-full">
-      <div className={cn("card-flip-inner", revealed && "flipped")}>
-        {face(question, "card-flip-front")}
-        {face(answer, "card-flip-back")}
+    <div className="mx-auto w-full perspective-distant">
+      <div className={cn("relative transition-transform duration-600 ease-in-out transform-3d", revealed && "rotate-y-180")}>
+        {face(question, cn("backface-hidden", revealed && hiddenFaceClass))}
+        {face(answer, cn("rotate-y-180 backface-hidden", !revealed && hiddenFaceClass))}
       </div>
     </div>
   );
 }
+
+/** The face turned away lies under the other, which sets the card's height. */
+const hiddenFaceClass = "absolute inset-0";
 
 /** A key that does the same as the button it sits in, shown on wide screens. */
 export function Shortcut({ children }: { children: React.ReactNode }) {
@@ -245,10 +248,10 @@ function ChoiceOptions({ card, selected, revealed, onPick }: ChoiceOptionsProps)
             onClick={() => onPick(option.id)}
             disabled={revealed}
             className={cn(
-              "flex w-full items-center gap-3 rounded-lg border px-4 py-2.5 text-left text-sm transition-all",
+              "flex w-full items-center gap-3 rounded-lg border px-4 py-2.5 text-left text-sm transition-colors",
               !revealed && (picked ? "border-foreground/30 bg-foreground/5 ring-1 ring-ring" : "border-border hover:bg-muted/50"),
-              revealed && option.correct && "border-green-400 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-300",
-              revealed && picked && !option.correct && "border-red-400 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-300",
+              revealed && option.correct && "border-positive/40 bg-positive-soft text-positive",
+              revealed && picked && !option.correct && "border-negative/40 bg-negative-soft text-negative",
               revealed && "cursor-default",
             )}
           >
@@ -261,7 +264,7 @@ function ChoiceOptions({ card, selected, revealed, onPick }: ChoiceOptionsProps)
             >
               {picked &&
                 (card.multiSelect ? (
-                  <span className="text-[10px] leading-none">✓</span>
+                  <span className="text-xs leading-none">✓</span>
                 ) : (
                   <span className="block h-2 w-2 rounded-full bg-background" />
                 ))}

@@ -1,0 +1,6 @@
+# The source rules of the static design gate (T3 of docs/design-research.md), apart from the
+# layer rules, whose sgconfig.yml session-codeintel writes. Rule ids name docs/design/rules.md.
+ruleDirs:
+  - rules
+testConfigs:
+  - testDir: tests

@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint . --max-warnings 0",
     "check:static": "scripts/check.sh",
-    "check": "scripts/check.sh && vitest run && vite build",
+    "check": "scripts/check.sh && vitest run && vite build && node scripts/design-census.mjs",
     "preview": "vite preview",
     "test": "vitest run"
   },
@@ -40,6 +40,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.13",
     "@eslint/js": "^10.0.1",
+    "@projectwallace/css-analyzer": "^9.9.9",
     "@rolldown/plugin-babel": "^0.2.4",
     "@types/babel__core": "^7.20.5",
     "@types/node": "^24.19.2",
@@ -50,6 +51,7 @@
     "@vitejs/plugin-react": "^6.3.0",
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^10.15.0",
+    "eslint-plugin-better-tailwindcss": "^4.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.14.0",

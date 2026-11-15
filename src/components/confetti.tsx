@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 
 import { randoms } from "@/effects/clock";
 
-const colors = ["#22c55e", "#3b82f6", "#f59e0b", "#ef4444", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
+/** The confetti takes the colours of the three results and the accent, from the tokens. */
+const fills = ["var(--positive)", "var(--caution)", "var(--negative)", "var(--primary)"];
 
 const PIECES = 50;
 /** How long the confetti falls before it goes. */
@@ -12,7 +13,7 @@ const SHOWN_MS = 3500;
 function piece([x, color, delay, duration, size, drift, round]: number[]) {
   return {
     x: x * 100,
-    color: colors[Math.floor(color * colors.length)],
+    color: fills[Math.floor(color * fills.length)],
     delay: delay * 0.5,
     duration: 1.5 + duration * 1.5,
     size: 4 + size * 6,
@@ -38,10 +39,9 @@ export function Confetti() {
       {pieces.map((p, i) => (
         <div
           key={i}
-          className="absolute animate-confetti-fall"
+          className="absolute -top-2.5 animate-confetti-fall"
           style={{
             left: `${p.x}%`,
-            top: "-10px",
             width: p.size,
             height: p.size,
             backgroundColor: p.color,

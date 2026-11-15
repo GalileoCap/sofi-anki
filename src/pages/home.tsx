@@ -160,11 +160,11 @@ function DeckTile({ deck, onOpen }: { deck: Deck; onOpen: () => void }) {
     <button type="button" onClick={onOpen} className="text-left">
       <Card className="h-full cursor-pointer overflow-hidden transition-colors hover:bg-muted/50" size="sm">
         {deck.color ? (
-          <div className="flex h-24 items-center justify-center text-4xl" style={{ backgroundColor: deck.color }}>
+          <div className="flex h-24 items-center justify-center text-emoji" style={{ backgroundColor: deck.color }}>
             {deck.emoji}
           </div>
         ) : (
-          deck.emoji && <div className="pt-3 text-center text-3xl leading-none">{deck.emoji}</div>
+          deck.emoji && <div className="pt-3 text-center text-emoji">{deck.emoji}</div>
         )}
         <CardHeader>
           <CardTitle>{deck.title}</CardTitle>
@@ -246,7 +246,7 @@ function TodayCard({ runs, now, goal, onGoal }: TodayCardProps) {
                     title={t("deckList.editGoal")}
                   >
                     {goal} {t("common.cards")}
-                    <span className="text-[10px] text-muted-foreground">&#9998;</span>
+                    <span className={looks.fine}>&#9998;</span>
                   </button>
                 )}
               </>

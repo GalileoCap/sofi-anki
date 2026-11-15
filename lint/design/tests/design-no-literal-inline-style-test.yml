@@ -1,0 +1,7 @@
+id: design-no-literal-inline-style
+valid:
+  - "const a = <div style={{ width: `${share * 100}%` }} />;"
+  - "const a = <div style={{ backgroundColor: deck.color }} />;"
+invalid:
+  - "const a = <div style={{ top: \"-10px\" }} />;"
+  - "const a = <div style={{ width: p.size, height: 12 }} />;"

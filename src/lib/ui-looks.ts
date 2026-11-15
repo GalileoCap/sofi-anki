@@ -36,6 +36,8 @@ export const looks = {
   filters: "flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4",
   /** A checkbox with its label. */
   check: "flex items-center gap-2 text-sm",
+  /** A chart's key: small swatches with their names, side by side. */
+  legend: "flex items-center gap-3 text-xs text-muted-foreground",
   /** A line of small figures. */
   smallRow: "flex items-center gap-2 text-xs",
   /** A dialog wide enough for JSON. */
@@ -74,7 +76,7 @@ export const looks = {
   /** A screen's title. */
   title: "text-2xl font-medium text-foreground",
   /** A filter chip, and its look when chosen. */
-  chip: "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-all",
+  chip: "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors",
   chosen: "border-foreground/20 bg-foreground/5 text-foreground",
   /** A dropdown menu's panel. */
   menu: "z-50 min-w-36 rounded-lg border bg-popover p-1 shadow-md",
@@ -82,11 +84,11 @@ export const looks = {
   menuItem:
     "flex w-full cursor-pointer select-none items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
   /** A card's hint, in amber. */
-  hint: "rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
+  hint: "rounded-lg border border-caution/40 bg-caution-soft px-3 py-2 text-sm text-caution",
   /** Text that reads as good, as a warning, and as bad. */
-  positive: "text-green-700 dark:text-green-400",
-  caution: "text-yellow-700 dark:text-yellow-400",
-  negative: "text-red-700 dark:text-red-400",
+  positive: "text-positive",
+  caution: "text-caution",
+  negative: "text-negative",
 } as const;
 
 /** The look of an accuracy in percent. */

@@ -12,9 +12,9 @@ const stacked = ["other", "wrong", "approximate", "correct"] as const;
 
 const swatch = "inline-block h-2 w-2 rounded-sm";
 const colors = {
-  correct: "bg-green-400 dark:bg-green-600",
-  approximate: "bg-yellow-400 dark:bg-yellow-600",
-  wrong: "bg-red-400 dark:bg-red-600",
+  correct: "bg-positive",
+  approximate: "bg-caution",
+  wrong: "bg-negative",
   other: "bg-muted",
 };
 
@@ -49,7 +49,7 @@ export function AccuracyTrend({ runs }: { runs: readonly RunRecord[] }) {
           );
         })}
       </div>
-      <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+      <div className={looks.legend}>
         <span className={looks.tightRow}>
           <span className={cn(swatch, colors.correct)} /> {t("common.correct")}
         </span>

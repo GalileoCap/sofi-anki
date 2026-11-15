@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 /** A colour to pick for the deck's cover, ringed and larger when picked. */
 const swatch = (picked: boolean): string =>
-  cn("h-7 w-7 rounded-full border-2 transition-all", picked ? "border-foreground scale-110" : "border-transparent hover:scale-105");
+  cn("h-7 w-7 rounded-full border-2 transition-[border-color,scale]", picked ? "border-foreground scale-110" : "border-transparent hover:scale-105");
 
 interface DeckFormProps {
   trigger: React.ReactNode;

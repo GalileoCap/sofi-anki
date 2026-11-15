@@ -1,148 +1,166 @@
-@import "tailwindcss";
+/* Classes are read from src/ alone, so a class named in a document or a mock is never built. */
+@import "tailwindcss" source(".");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/figtree";
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * The design tokens (T2 of docs/design-research.md), written up in docs/design/system.md.
+ * Tailwind's own palette, radii, shadows, type sizes and families are reset, so a value
+ * outside this file is a class that does not exist and the lint reports it.
+ */
+
 :root {
+  /* Neutrals: four surfaces, two strokes, three text tones. */
   --background: oklch(1 0 0);
-
-  --foreground: oklch(0.145 0 0);
-
   --card: oklch(1 0 0);
-
-  --card-foreground: oklch(0.145 0 0);
-
   --popover: oklch(1 0 0);
-
-  --popover-foreground: oklch(0.145 0 0);
-
-  --primary: oklch(0.205 0 0);
-
-  --primary-foreground: oklch(0.985 0 0);
-
-  --secondary: oklch(0.97 0 0);
-
-  --secondary-foreground: oklch(0.205 0 0);
-
   --muted: oklch(0.97 0 0);
-
+  --secondary: oklch(0.97 0 0);
+  --accent: oklch(0.97 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --accent-foreground: oklch(0.205 0 0);
   --muted-foreground: oklch(0.556 0 0);
 
-  --accent-foreground: oklch(0.205 0 0);
-
-  --destructive: oklch(0.577 0.245 27.325);
-
-  --input: oklch(0.922 0 0);
-
+  /* The accent, and the focus ring. */
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
   --ring: oklch(0.708 0 0);
 
-  --chart-1: oklch(0.87 0 0);
-
-  --chart-2: oklch(0.556 0 0);
-
-  --chart-3: oklch(0.439 0 0);
-
-  --chart-4: oklch(0.371 0 0);
-
-  --chart-5: oklch(0.269 0 0);
-
-  --radius: 0.625rem;
-
-  --sidebar: oklch(0.985 0 0);
-
-  --sidebar-foreground: oklch(0.145 0 0);
-
-  --sidebar-primary: oklch(0.205 0 0);
-
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-
-  --sidebar-accent: oklch(0.97 0 0);
-
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-
-  --sidebar-border: oklch(0.922 0 0);
-
-  --sidebar-ring: oklch(0.708 0 0)
-}
-
-
-@theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: 'Figtree Variable', sans-serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  /* Meaning: a good, a middling and a bad result, and deletion. */
+  --positive: oklch(0.527 0.154 150.069);
+  --positive-soft: oklch(0.982 0.018 155.826);
+  --caution: oklch(0.555 0.163 48.998);
+  --caution-soft: oklch(0.987 0.022 95.277);
+  --negative: oklch(0.505 0.213 27.518);
+  --negative-soft: oklch(0.971 0.013 17.38);
+  --destructive: oklch(0.577 0.245 27.325);
 }
 
 .dark {
   --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --secondary: oklch(0.269 0 0);
   --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
+  --foreground: oklch(0.985 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+
+  --positive: oklch(0.792 0.209 151.711);
+  --positive-soft: oklch(0.266 0.065 152.934);
+  --caution: oklch(0.828 0.189 84.429);
+  --caution-soft: oklch(0.279 0.077 45.635);
+  --negative: oklch(0.704 0.191 22.216);
+  --negative-soft: oklch(0.258 0.092 26.042);
+  --destructive: oklch(0.704 0.191 22.216);
+}
+
+@theme {
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --text-*: initial;
+  --font-*: initial;
+
+  /* Six type sizes, and two for one role each. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: calc(1 / 0.75);
+  --text-sm: 0.875rem;
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-base: 1rem;
+  --text-base--line-height: calc(1.5 / 1);
+  --text-lg: 1.125rem;
+  --text-lg--line-height: calc(1.75 / 1.125);
+  --text-xl: 1.25rem;
+  --text-xl--line-height: calc(1.75 / 1.25);
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: calc(2 / 1.5);
+  /* Code inside running text, sized to the text around it. */
+  --text-code: 0.82em;
+  /* A deck's emoji on its cover. */
+  --text-emoji: 2.25rem;
+  --text-emoji--line-height: 1;
+
+  --font-sans: 'Figtree Variable', sans-serif;
+  --font-heading: 'Figtree Variable', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+
+  /* Three radii, the round one, and the pill. The names shadcn's components use share these values. */
+  --radius: 0.375rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 0.875rem;
+  --radius-4xl: 1.625rem;
+
+  /* Two depths: a thing lifted a little (a tooltip), and a thing over the page (a menu). */
+  --shadow-sm: 0 1px 3px 0 oklch(0 0 0 / 0.1), 0 1px 2px -1px oklch(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.1);
+
+  /* Confetti falling, for the daily goal reached. */
+  --animate-confetti-fall: confetti-fall linear forwards;
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(0) translateX(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) translateX(var(--drift, 0px)) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  /* The scrim behind shadcn's dialog, its only use. */
+  --color-black: oklch(0 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-ring: var(--ring);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-caution: var(--caution);
+  --color-caution-soft: var(--caution-soft);
+  --color-negative: var(--negative);
+  --color-negative-soft: var(--negative-soft);
+  --color-destructive: var(--destructive);
 }
 
 html {
@@ -156,53 +174,3 @@ html {
     @apply bg-background text-foreground;}
   html {
     @apply font-sans;}}
-
-.card-flip-container {
-  perspective: 1200px;
-}
-
-.card-flip-inner {
-  position: relative;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-style: preserve-3d;
-}
-
-.card-flip-inner.flipped {
-  transform: rotateY(180deg);
-}
-
-.card-flip-front,
-.card-flip-back {
-  backface-visibility: hidden;
-}
-
-/* Before flip: front is in flow, back is absolute */
-.card-flip-inner:not(.flipped) .card-flip-back {
-  position: absolute;
-  inset: 0;
-}
-
-/* After flip: back is in flow, front is absolute */
-.card-flip-inner.flipped .card-flip-front {
-  position: absolute;
-  inset: 0;
-}
-
-.card-flip-back {
-  transform: rotateY(180deg);
-}
-
-@keyframes confetti-fall {
-  0% {
-    transform: translateY(0) translateX(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(calc(100vh)) translateX(var(--drift, 0px)) rotate(720deg);
-    opacity: 0;
-  }
-}
-
-.animate-confetti-fall {
-  animation: confetti-fall linear forwards;
-}

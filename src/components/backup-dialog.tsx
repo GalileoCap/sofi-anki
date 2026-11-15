@@ -125,7 +125,7 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
           )}
 
           {error && <p className={looks.error}>{error}</p>}
-          {success && <p className="text-sm text-green-600 dark:text-green-400">{success}</p>}
+          {success && <p className="text-sm text-positive">{success}</p>}
         </div>
       </DialogContent>
     </Dialog>

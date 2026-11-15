@@ -1,0 +1,11 @@
+id: design-copy-no-meta-marks
+language: typescript
+severity: error
+message: >-
+  copy-3: no middle dots joining meta strings and no arrows ending links. Say it in words,
+  or give each fact its own place on the screen.
+files:
+  - src/lib/translations/**/*.ts
+rule:
+  kind: string_fragment
+  regex: "[·•→←↗»]"

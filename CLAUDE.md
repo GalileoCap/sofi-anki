@@ -51,4 +51,6 @@ The deployed site holds people's real decks. Whatever the app stores (the `local
 - [docs/rewrite-plan.md](docs/rewrite-plan.md): the design and order of the rewrite onto the pure-core shape.
 - [docs/design-research.md](docs/design-research.md): why the first restyle mocks read as machine-made, the research and working designers' patterns for avoiding it, and the design tools proposed for trial here and for session-kit after (`O6`).
 - [docs/design/brief.md](docs/design/brief.md): the design brief (`A9`): register, people, tasks, the data's shapes, what is wrong now, references, and the generic choices to avoid.
+- [docs/design/rules.md](docs/design/rules.md): the design rules by topic (T8), each with its registers, its source and what holds it. The gate's messages and the critique's questions name them.
+- [docs/design/system.md](docs/design/system.md): the design tokens by role (`A10`), the scales, and the census budgets the static design gate (`A11`) holds.
 - [docs/suppressions.md](docs/suppressions.md): every suppression and type escape with its reason, written by `session-suppressions index`.

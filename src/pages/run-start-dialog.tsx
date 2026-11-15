@@ -14,7 +14,7 @@ const DEFAULT_GOAL: SessionGoal = { type: "cards", value: 20 };
 
 const choice = (chosen: boolean) =>
   cn(
-    "rounded-lg border px-3 py-2 text-sm font-medium transition-all",
+    "rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
     chosen ? looks.chosen : "border-border text-muted-foreground hover:bg-muted/50",
   );
 

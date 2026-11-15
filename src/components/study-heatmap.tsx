@@ -11,10 +11,10 @@ const DAYS = 13 * 7;
 /** The shade of a day, by the cards studied on it, from the least to the most. */
 const LEVELS = [
   { least: 0, className: "bg-muted/30" },
-  { least: 1, className: "bg-green-200 dark:bg-green-900/50" },
-  { least: 6, className: "bg-green-400 dark:bg-green-700/60" },
-  { least: 16, className: "bg-green-500 dark:bg-green-600/70" },
-  { least: 31, className: "bg-green-700 dark:bg-green-500" },
+  { least: 1, className: "bg-positive/25" },
+  { least: 6, className: "bg-positive/50" },
+  { least: 16, className: "bg-positive/75" },
+  { least: 31, className: "bg-positive" },
 ] as const;
 
 const shade = (count: number): string => LEVELS.findLast((level) => count >= level.least)?.className ?? LEVELS[0].className;
@@ -35,7 +35,7 @@ export function StudyHeatmap({ runs, now }: { runs: readonly RunRecord[]; now: M
       <div className="flex gap-[3px]">
         <div className="flex flex-col gap-[3px] pr-1">
           {DAY_LABELS.map((label, i) => (
-            <div key={i} className={cn(cell, "flex items-center justify-center text-[9px] text-muted-foreground")}>
+            <div key={i} className={cn(cell, "flex items-center justify-center text-xs text-muted-foreground")}>
               {label && t(label)}
             </div>
           ))}
@@ -56,7 +56,7 @@ export function StudyHeatmap({ runs, now }: { runs: readonly RunRecord[]; now: M
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <span>{t("heatmap.less")}</span>
         {LEVELS.map((level) => (
           <div key={level.least} className={cn("h-3 w-3 rounded-sm", level.className)} />

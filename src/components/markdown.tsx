@@ -36,7 +36,7 @@ export function Markdown({ children, className, inline }: MarkdownProps) {
           return isBlock ? (
             <code className={cn(looks.code, cls)}>{children}</code>
           ) : (
-            <code className="rounded border border-border/50 bg-muted/80 px-1 py-0.5 font-mono text-[0.82em]">
+            <code className="rounded border border-border/50 bg-muted/80 px-1 py-0.5 font-mono text-code">
               {children}
             </code>
           );

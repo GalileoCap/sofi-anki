@@ -5,9 +5,9 @@ import type { TranslationKey } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 
 const shown: Record<CardDisposition, { label: TranslationKey; className: string }> = {
-  correct: { label: "common.correct", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  approximate: { label: "common.approximate", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
-  wrong: { label: "common.wrong", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
+  correct: { label: "common.correct", className: "bg-positive-soft text-positive" },
+  approximate: { label: "common.approximate", className: "bg-caution-soft text-caution" },
+  wrong: { label: "common.wrong", className: "bg-negative-soft text-negative" },
   skip: { label: "common.skipped", className: "bg-muted text-muted-foreground" },
   save_for_later: { label: "common.saved", className: "bg-muted text-muted-foreground" },
 };

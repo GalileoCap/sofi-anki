@@ -1,0 +1,8 @@
+id: design-no-emoji-in-markup
+valid:
+  - "const a = <span>✓</span>;"
+  - "const a = <span>{deck.emoji}</span>;"
+  - "const a = <p>Study</p>;"
+invalid:
+  - "const a = <span>🌙</span>;"
+  - "const ICONS = { light: \"☀️\" };"

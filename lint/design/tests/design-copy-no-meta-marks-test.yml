@@ -1,0 +1,6 @@
+id: design-copy-no-meta-marks
+valid:
+  - "export const en = { \"home.stats\": \"Stats\" };"
+invalid:
+  - "export const en = { \"home.stats\": \"Stats →\" };"
+  - "export const en = { \"run.meta\": \"7 of 12 · Spanish\" };"
