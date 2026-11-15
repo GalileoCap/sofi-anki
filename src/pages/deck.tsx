@@ -116,6 +116,11 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
           <Button variant="ghost" onClick={onBack}>
             {t("deck.back")}
           </Button>
+          {hasRuns && (
+            <Button variant="ghost" onClick={onStats}>
+              {t("common.stats")}
+            </Button>
+          )}
         </div>
         <DeckRow deck={deck} meta={meta} head />
         <Button size="lg" className="w-full" onClick={studyNow} disabled={deck.cards.length === 0}>
@@ -124,22 +129,24 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
             : t("deck.studyAll").replace("{n}", String(deck.cards.length))}
           <Key>S</Key>
         </Button>
-        <div className={looks.buttons}>
+        <div className={cn(looks.buttons, "flex-wrap")}>
           {addCard(
-            <Button variant="outline" className="flex-1">
+            <Button variant="outline" className="grow">
               {t("deck.addCard")}
             </Button>,
           )}
+          <Button variant="outline" className="grow" onClick={() => setDialog("choose")}>
+            {t("deck.chooseCards")}
+          </Button>
+          <Button variant="outline" className="grow" onClick={share}>
+            {t("deck.shareLink")}
+          </Button>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <Button variant="outline">{t("home.more")}</Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
               <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
-                {item(t("deck.chooseCards"), () => setDialog("choose"))}
-                {hasRuns && item(t("common.stats"), onStats)}
-                <DropdownMenu.Separator className={looks.menuRule} />
-                {item(t("deck.shareLink"), share)}
                 {item(t("deck.exportFile"), () => setDialog("export"))}
                 {item(t("deck.exportAnki"), exportApkg)}
                 {item(t("deck.bringIn"), () => setDialog("import"))}

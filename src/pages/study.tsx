@@ -1,7 +1,7 @@
 import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
 
-import { EmojiSticker, Key, Sheet, Spots } from "@/components/sticker";
+import { GradeMark, Key, Sheet, Spots } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import type { CardRunResult, Deck, SessionGoal, Store } from "@/core/model";
@@ -20,11 +20,12 @@ import {
   withRuns,
 } from "@/core/run";
 import { indexSchedules, scheduleKey, wasAnswered } from "@/core/scheduler";
-import { stickersOn } from "@/core/stats";
+import { firstTries, stickersOn } from "@/core/stats";
 import { clockFace, elapsed, pauseStopwatch, resumeStopwatch, startStopwatch } from "@/core/time";
 import { newId, now, randoms } from "@/effects/clock";
 import { useKeys } from "@/hooks/use-keys";
 import { useNow } from "@/hooks/use-now";
+import { gradeLooks, gradeWords, smallMark } from "@/lib/sticker-looks";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 import { RunSummary } from "@/pages/run-summary";
@@ -134,9 +135,12 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
   const stickers = [...stickersOn(before.runs, opened), ...answeredNow.flatMap((result) => byKey.get(result.card.id)?.deckId ?? [])];
   const showGoal = goal !== undefined && !goalDismissed && goalReached(goal, run, spent);
   const dailyGoal = before.settings.dailyCardGoal;
-  const inRun = new Map<string, number>();
-  for (const item of items) inRun.set(item.deckId, (inRun.get(item.deckId) ?? 0) + 1);
-
+  const actions: StudyAction[] = [
+    { label: paused ? t("common.resume") : t("common.pause"), key: "P", onClick: togglePause },
+    { label: t("common.undo"), key: "⌘Z", onClick: undo, disabled: run.undo.length === 0 },
+    { label: t("common.skip"), key: "S", onClick: skip, disabled: paused },
+    { label: t("studyCard.saveForLater"), key: "L", onClick: postpone, disabled: paused },
+  ];
   const sheetValue = t("home.ofGoal").replace("{n}", String(stickers.length)).replace("{goal}", String(dailyGoal));
 
   return (
@@ -145,25 +149,19 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
         <Sheet label={t("home.sheet")} value={sheetValue}>
           <Spots stickers={stickers} goal={dailyGoal} decks={before.decks} />
         </Sheet>
-        <div>
-          <h2 className={looks.sectionTitle}>{t("study.inThisRun")}</h2>
-          <div className={looks.list}>
-            {[...inRun].flatMap(([deckId, count]) => {
-              const deck = before.decks.find((d) => d.id === deckId);
-              return deck === undefined
-                ? []
-                : [
-                    <div key={deckId} className={looks.listRow}>
-                      <span className={cn(looks.row, "min-w-0")}>
-                        <EmojiSticker deck={deck} />
-                        <span className="truncate" title={deck.title}>
-                          {deck.title}
-                        </span>
-                      </span>
-                      <span className={looks.figure}>{count}</span>
-                    </div>,
-                  ];
-            })}
+        <div className={looks.stack}>
+          <div className={looks.spread}>
+            <h2 className={looks.sectionTitle}>{t("study.thisRun")}</h2>
+            <span className={cn(looks.value, "text-lg")}>{clockFace(spent)}</span>
+          </div>
+          <FirstTriesSoFar results={answeredNow} />
+          <div className="flex flex-col items-start">
+            {actions.map(({ label, key, onClick, disabled }) => (
+              <Button key={key} variant="ghost" disabled={disabled} onClick={onClick}>
+                {label}
+                <Key>{key}</Key>
+              </Button>
+            ))}
           </div>
         </div>
         <p className={looks.fine}>{t("study.keys")}</p>
@@ -175,13 +173,23 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
             {t("study.leave")}
             <Key>Esc</Key>
           </Button>
-          <span className="tabular-nums">
+          <span className="tabular-nums whitespace-nowrap">
             {t("study.position").replace("{n}", String(Math.min(run.index + 1, run.queue.length))).replace("{total}", String(run.queue.length))}
           </span>
-          <StudyMenu paused={paused} canUndo={run.undo.length > 0} onPostpone={postpone} onSkip={skip} onPause={togglePause} onUndo={undo} />
+          <span className={cn(looks.row, "lg:hidden")}>
+            <Button variant="ghost" onClick={togglePause}>
+              {paused ? t("common.resume") : t("common.pause")}
+            </Button>
+            <StudyMenu actions={actions.filter((action) => action.key !== "P")} />
+          </span>
         </div>
-        <div className="lg:hidden">
-          <p className="sr-only">{`${t("home.sheet")}: ${sheetValue}`}</p>
+        <div className="flex flex-col gap-1.5 lg:hidden">
+          <p className={cn(looks.spread, looks.muted)}>
+            <span>{`${t("home.sheet")}: ${sheetValue}`}</span>
+            <span className="tabular-nums" role="timer" aria-label={t("study.time")}>
+              {clockFace(spent)}
+            </span>
+          </p>
           <Spots stickers={stickers} goal={dailyGoal} decks={before.decks} />
         </div>
         {goal && (
@@ -228,30 +236,40 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
   );
 }
 
-type StudyMenuProps = { paused: boolean; canUndo: boolean; onPostpone: () => void; onSkip: () => void; onPause: () => void; onUndo: () => void };
+type StudyAction = { label: string; key: string; onClick: () => void; disabled?: boolean };
 
-/** What is done now and then in a run: put the card off, skip it, pause, take a grade back. */
-function StudyMenu({ paused, canUndo, onPostpone, onSkip, onPause, onUndo }: StudyMenuProps) {
+/** The first tries of the cards answered so far, each grade's count beside its mark. */
+function FirstTriesSoFar({ results }: { results: readonly CardRunResult[] }) {
   const { t } = useLanguage();
-  const item = (label: string, key: string, onSelect: () => void, disabled = false) => (
-    <DropdownMenu.Item className={looks.menuItem} disabled={disabled} onSelect={onSelect}>
-      <span className="flex-1">{label}</span>
-      <Key>{key}</Key>
-    </DropdownMenu.Item>
+  const counts = firstTries({ results: [...results] });
+  return (
+    <p className="flex gap-4 text-sm">
+      {(["correct", "approximate", "wrong"] as const).map((result) => (
+        <span key={result} className={cn("inline-flex items-center gap-1.5", looks.value, gradeLooks[result].text)}>
+          <GradeMark result={result} className={smallMark} />
+          {counts[result]}
+          <span className="sr-only">{t(gradeWords[result])}</span>
+        </span>
+      ))}
+    </p>
   );
+}
+
+/** On a phone, what is done now and then in a run: take a grade back, skip the card, put it off. */
+function StudyMenu({ actions }: { actions: readonly StudyAction[] }) {
+  const { t } = useLanguage();
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <Button variant="ghost">
-          {t("home.more")}
-        </Button>
+        <Button variant="ghost">{t("home.more")}</Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
-          {item(t("studyCard.saveForLater"), "L", onPostpone, paused)}
-          {item(t("common.skip"), "S", onSkip, paused)}
-          {item(paused ? t("common.resume") : t("common.pause"), "P", onPause)}
-          {item(t("common.undo"), "⌘Z", onUndo, !canUndo)}
+          {actions.map(({ label, key, onClick, disabled }) => (
+            <DropdownMenu.Item key={key} className={looks.menuItem} disabled={disabled} onSelect={onClick}>
+              {label}
+            </DropdownMenu.Item>
+          ))}
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

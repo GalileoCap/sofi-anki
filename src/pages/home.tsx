@@ -47,7 +47,7 @@ type HomeProps = {
 
 /** Today: what is due, the day's sheet of stickers, one button to study it all, and the decks ranked by due. */
 export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStudy }: HomeProps) {
-  const { t, tp } = useLanguage();
+  const { t, tp, lang, setLang } = useLanguage();
   const { decks, runs } = store;
   const [dialog, setDialog] = useState<"newDeck" | "json" | "apkg" | "backup" | "goal" | null>(null);
   const [search, setSearch] = useState("");
@@ -102,6 +102,9 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
             {t("common.stats")}
           </Button>
         )}
+        <Button variant="ghost" lang={following(langs, lang)} onClick={() => setLang(following(langs, lang))}>
+          {t("language.other")}
+        </Button>
         <HomeMenu onDialog={setDialog} />
       </div>
 
@@ -143,7 +146,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
             <div className={looks.row}>
               <h2 className="flex-1 text-lg font-bold">{t("home.decks")}</h2>
               {newDeckForm(
-                <Button variant="outline" className="hidden lg:inline-flex">
+                <Button variant="outline">
                   {t("home.newDeck")}
                 </Button>,
               )}
@@ -212,9 +215,9 @@ type HomeMenuProps = {
   onDialog: (dialog: "newDeck" | "json" | "apkg" | "backup" | "goal") => void;
 };
 
-/** Home's menu: what is done now and then, from a new deck to the theme and the language. */
+/** Home's menu: what is done now and then, from bringing decks in to the theme. */
 function HomeMenu({ onDialog }: HomeMenuProps) {
-  const { t, lang, setLang } = useLanguage();
+  const { t } = useLanguage();
   const { theme, cycleTheme } = useTheme();
   const item = (label: string, onSelect: () => void) => (
     <DropdownMenu.Item className={looks.menuItem} onSelect={onSelect}>
@@ -228,7 +231,6 @@ function HomeMenu({ onDialog }: HomeMenuProps) {
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
-          {item(t("home.newDeck"), () => onDialog("newDeck"))}
           {item(t("home.fromAnki"), () => onDialog("apkg"))}
           {item(t("home.fromJson"), () => onDialog("json"))}
           {item(t("home.backup"), () => onDialog("backup"))}
@@ -236,9 +238,6 @@ function HomeMenu({ onDialog }: HomeMenuProps) {
           {item(t("home.dailyGoal"), () => onDialog("goal"))}
           <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => (e.preventDefault(), cycleTheme())}>
             {t("theme.label")}: {t(`theme.${theme}`)}
-          </DropdownMenu.Item>
-          <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => (e.preventDefault(), setLang(following(langs, lang)))}>
-            {t("language.label")}: {t("language.name")}
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

@@ -21,7 +21,7 @@ Each step is a commit, with `pnpm check` green and the screens it touches driven
 
 The owner approved the mock, which leaves these out of the screens. Each is recorded here so it is a decision.
 
-- The study timer and its estimate leave the study screen. The run's time shows at its end.
+- The study timer and its estimate leave the study screen. The run's time shows at its end. Overruled by the owner on 2026-11-15 ("The timer is missing"): the run's time is back, above the spots on a phone and in the laptop's side panel, and the estimate stays out.
 - The redo-later checkbox goes. A wrong or almost grade asks for the card again in the run, as the default was.
 - Leaving a run keeps the cards answered without asking first, since nothing is lost.
 - The run's end lists the cards to look at again without each card's tries. "Study these again" studies those cards, and the others are done.
@@ -68,3 +68,13 @@ Kept, each for the owner to overrule:
 - The rest of the mock's "Kept" list in [audit.md](../../mocks/sticker-chart/audit.md) stands.
 
 `hi-4` and `st-4` could not be answered from stills. Driven by hand, every error shown says what happened, and the Anki import's also says what to do. The backup's says nothing changed but not which file to choose.
+
+## After the owner's review
+
+On 2026-11-15 the owner found dark mode hard to read, the More menus too full, the laptop's study side panel of little use, and the timer missing. Changed:
+
+- Dark mode's neutrals keep about a third of their tint, so the page and its surfaces read as a near-neutral dark and only the decks and grades carry colour.
+- Home shows New deck at every width and the language switch in its top bar. Its More menu keeps bringing decks in, backup, the daily goal and the theme.
+- The deck page shows Stats in its top bar and Choose cards and Share a link beside Add a card. Its More menu keeps the exports, bringing cards in, the cover and deletion.
+- Study shows Pause in the phone's top bar, with Undo, Skip and Save for later in its More menu. On a laptop the side panel holds the sheet, the run's time, its first tries so far, and each action as a button with its key, in place of the run's decks.
+- The card form's hint is a text box again, so a hint of several lines keeps its lines.

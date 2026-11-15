@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Kbd } from "@/components/ui/kbd";
 import { useLanguage } from "@/contexts/language-context";
 import type { AnswerResult, Deck } from "@/core/model";
-import { deckColour, gradeLooks, gradeWords } from "@/lib/sticker-looks";
+import { deckColour, gradeLooks, gradeWords, smallMark } from "@/lib/sticker-looks";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +35,7 @@ export function GradeChip({ result }: { result: AnswerResult }) {
   const look = gradeLooks[result];
   return (
     <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap", look.chip)}>
-      <GradeMark result={result} className="h-3 w-3.5 stroke-[3.6]" />
+      <GradeMark result={result} className={smallMark} />
       {t(gradeWords[result])}
     </span>
   );

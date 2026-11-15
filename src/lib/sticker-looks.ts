@@ -17,3 +17,6 @@ export const gradeLooks: Record<AnswerResult, { text: string; chip: string }> = 
   approximate: { text: "text-caution", chip: "bg-caution-soft text-caution" },
   correct: { text: "text-positive", chip: "bg-positive-soft text-positive" },
 };
+
+/** A grade's mark at the size of the text beside it. */
+export const smallMark = "h-3 w-3.5 stroke-[3.6]";

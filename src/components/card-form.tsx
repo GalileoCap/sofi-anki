@@ -148,7 +148,7 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
             )}
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={t("cardForm.hint")}>
-                <Input value={hint} onChange={(e) => setHint(e.target.value)} />
+                <Textarea value={hint} onChange={(e) => setHint(e.target.value)} rows={2} />
               </Field>
               <Field label={t("cardForm.difficulty")} group>
                 <Segmented

@@ -18,7 +18,7 @@ const startStudy = (page) => click(page, "button", /^Study \d+ cards?/);
 
 export const screens = [
   { name: "home", go: async () => {} },
-  { name: "home, new deck", go: (page) => homeMenu(page, "New deck") },
+  { name: "home, new deck", go: (page) => click(page, "button", /^New deck$/) },
   { name: "home, daily goal", go: (page) => homeMenu(page, "Daily goal") },
   { name: "home, back up and restore", go: (page) => homeMenu(page, "Back up and restore") },
   { name: "home, bring in from Anki", go: (page) => homeMenu(page, "Bring in from Anki") },
@@ -32,9 +32,21 @@ export const screens = [
       await click(page, "button", /^Add a card$/);
     },
   },
-  { name: "deck, choose cards", go: (page) => deckMenu(page, "Choose cards to study") },
+  {
+    name: "deck, choose cards",
+    go: async (page) => {
+      await openDeck(page);
+      await click(page, "button", /^Choose cards to study$/);
+    },
+  },
   { name: "deck, export a file", go: (page) => deckMenu(page, "Export a file") },
-  { name: "deck stats", go: (page) => deckMenu(page, /^Stats$/) },
+  {
+    name: "deck stats",
+    go: async (page) => {
+      await openDeck(page);
+      await click(page, "button", /^Stats$/);
+    },
+  },
   { name: "study, question", go: startStudy },
   {
     name: "study, answer",
@@ -60,7 +72,8 @@ export const screens = [
   {
     name: "shared deck",
     go: async (page) => {
-      await deckMenu(page, "Share a link");
+      await openDeck(page);
+      await click(page, "button", /^Share a link$/);
       const link = await page.evaluate(() => navigator.clipboard.readText());
       await page.evaluate(() => localStorage.clear());
       await page.goto(link);

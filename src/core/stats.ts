@@ -37,7 +37,7 @@ export function streak(runs: readonly RunRecord[], now: Millis): number {
 export type DispositionCounts = Record<CardDisposition, number>;
 
 /** How each card of a run went the first time it came up. */
-export function firstTries(run: RunRecord): DispositionCounts {
+export function firstTries(run: Pick<RunRecord, "results">): DispositionCounts {
   const counts: DispositionCounts = { correct: 0, approximate: 0, wrong: 0, skip: 0, save_for_later: 0 };
   for (const result of run.results) {
     const first = result.attempts[0];

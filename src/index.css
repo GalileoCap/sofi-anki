@@ -53,23 +53,23 @@
 }
 
 .dark {
-  --background: oklch(0.2 0.025 350);
-  --card: oklch(0.25 0.03 350);
-  --popover: oklch(0.25 0.03 350);
-  --muted: oklch(0.3 0.035 350);
-  --secondary: oklch(0.3 0.035 350);
-  --accent: oklch(0.3 0.035 350);
-  --border: oklch(0.38 0.04 350);
-  --input: oklch(0.38 0.04 350);
-  --foreground: oklch(0.95 0.015 10);
-  --card-foreground: oklch(0.95 0.015 10);
-  --popover-foreground: oklch(0.95 0.015 10);
-  --secondary-foreground: oklch(0.95 0.015 10);
-  --accent-foreground: oklch(0.95 0.015 10);
-  --muted-foreground: oklch(0.76 0.03 10);
+  --background: oklch(0.19 0.008 350);
+  --card: oklch(0.235 0.01 350);
+  --popover: oklch(0.235 0.01 350);
+  --muted: oklch(0.285 0.012 350);
+  --secondary: oklch(0.285 0.012 350);
+  --accent: oklch(0.285 0.012 350);
+  --border: oklch(0.36 0.014 350);
+  --input: oklch(0.36 0.014 350);
+  --foreground: oklch(0.93 0.006 10);
+  --card-foreground: oklch(0.93 0.006 10);
+  --popover-foreground: oklch(0.93 0.006 10);
+  --secondary-foreground: oklch(0.93 0.006 10);
+  --accent-foreground: oklch(0.93 0.006 10);
+  --muted-foreground: oklch(0.75 0.012 10);
 
-  --primary: oklch(0.84 0.05 355);
-  --primary-foreground: oklch(0.22 0.04 350);
+  --primary: oklch(0.82 0.035 355);
+  --primary-foreground: oklch(0.2 0.02 350);
   --ring: oklch(0.7 0.1 355);
 
   /* The three grades at one lightness, so no bar of a chart glows beside another (col-8). */
