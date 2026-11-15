@@ -32,3 +32,7 @@ Kept: the restore regression (`A3`), the decoding of every stored shape the hist
 4. Pages and components rebuilt on them, one screen at a time, with the looks file; the old `src/lib`, `src/hooks` and `src/components` files go as each screen moves.
 5. The layers gate, looks at zero, tells and lengths at zero, build without warnings (code-split the `.apkg` import).
 6. Every flow driven in the browser against data written by the old version.
+
+## Later
+
+- A card answered before it is due grows its interval as if it came up on time, so a deck studied every day with All Cards pushes a card out by years (the seed's `typeof null` card reaches 5142 days after twelve correct answers in twelve days). `O3` (cards come back around when they would be forgotten) wants an early answer to count for less, and an interval with a ceiling. The first version did the same.
