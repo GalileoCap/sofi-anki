@@ -240,8 +240,6 @@ Proposed for after the trial, so a project of any kind and register takes them w
 - **A command**, `session-design`, with `check` (T3) and `audit` (T4), configured by a `design` block in `.claude/claude-kit.json`: the register, the token entry, the budgets, the screens and widths to render. Like `session-codeintel layers`, it writes its ast-grep rules from that block.
 - **Records** under each project's `docs/design/`: the brief, the system, the states and the walkthroughs, held by `session-docs`.
 
-## 8. What this needs from the owner
+## 8. The owner's answers
 
-- Approval of `O6`, or its rewording.
-- For this project's brief: who the friends are and what they study on; two or three things (apps, objects, places, books) whose feel you want, and two whose feel you don't; and what bothers you in the current app, if anything specific.
-- Whether the dev dependencies T3 and T4 need are acceptable here: `eslint-plugin-better-tailwindcss`, `@projectwallace/css-analyzer`, `@axe-core/playwright` and Playwright with one browser.
+Given on 2026-11-15: `O6` approved; the friends make decks on a laptop and study on a laptop or a phone, rarely creating on a phone; no references in mind; the app is "functional but ugly"; the dev dependencies of T3 and T4 are accepted. The brief built from these answers is [docs/design/brief.md](design/brief.md).

@@ -19,7 +19,7 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 - `O3` Cards come back for study around when they would be forgotten (approved).
 - `O4` A deck made in Anki can be studied here (approved).
 - `O5` A session can change the app unobserved without breaking what people rely on (approved).
-- `O6` The app looks made for its people, the same on every screen, and is easy to use (proposed).
+- `O6` The app looks made for its people, the same on every screen, and is easy to use (approved).
 
 ## Environment
 
@@ -50,4 +50,5 @@ The deployed site holds people's real decks. Whatever the app stores (the `local
 - [docs/session-kit-adoption.md](docs/session-kit-adoption.md): the review against the session-kit rules and `CODE.md`, and the order of work.
 - [docs/rewrite-plan.md](docs/rewrite-plan.md): the design and order of the rewrite onto the pure-core shape.
 - [docs/design-research.md](docs/design-research.md): why the first restyle mocks read as machine-made, the research and working designers' patterns for avoiding it, and the design tools proposed for trial here and for session-kit after (`O6`).
+- [docs/design/brief.md](docs/design/brief.md): the design brief (`A9`): register, people, tasks, the data's shapes, what is wrong now, references, and the generic choices to avoid.
 - [docs/suppressions.md](docs/suppressions.md): every suppression and type escape with its reason, written by `session-suppressions index`.
