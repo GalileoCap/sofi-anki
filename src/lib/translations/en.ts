@@ -273,6 +273,10 @@ export const en = {
   // Study heatmap
   "heatmap.less": "Less",
   "heatmap.more": "More",
+  // The initials of Monday, Wednesday and Friday, beside the heatmap's rows.
+  "heatmap.monday": "M",
+  "heatmap.wednesday": "W",
+  "heatmap.friday": "F",
   // Deck schema prompt
   "import.deck.schemaPrompt": `Generate flashcards in the following JSON format:
 

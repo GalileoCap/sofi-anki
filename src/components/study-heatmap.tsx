@@ -1,6 +1,7 @@
 import { useLanguage } from "@/contexts/language-context";
 import type { Millis, RunRecord } from "@/core/model";
 import { cardsByDay, dayKey, heatmapWeeks } from "@/core/stats";
+import type { TranslationKey } from "@/lib/translations";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +19,8 @@ const LEVELS = [
 
 const shade = (count: number): string => LEVELS.findLast((level) => count >= level.least)?.className ?? LEVELS[0].className;
 
-const DAY_LABELS = ["M", "", "W", "", "F", "", ""];
+/** The rows labelled, Monday first: every other weekday, so the letters have room. */
+const DAY_LABELS: readonly (TranslationKey | null)[] = ["heatmap.monday", null, "heatmap.wednesday", null, "heatmap.friday", null, null];
 
 const cell = "h-[20px]";
 
@@ -34,7 +36,7 @@ export function StudyHeatmap({ runs, now }: { runs: readonly RunRecord[]; now: M
         <div className="flex flex-col gap-[3px] pr-1">
           {DAY_LABELS.map((label, i) => (
             <div key={i} className={cn(cell, "flex items-center justify-center text-[9px] text-muted-foreground")}>
-              {label}
+              {label && t(label)}
             </div>
           ))}
         </div>

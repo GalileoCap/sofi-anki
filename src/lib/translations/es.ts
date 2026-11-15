@@ -259,6 +259,9 @@ export const es: Translation = {
   "importMerge.newCount": "{n} nuevas",
   "heatmap.less": "Menos",
   "heatmap.more": "Más",
+  "heatmap.monday": "L",
+  "heatmap.wednesday": "X",
+  "heatmap.friday": "V",
   "import.deck.schemaPrompt": `Generá un mazo de 50 tarjetas tipo anki sobre "" en el siguiente formato JSON:
 
 
