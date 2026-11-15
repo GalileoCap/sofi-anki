@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 1: the Leitner box</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;500&family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="frame.css">
+<style>
+  /* The direction's tokens, by the roles of docs/design/system.md. Beech for the neutrals, walnut for the accent. */
+  .dir {
+    --background: oklch(0.975 0.006 75);
+    --card: oklch(0.995 0.003 75);
+    --muted: oklch(0.945 0.012 72);
+    --border: oklch(0.885 0.018 70);
+    --foreground: oklch(0.24 0.02 60);
+    --muted-foreground: oklch(0.5 0.02 65);
+    --primary: oklch(0.33 0.035 55);
+    --primary-foreground: oklch(0.98 0.005 75);
+    --positive: oklch(0.53 0.13 150);
+    --positive-soft: oklch(0.96 0.03 150);
+    --caution: oklch(0.56 0.13 60);
+    --caution-soft: oklch(0.96 0.035 75);
+    --negative: oklch(0.52 0.18 27);
+    --negative-soft: oklch(0.96 0.02 25);
+    --shadow-md: 0 4px 6px -1px oklch(0.3 0.03 60 / 0.12), 0 2px 4px -2px oklch(0.3 0.03 60 / 0.1);
+    --xs: 13.5px; --sm: 15.75px; --base: 18px; --lg: 20.25px; --xl: 22.5px; --2xl: 27px;
+    --r-sm: 6px; --r-md: 10px; --r-xl: 14px;
+    font-family: "Atkinson Hyperlegible Next", sans-serif;
+    font-size: var(--base);
+    line-height: 1.5;
+    background: var(--background);
+    color: var(--foreground);
+  }
+  .dark .dir {
+    --background: oklch(0.19 0.012 60);
+    --card: oklch(0.235 0.013 60);
+    --muted: oklch(0.28 0.014 60);
+    --border: oklch(0.36 0.016 60);
+    --foreground: oklch(0.93 0.01 75);
+    --muted-foreground: oklch(0.72 0.015 70);
+    --primary: oklch(0.86 0.04 70);
+    --primary-foreground: oklch(0.2 0.02 60);
+    --positive: oklch(0.78 0.15 150);
+    --positive-soft: oklch(0.28 0.05 150);
+    --caution: oklch(0.82 0.13 75);
+    --caution-soft: oklch(0.29 0.05 70);
+    --negative: oklch(0.72 0.16 25);
+    --negative-soft: oklch(0.28 0.06 25);
+  }
+  .dir code { font-family: "Atkinson Hyperlegible Mono", monospace; font-size: 0.9em; }
+  .dir .figure { font-variant-numeric: tabular-nums; }
+
+  /* The screen. */
+  .home { padding: 20px 16px 96px; }
+  .home header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .home h1 { margin: 0; font-size: var(--2xl); font-weight: 700; letter-spacing: -0.01em; }
+  .ghost { border: 0; background: none; color: var(--muted-foreground); font: inherit; font-size: var(--sm); padding: 8px; border-radius: var(--r-md); cursor: pointer; }
+  .ghost:hover { background: var(--muted); color: var(--foreground); }
+  .today { margin: 6px 0 20px; font-size: var(--sm); color: var(--muted-foreground); }
+  .today strong { color: var(--foreground); font-weight: 600; }
+  .goal { height: 6px; border-radius: 999px; background: var(--muted); margin-top: 8px; overflow: hidden; }
+  .goal span { display: block; height: 100%; width: 0; background: var(--positive); }
+
+  /* The box: one compartment per place in the schedule, each card an edge in its deck's colour. */
+  .box { border: 2px solid var(--border); border-radius: var(--r-xl); background: var(--muted); padding: 6px; display: grid; gap: 6px; }
+  .slot { background: var(--card); border-radius: var(--r-md); padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; }
+  .slot h2 { margin: 0; font-size: var(--base); font-weight: 600; }
+  .slot .count { font-size: var(--lg); font-weight: 600; }
+  .slot .when { grid-column: 1 / -1; font-size: var(--xs); color: var(--muted-foreground); }
+  .edges { grid-column: 1 / -1; display: flex; gap: 3px; height: 28px; align-items: flex-end; }
+  .edges i { width: 6px; height: 100%; border-radius: 2px 2px 0 0; }
+  .edges:empty::after { content: "Empty"; font-size: var(--xs); color: var(--muted-foreground); align-self: center; }
+  .slot.front { outline: 2px solid var(--primary); outline-offset: -2px; }
+  .study { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 52px; border: 0; border-radius: var(--r-md); background: var(--primary); color: var(--primary-foreground); font: inherit; font-size: var(--base); font-weight: 600; cursor: pointer; }
+  .study:hover { background: oklch(from var(--primary) calc(l - 0.05) c h); }
+  .dark .study:hover { background: oklch(from var(--primary) calc(l + 0.04) c h); }
+  .dock { position: sticky; bottom: 0; padding: 12px 16px 16px; background: var(--background); margin: 0 -16px; }
+
+  .decks { margin-top: 28px; }
+  .decks h2 { font-size: var(--lg); font-weight: 600; margin: 0 0 8px; }
+  .deck { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+  .deck:last-child { border-bottom: 0; }
+  .mark { width: 36px; height: 36px; border-radius: var(--r-sm); display: grid; place-items: center; font-size: 20px; }
+  .deck .title { font-weight: 600; }
+  .deck .sub { font-size: var(--xs); color: var(--muted-foreground); }
+  .deck .due { font-size: var(--sm); text-align: right; }
+  .deck .due b { font-weight: 600; }
+
+  /* Laptop: the box opens left to right, the decks sit beside it. */
+  .laptop .home { padding: 28px 40px; display: grid; grid-template-columns: 1fr 340px; gap: 8px 40px; }
+  .laptop .home > header, .laptop .home > .today { grid-column: 1 / -1; }
+  .laptop .box { grid-template-columns: 1.3fr 1fr 1fr 1fr 1fr; align-items: stretch; }
+  .laptop .slot { align-content: start; min-height: 220px; grid-template-columns: 1fr; }
+  .laptop .edges { flex-wrap: wrap; height: auto; align-content: flex-start; }
+  .laptop .edges i { height: 64px; }
+  .laptop .dock { position: static; padding: 12px 0 0; margin: 0; background: none; }
+  .laptop .study { width: auto; padding: 0 28px; min-height: 44px; justify-self: start; }
+  .laptop .decks { margin-top: 0; }
+  .laptop .kbd { font-size: var(--xs); opacity: 0.75; border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; }
+  .phone .kbd { display: none; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bar">
+    <h1>Direction 1 of 3: the Leitner box</h1>
+    <button type="button" onclick="document.body.classList.toggle('dark-page'); document.querySelectorAll('.theme').forEach((e) => e.classList.toggle('dark'))">Light / dark</button>
+    <nav><a href="index.html">All three</a><a href="1-leitner-box.html" aria-current="page">1</a><a href="2-index-card.html">2</a><a href="3-reading-room.html">3</a></nav>
+  </div>
+
+  <p class="bet"><strong>The bet:</strong> the schedule is a box you can see. Home is the box itself, its compartments the places the scheduler has put every card, from every deck, and studying is the front compartment, one tap away.</p>
+  <div class="notes">
+    <p>The one bold element is the box: five compartments (today, tomorrow, this week, later, new), each card drawn as an edge in its deck's colour, so the place and the deck read at a glance. It comes from the Leitner box, the wooden box that spaced repetition began as, where a card moves forward when known and back to the front when missed. The app's scheduler does the same (<code>O3</code>), so the picture is true.</p>
+    <p>What it changes: task 1 (study what is due, on a phone) is one tap from opening the app, across decks. Today it is four steps inside one deck. Decks drop to a list ranked by what is due, below the box. After a grade, the card's edge moves to its new compartment, which is the only motion besides the card turning.</p>
+    <p>References: the Leitner box, school notebook covers (each deck's colour as its mark), a library reading room for the quiet around it.</p>
+  </div>
+
+  <section class="part">
+    <h2>The default check</h2>
+    <table class="check">
+      <tr><th>Decision</th><td class="generic">The generic choice</td><td>This direction</td></tr>
+      <tr><th>Colour</th><td class="generic">Grey shadcn neutrals and one saturated accent; cream with terracotta for cozy</td><td>Neutrals tinted from beech, the wood of the box (hue 70 to 75, chroma under 0.02). The accent is walnut, the box's darker wood, used for the one action. The only saturated colours are the decks' own, as card edges, and the three grades.</td></tr>
+      <tr><th>Type</th><td class="generic">Inter or Figtree; Fraunces or Nunito for cozy</td><td>Atkinson Hyperlegible Next, drawn for legibility by the Braille Institute, with its own Mono for code, so card text and code share one design. Full Latin coverage, Spanish accents included.</td></tr>
+      <tr><th>Layout</th><td class="generic">A grid of deck covers over a row of stat tiles</td><td>The box first, decks as a list ranked by due. Today against the goal is one line with a bar.</td></tr>
+      <tr><th>Shape</th><td class="generic">One radius and one soft shadow on every box</td><td>One container, the box, with its compartments inside it. No shadow on home, since nothing there is lifted. The card in study has the one shadow.</td></tr>
+      <tr><th>Decoration</th><td class="generic">Emoji, gradients, props</td><td>None of the app's own. The edges are data: one per card, in its deck's colour.</td></tr>
+      <tr><th>Motion</th><td class="generic">Fades and lifts on every element</td><td>The card turning in study, and a card's edge moving to its new compartment after the grade.</td></tr>
+    </table>
+  </section>
+
+  <section class="part theme">
+    <h2>Type specimen</h2>
+    <div class="dir" style="padding: 20px; border-radius: 10px;">
+      <div style="font-size: var(--2xl); font-weight: 700; letter-spacing: -0.01em;">Today, 2xl 27 px</div>
+      <div style="font-size: var(--xl); font-weight: 600;">What is a closure? xl 22.5 px</div>
+      <div style="font-size: var(--lg); font-weight: 600;">Decks, lg 20.25 px</div>
+      <p style="margin: 6px 0;">A function that retains access to its enclosing scope's variables even after the outer function has returned. Base 18 px.</p>
+      <p style="margin: 6px 0;">¿Cuál es la diferencia entre <code>let</code> y <code>const</code>? Las dos tienen ámbito de bloque; sólo <code>let</code> admite reasignación. Ñandú, pingüino, acción.</p>
+      <pre style="margin: 8px 0; font-family: 'Atkinson Hyperlegible Mono', monospace; font-size: var(--sm); background: var(--muted); padding: 12px; border-radius: 10px;">const inc = makeCounter();
+inc(); // 1
+inc(); // 2</pre>
+      <div style="font-size: var(--sm);">Labels and list lines, sm 15.75 px. <span class="figure">0 of 20, 10 days, 5 due</span></div>
+      <div style="font-size: var(--xs); color: var(--muted-foreground);">Fine print and counts, xs 13.5 px</div>
+    </div>
+  </section>
+
+  <section class="part">
+    <h2>Tokens (each chip: light on the left, dark on the right)</h2>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section class="part">
+    <h2>Home, the one screen</h2>
+    <div class="devices">
+      <div>
+        <p class="device-label">Phone, 375 px</p>
+        <div class="device phone theme"><div class="dir" data-screen></div></div>
+      </div>
+      <div>
+        <p class="device-label">Laptop, 1130 px</p>
+        <div class="device laptop theme"><div class="dir" data-screen></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<template id="home">
+  <div class="home">
+    <header>
+      <h1>Today</h1>
+      <div><button class="ghost" type="button">Stats</button><button class="ghost" type="button" aria-label="More: new deck, import, back up">More</button></div>
+    </header>
+    <div class="today"><strong class="figure">0 of 20</strong> cards today, <strong class="figure">10</strong> days in a row<div class="goal"><span></span></div></div>
+    <div>
+      <div class="box">
+        <div class="slot front"><h2>Due today</h2><span class="count figure">6</span><span class="when">Missed, or ready to come back</span><div class="edges" data-edges="js:5 guide:1"></div></div>
+        <div class="slot"><h2>Tomorrow</h2><span class="count figure">3</span><div class="edges" data-edges="js:1 guide:2"></div></div>
+        <div class="slot"><h2>This week</h2><span class="count figure">15</span><div class="edges" data-edges="js:6 guide:9"></div></div>
+        <div class="slot"><h2>Later</h2><span class="count figure">0</span><div class="edges" data-edges=""></div></div>
+        <div class="slot"><h2>New</h2><span class="count figure">0</span><div class="edges" data-edges=""></div></div>
+      </div>
+      <div class="dock"><button class="study" type="button">Study 6 cards <span class="kbd">S</span></button></div>
+    </div>
+    <div class="decks">
+      <h2>Decks</h2>
+      <div class="deck"><span class="mark" style="background: #f59e0b">⚡</span><div><div class="title">JavaScript Fundamentals</div><div class="sub">12 cards</div></div><div class="due"><b class="figure">5</b> due</div></div>
+      <div class="deck"><span class="mark" style="background: #863bff">📖</span><div><div class="title">sofi-anki Guide</div><div class="sub">12 cards</div></div><div class="due"><b class="figure">1</b> due</div></div>
+    </div>
+  </div>
+</template>
+
+<script>
+  const colours = { js: "#f59e0b", guide: "#863bff" };
+  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById("home").content.cloneNode(true));
+  for (const edges of document.querySelectorAll("[data-edges]")) {
+    for (const part of edges.dataset.edges.split(" ").filter(Boolean)) {
+      const [deck, n] = part.split(":");
+      for (let i = 0; i < Number(n); i++) {
+        const edge = document.createElement("i");
+        edge.style.background = colours[deck];
+        edges.append(edge);
+      }
+    }
+  }
+  const roles = ["background", "card", "muted", "border", "foreground", "muted-foreground", "primary", "primary-foreground", "positive", "positive-soft", "caution", "caution-soft", "negative", "negative-soft"];
+  const light = document.createElement("div"); light.className = "dir"; document.body.append(light);
+  const darkHost = document.createElement("div"); darkHost.className = "dark"; const dark = document.createElement("div"); dark.className = "dir"; darkHost.append(dark); document.body.append(darkHost);
+  const read = (el, role) => getComputedStyle(el).getPropertyValue(`--${role}`).trim();
+  document.getElementById("swatches").innerHTML = roles.map((role) => `<div class="swatch"><div class="chip"><span style="background:${read(light, role)}"></span><span style="background:${read(dark, role)}"></span></div><b>${role}</b><code>${read(light, role)}</code></div>`).join("");
+  light.remove(); darkHost.remove();
+</script>
+</body>
+</html>

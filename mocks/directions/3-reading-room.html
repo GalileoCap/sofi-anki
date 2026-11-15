@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 3: the reading room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL,CRSV,MONO@-15..0,300..800,0..1,0..1,0..1&display=swap">
+<link rel="stylesheet" href="frame.css">
+<style>
+  /* The direction's tokens. Linen and stone for the neutrals, stamp ink for the accent. */
+  .dir {
+    --background: oklch(0.97 0.007 85);
+    --card: oklch(0.985 0.005 85);
+    --muted: oklch(0.935 0.009 85);
+    --border: oklch(0.87 0.012 85);
+    --foreground: oklch(0.23 0.012 70);
+    --muted-foreground: oklch(0.5 0.014 75);
+    --primary: oklch(0.38 0.09 262);
+    --primary-foreground: oklch(0.98 0.005 85);
+    --positive: oklch(0.52 0.13 150);
+    --positive-soft: oklch(0.95 0.035 150);
+    --caution: oklch(0.56 0.13 65);
+    --caution-soft: oklch(0.95 0.04 75);
+    --negative: oklch(0.52 0.18 27);
+    --negative-soft: oklch(0.95 0.025 25);
+    --xs: 13.5px; --sm: 15.75px; --base: 18px; --lg: 20.25px; --xl: 22.5px; --2xl: 27px;
+    --r-sm: 4px; --r-md: 8px;
+    font-family: "Recursive", sans-serif;
+    font-variation-settings: "MONO" 0, "CASL" 0;
+    font-size: var(--sm);
+    line-height: 1.5;
+    background: var(--background);
+    color: var(--foreground);
+  }
+  .dark .dir {
+    --background: oklch(0.2 0.01 75);
+    --card: oklch(0.235 0.011 75);
+    --muted: oklch(0.275 0.012 75);
+    --border: oklch(0.34 0.013 75);
+    --foreground: oklch(0.92 0.012 85);
+    --muted-foreground: oklch(0.7 0.014 85);
+    --primary: oklch(0.78 0.09 262);
+    --primary-foreground: oklch(0.2 0.02 262);
+    --positive: oklch(0.78 0.14 150);
+    --positive-soft: oklch(0.3 0.05 150);
+    --caution: oklch(0.82 0.13 75);
+    --caution-soft: oklch(0.3 0.05 70);
+    --negative: oklch(0.72 0.16 25);
+    --negative-soft: oklch(0.3 0.06 25);
+  }
+  .dir code, .dir .mono { font-variation-settings: "MONO" 1, "CASL" 0; font-size: 0.92em; }
+  .dir .figure { font-variant-numeric: tabular-nums; }
+
+  /* The ledger: decks, and the open deck's cards beneath it, on one page. */
+  .room { padding: 14px 12px 88px; }
+  .room header { display: flex; align-items: center; gap: 8px; }
+  .room h1 { margin: 0 auto 0 0; font-size: var(--2xl); font-weight: 650; letter-spacing: -0.01em; }
+  .btn { min-height: 44px; padding: 0 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card); color: var(--foreground); font: inherit; cursor: pointer; }
+  .btn:hover { background: var(--muted); }
+  .btn.primary { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); font-weight: 600; }
+  .today { margin: 4px 0 18px; color: var(--muted-foreground); }
+  .today b { color: var(--foreground); font-weight: 600; }
+
+  table.ledger { width: 100%; border-collapse: collapse; }
+  .ledger th { text-align: left; font-weight: 500; font-size: var(--xs); color: var(--muted-foreground); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .ledger td { padding: 9px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .ledger .num { text-align: right; }
+  .ledger tr.deck td { font-size: var(--base); }
+  .ledger tr.deck td:first-child { font-weight: 600; }
+  .ledger tr.deck.open { background: var(--muted); }
+  .ledger .tab { display: inline-block; width: 8px; height: 22px; border-radius: 2px; vertical-align: -5px; margin-right: 10px; }
+  .ledger tr.card td { color: var(--foreground); }
+  .ledger tr.card td:first-child { padding-left: 26px; }
+  .ledger tr.card .quiet { color: var(--muted-foreground); font-size: var(--xs); }
+  .ledger tr.card td.mark-wrong { color: var(--negative); }
+  .ledger tr.card td.mark-almost { color: var(--caution); }
+  .ledger tr.card td.mark-right { color: var(--positive); }
+
+  /* The date-due stamp: the one strong voice, in stamp ink and the family's monospace. */
+  .stamp { display: inline-block; padding: 1px 8px; border: 1.5px solid currentColor; border-radius: var(--r-sm); color: var(--primary); font-variation-settings: "MONO" 1, "CASL" 1; font-weight: 600; font-size: var(--xs); white-space: nowrap; }
+  .stamp.now { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+  .stamp.later { color: var(--muted-foreground); font-weight: 450; }
+
+  .keys { margin-top: 14px; font-size: var(--xs); color: var(--muted-foreground); }
+  .keys kbd { font: inherit; font-variation-settings: "MONO" 1; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 0 5px; margin-right: 2px; }
+  .dock { position: sticky; bottom: 0; padding: 10px 0 12px; background: var(--background); display: none; }
+  .dock .btn { width: 100%; min-height: 52px; font-size: var(--base); }
+
+  /* Phone: the same ledger with the columns a phone does not need folded away. */
+  .phone .wide, .phone .keys, .phone header .btn { display: none; }
+  .phone .dock { display: block; }
+  .phone .ledger tr.card td:first-child { padding-left: 8px; }
+  .phone .ledger td { padding: 10px 6px; }
+  .laptop .room { padding: 28px 40px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bar">
+    <h1>Direction 3 of 3: the reading room</h1>
+    <button type="button" onclick="document.body.classList.toggle('dark-page'); document.querySelectorAll('.theme').forEach((e) => e.classList.toggle('dark'))">Light / dark</button>
+    <nav><a href="index.html">All three</a><a href="1-leitner-box.html">1</a><a href="2-index-card.html">2</a><a href="3-reading-room.html" aria-current="page">3</a></nav>
+  </div>
+
+  <p class="bet"><strong>The bet:</strong> everything is on one quiet page, driven by the keyboard. Home is a ledger of decks, and a deck opens in place into its cards, so making, checking and studying never leave the page.</p>
+  <div class="notes">
+    <p>The one bold element is the date-due stamp: when each card and deck comes back, stamped in ink in the family's monospace, the way a library book carries its due date. Today's stamps are solid, near ones outlined, far ones quiet, so the column reads as a ranking before any number is read.</p>
+    <p>What it changes: the laptop tasks (2, 3, 5) happen in one place, with keys for every frequent step (<code>j</code> and <code>k</code> to move, <code>Enter</code> to open, <code>s</code> to study what is due, <code>n</code> for a new card). Rare actions sit in one menu per row. On a phone the ledger keeps its order, folds its columns, and keeps one Study button under the thumb, so task 1 is one tap.</p>
+    <p>References: a library reading room, the date-due slip, Anki's own density as the baseline friends know.</p>
+  </div>
+
+  <section class="part">
+    <h2>The default check</h2>
+    <table class="check">
+      <tr><th>Decision</th><td class="generic">The generic choice</td><td>This direction</td></tr>
+      <tr><th>Colour</th><td class="generic">Grey shadcn neutrals and one saturated accent; cream with terracotta for cozy</td><td>Neutrals tinted from linen and stone (hue 75 to 85, chroma near 0.01). The accent is stamp ink, a blue-black, used for the stamps and the one action. Saturated colour only in each deck's tab and the three marks.</td></tr>
+      <tr><th>Type</th><td class="generic">Inter or Figtree; Fraunces or Nunito for cozy</td><td>Recursive, one family with a sans and a monospace on one axis, so code, figures and the stamps share its shapes. Its casual axis is used only on the stamps. Full Spanish coverage.</td></tr>
+      <tr><th>Layout</th><td class="generic">A grid of deck covers over a row of stat tiles</td><td>A ledger: one row per deck, ranked by due, the open deck's cards beneath it. Today against the goal is one line.</td></tr>
+      <tr><th>Shape</th><td class="generic">One radius and one soft shadow on every box</td><td>No containers on the page: rows and rules group, and the open deck is shaded. No shadow except menus and dialogs.</td></tr>
+      <tr><th>Decoration</th><td class="generic">Emoji, gradients, props</td><td>None. The stamps carry data. Deck emoji stay in each deck's own screen.</td></tr>
+      <tr><th>Motion</th><td class="generic">Fades and lifts on every element</td><td>A deck's rows opening in place, and the card turning in study.</td></tr>
+    </table>
+  </section>
+
+  <section class="part theme">
+    <h2>Type specimen</h2>
+    <div class="dir" style="padding: 20px; border-radius: 10px; font-size: var(--base);">
+      <div style="font-size: var(--2xl); font-weight: 650; letter-spacing: -0.01em;">Decks, 2xl 27 px</div>
+      <div style="font-size: var(--xl); font-weight: 600;">What is a closure? xl 22.5 px</div>
+      <div style="font-size: var(--lg); font-weight: 600;">JavaScript Fundamentals, lg 20.25 px</div>
+      <p style="margin: 6px 0;">A function that retains access to its enclosing scope's variables even after the outer function has returned. Base 18 px.</p>
+      <p style="margin: 6px 0;">¿Cuál es la diferencia entre <code>let</code> y <code>const</code>? Las dos tienen ámbito de bloque; sólo <code>let</code> admite reasignación. Ñandú, pingüino, acción.</p>
+      <pre class="mono" style="margin: 8px 0; font-size: var(--sm); background: var(--muted); padding: 12px; border-radius: 8px;">const inc = makeCounter();
+inc(); // 1
+inc(); // 2</pre>
+      <div style="font-size: var(--sm);">Labels and list lines, sm 15.75 px. <span class="figure">0 of 20, 10 days, 5 due</span> <span class="stamp now">Today</span> <span class="stamp">Tomorrow</span> <span class="stamp later">In 7 days</span></div>
+      <div style="font-size: var(--xs); color: var(--muted-foreground);">Fine print and counts, xs 13.5 px</div>
+    </div>
+  </section>
+
+  <section class="part">
+    <h2>Tokens (each chip: light on the left, dark on the right)</h2>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section class="part">
+    <h2>Home, the one screen: the ledger, one deck open</h2>
+    <div class="devices">
+      <div>
+        <p class="device-label">Phone, 375 px</p>
+        <div class="device phone theme"><div class="dir" data-screen></div></div>
+      </div>
+      <div>
+        <p class="device-label">Laptop, 1130 px</p>
+        <div class="device laptop theme"><div class="dir" data-screen></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<template id="screen">
+  <div class="room">
+    <header>
+      <h1>Decks</h1>
+      <button class="btn" type="button">Stats</button>
+      <button class="btn" type="button">New deck <span class="mono">n</span></button>
+      <button class="btn primary" type="button">Study 6 due <span class="mono">s</span></button>
+      <button class="btn" type="button" aria-label="More: import, back up">More</button>
+    </header>
+    <p class="today"><b class="figure">0 of 20</b> cards today, <b class="figure">10</b> days in a row</p>
+    <table class="ledger">
+      <thead><tr><th>Deck and cards</th><th class="wide">Last mark</th><th class="num wide">Right</th><th class="wide">Level</th><th>Due</th></tr></thead>
+      <tbody>
+        <tr class="deck open"><td><span class="tab" style="background: #f59e0b"></span>JavaScript Fundamentals <span class="quiet figure" style="font-weight: 400; font-size: var(--xs); color: var(--muted-foreground);">12 cards</span></td><td class="wide"></td><td class="num wide figure">48%</td><td class="wide"></td><td><span class="stamp now">5 today</span></td></tr>
+        <tr class="card"><td>What is event bubbling?</td><td class="wide mark-wrong">Wrong</td><td class="num wide figure">0%</td><td class="wide quiet">Medium</td><td><span class="stamp now">Yesterday</span></td></tr>
+        <tr class="card"><td>What does <code>Array.from({length: 3}, (_, i) =&gt; i)</code> return?</td><td class="wide mark-wrong">Wrong</td><td class="num wide figure">0%</td><td class="wide quiet">Hard</td><td><span class="stamp now">Yesterday</span></td></tr>
+        <tr class="card"><td>What is a <code>Symbol</code> and when would you use one?</td><td class="wide mark-wrong">Wrong</td><td class="num wide figure">0%</td><td class="wide quiet">Hard</td><td><span class="stamp now">Yesterday</span></td></tr>
+        <tr class="card"><td>Which Array methods <strong>mutate</strong> the original array?</td><td class="wide mark-almost">Almost</td><td class="num wide figure">0%</td><td class="wide quiet">Medium</td><td><span class="stamp now">Today</span></td></tr>
+        <tr class="card"><td>What is a closure?</td><td class="wide mark-almost">Almost</td><td class="num wide figure">18%</td><td class="wide quiet">Medium</td><td><span class="stamp now">Today</span></td></tr>
+        <tr class="card"><td>What does <code>Promise.all()</code> do?</td><td class="wide mark-right">Right</td><td class="num wide figure">45%</td><td class="wide quiet">Medium</td><td><span class="stamp">Tomorrow</span></td></tr>
+        <tr class="card"><td>Which of these return a <strong>new</strong> array?</td><td class="wide mark-almost">Almost</td><td class="num wide figure">55%</td><td class="wide quiet">Easy</td><td><span class="stamp">In 3 days</span></td></tr>
+        <tr class="card"><td>What is the difference between <code>==</code> and <code>===</code>?</td><td class="wide mark-right">Right</td><td class="num wide figure">82%</td><td class="wide quiet">Easy</td><td><span class="stamp later">In 4 days</span></td></tr>
+        <tr class="card"><td>And 4 more, due in 4 to 7 days</td><td class="wide"></td><td class="wide"></td><td class="wide"></td><td></td></tr>
+        <tr class="deck"><td><span class="tab" style="background: #863bff"></span>sofi-anki Guide <span class="figure" style="font-weight: 400; font-size: var(--xs); color: var(--muted-foreground);">12 cards</span></td><td class="wide"></td><td class="num wide figure">60%</td><td class="wide"></td><td><span class="stamp now">1 today</span></td></tr>
+      </tbody>
+    </table>
+    <p class="keys"><kbd>j</kbd><kbd>k</kbd> move, <kbd>Enter</kbd> opens or closes a deck, <kbd>s</kbd> studies what is due, <kbd>n</kbd> adds a card to the open deck</p>
+    <div class="dock"><button class="btn primary" type="button">Study 6 due</button></div>
+  </div>
+</template>
+
+<script>
+  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById("screen").content.cloneNode(true));
+  const roles = ["background", "card", "muted", "border", "foreground", "muted-foreground", "primary", "primary-foreground", "positive", "positive-soft", "caution", "caution-soft", "negative", "negative-soft"];
+  const light = document.createElement("div"); light.className = "dir"; document.body.append(light);
+  const darkHost = document.createElement("div"); darkHost.className = "dark"; const dark = document.createElement("div"); dark.className = "dir"; darkHost.append(dark); document.body.append(darkHost);
+  const read = (el, role) => getComputedStyle(el).getPropertyValue(`--${role}`).trim();
+  document.getElementById("swatches").innerHTML = roles.map((role) => `<div class="swatch"><div class="chip"><span style="background:${read(light, role)}"></span><span style="background:${read(dark, role)}"></span></div><b>${role}</b><code>${read(light, role)}</code></div>`).join("");
+  light.remove(); darkHost.remove();
+</script>
+</body>
+</html>

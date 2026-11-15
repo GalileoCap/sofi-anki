@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 2: the index card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400&display=swap">
+<link rel="stylesheet" href="frame.css">
+<style>
+  /* The direction's tokens. Card stock for the surfaces, the ruled lines' blue for every stroke, graphite for the accent. */
+  .dir {
+    --background: oklch(0.955 0.008 95);
+    --card: oklch(0.99 0.006 95);
+    --muted: oklch(0.93 0.01 95);
+    --border: oklch(0.86 0.03 240);
+    --foreground: oklch(0.25 0.012 250);
+    --muted-foreground: oklch(0.5 0.015 250);
+    --primary: oklch(0.3 0.012 250);
+    --primary-foreground: oklch(0.98 0.005 95);
+    --positive: oklch(0.52 0.13 150);
+    --positive-soft: oklch(0.95 0.035 150);
+    --caution: oklch(0.56 0.13 65);
+    --caution-soft: oklch(0.95 0.04 75);
+    --negative: oklch(0.52 0.18 27);
+    --negative-soft: oklch(0.95 0.025 25);
+    --shadow-md: 0 6px 16px -4px oklch(0.3 0.02 250 / 0.18), 0 2px 4px -2px oklch(0.3 0.02 250 / 0.12);
+    --xs: 13.5px; --sm: 15.75px; --base: 18px; --lg: 20.25px; --xl: 22.5px; --2xl: 27px;
+    --r-sm: 4px; --r-md: 8px;
+    font-family: "Literata", serif;
+    font-optical-sizing: auto;
+    font-size: var(--base);
+    line-height: 1.5;
+    background: var(--background);
+    color: var(--foreground);
+  }
+  .dark .dir {
+    --background: oklch(0.2 0.008 250);
+    --card: oklch(0.255 0.01 250);
+    --muted: oklch(0.3 0.012 250);
+    --border: oklch(0.42 0.04 240);
+    --foreground: oklch(0.93 0.008 95);
+    --muted-foreground: oklch(0.72 0.012 95);
+    --primary: oklch(0.9 0.01 95);
+    --primary-foreground: oklch(0.22 0.01 250);
+    --positive: oklch(0.78 0.14 150);
+    --positive-soft: oklch(0.3 0.05 150);
+    --caution: oklch(0.82 0.13 75);
+    --caution-soft: oklch(0.3 0.05 70);
+    --negative: oklch(0.72 0.16 25);
+    --negative-soft: oklch(0.3 0.06 25);
+    --shadow-md: 0 6px 16px -4px oklch(0 0 0 / 0.5);
+  }
+  .dir code, .dir pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .dir code { font-size: 0.85em; }
+  .dir .figure { font-variant-numeric: tabular-nums lining-nums; }
+
+  /* The screen: the next card, nothing above it but where it came from. */
+  .study { padding: 14px 12px 20px; display: flex; flex-direction: column; gap: 12px; min-height: 100%; }
+  .top { display: flex; align-items: center; justify-content: space-between; font-size: var(--sm); color: var(--muted-foreground); }
+  .top button { border: 0; background: none; font: inherit; color: var(--foreground); padding: 10px 8px; border-radius: var(--r-md); cursor: pointer; }
+  .top button:hover { background: var(--muted); }
+
+  /* The index card: ruled lines, a head rule in the deck's colour, the corner holds the deck. */
+  .card {
+    background-color: var(--card);
+    border-radius: var(--r-sm);
+    box-shadow: var(--shadow-md);
+    padding: 0 18px 20px;
+    position: relative;
+    flex: 1;
+    display: flex; flex-direction: column;
+  }
+  .head { height: 72px; display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 8px; border-bottom: 2px solid var(--deck); font-size: var(--xs); color: var(--muted-foreground); }
+  /* Every line of the card is one ruled line high, so the writing sits on the rules. */
+  .ruled { flex: 1; background-image: repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in oklch, var(--border) 70%, transparent) 31px 32px); }
+  .card h2 { margin: 0; font-size: var(--xl); font-weight: 600; line-height: 32px; }
+  .card p { margin: 0; line-height: 32px; }
+  .card pre { margin: 0; padding: 0 12px; background: var(--muted); border-radius: var(--r-md); font-size: var(--sm); line-height: 32px; overflow-x: auto; }
+  .card .answer { margin-top: 32px; }
+
+  /* The teacher's marks: the shape carries the grade, the colour repeats it. */
+  .marks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .mark { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 64px; justify-content: center; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card); font: inherit; font-size: var(--sm); color: var(--foreground); cursor: pointer; }
+  .mark svg { width: 30px; height: 26px; fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+  .mark.right svg { stroke: var(--positive); }
+  .mark.almost svg { stroke: var(--caution); }
+  .mark.wrong svg { stroke: var(--negative); }
+  .mark:hover { background: var(--muted); }
+  .mark .key { display: none; }
+
+  /* Laptop: the card at its 5 by 3 shape in the middle, the queue and the decks beside it. */
+  .laptop .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100%; }
+  .laptop aside { border-right: 1px solid var(--border); padding: 24px 20px; font-size: var(--sm); }
+  .laptop aside h3 { font-size: var(--base); font-weight: 600; margin: 0 0 6px; }
+  .laptop aside .row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+  .laptop aside .row b { margin-left: auto; font-weight: 600; }
+  .laptop aside .swatch-mark { width: 10px; height: 28px; border-radius: 2px; }
+  .laptop aside .quiet { color: var(--muted-foreground); font-size: var(--xs); margin: 0 0 18px; }
+  .laptop .study { padding: 24px 40px; align-items: center; }
+  .laptop .top, .laptop .marks { width: 100%; max-width: 760px; }
+  .laptop .card { width: 100%; max-width: 760px; flex: none; min-height: 456px; padding: 0 32px 24px; }
+  .laptop .mark { flex-direction: row; gap: 10px; min-height: 52px; }
+  .laptop .mark .key { display: inline; font-family: ui-monospace, monospace; font-size: var(--xs); color: var(--muted-foreground); }
+  .phone aside { display: none; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bar">
+    <h1>Direction 2 of 3: the index card</h1>
+    <button type="button" onclick="document.body.classList.toggle('dark-page'); document.querySelectorAll('.theme').forEach((e) => e.classList.toggle('dark'))">Light / dark</button>
+    <nav><a href="index.html">All three</a><a href="1-leitner-box.html">1</a><a href="2-index-card.html" aria-current="page">2</a><a href="3-reading-room.html">3</a></nav>
+  </div>
+
+  <p class="bet"><strong>The bet:</strong> the card is the app. Opening it on a phone shows the next due card, from whichever deck it is in, and a grade brings the next one. Decks, stats and making cards sit one tap behind it.</p>
+  <div class="notes">
+    <p>The one bold element is the card: ruled card stock at the 5 by 3 shape of an index card, its head rule in the deck's own colour, the deck named in its corner. Grades are a teacher's tick, half tick and cross, drawn as marks, so the shape carries the meaning and the colour repeats it.</p>
+    <p>What it changes: task 1 has no steps before the first card. Grading moves on by itself, so the Next button goes (one step where there are two today). The answer and its code read left-aligned on the card's lines. On a laptop the card keeps its shape in the middle, with the queue and the decks ranked by due beside it, and keys for each grade.</p>
+    <p>References: the index card, a teacher's marking, school notebook covers for each deck's colour.</p>
+  </div>
+
+  <section class="part">
+    <h2>The default check</h2>
+    <table class="check">
+      <tr><th>Decision</th><td class="generic">The generic choice</td><td>This direction</td></tr>
+      <tr><th>Colour</th><td class="generic">Grey shadcn neutrals and one saturated accent; cream with terracotta for cozy</td><td>Surfaces tinted from card stock (hue 95, chroma under 0.01). Every stroke takes the blue of the card's ruled lines. The accent is graphite, the pencil. The only saturated colours are each deck's head rule and the three marks.</td></tr>
+      <tr><th>Type</th><td class="generic">Inter or Figtree; Fraunces or Nunito for cozy</td><td>Literata, a serif drawn for long reading on screens (for Google Play Books), with optical sizes, so a card's question and answer read like a page. Code in the system's monospace. Full Spanish coverage.</td></tr>
+      <tr><th>Layout</th><td class="generic">A grid of deck covers over a row of stat tiles</td><td>No home grid. The phone opens on the card. The deck list is a sheet behind it, ranked by due.</td></tr>
+      <tr><th>Shape</th><td class="generic">One radius and one soft shadow on every box</td><td>The card is the one lifted thing and has the one shadow, with the small radius of cut card. Buttons and fields use one larger radius.</td></tr>
+      <tr><th>Decoration</th><td class="generic">Emoji, gradients, props</td><td>The ruled lines are the card's own, spaced to the text's line height, so they line up with what is written. Nothing else.</td></tr>
+      <tr><th>Motion</th><td class="generic">Fades and lifts on every element</td><td>The card turning to its answer, and the graded card sliding off the stack to show the next.</td></tr>
+    </table>
+  </section>
+
+  <section class="part theme">
+    <h2>Type specimen</h2>
+    <div class="dir" style="padding: 20px; border-radius: 10px;">
+      <div style="font-size: var(--2xl); font-weight: 650;">Decks, 2xl 27 px</div>
+      <div style="font-size: var(--xl); font-weight: 600;">What is a closure? xl 22.5 px</div>
+      <div style="font-size: var(--lg); font-weight: 600;">6 due, lg 20.25 px</div>
+      <p style="margin: 6px 0;">A function that retains access to its enclosing scope's variables even after the outer function has returned. Base 18 px.</p>
+      <p style="margin: 6px 0;">¿Cuál es la diferencia entre <code>let</code> y <code>const</code>? Las dos tienen ámbito de bloque; sólo <code>let</code> admite reasignación. Ñandú, pingüino, acción.</p>
+      <pre style="margin: 8px 0; font-size: var(--sm); background: var(--muted); padding: 12px; border-radius: 8px;">const inc = makeCounter();
+inc(); // 1
+inc(); // 2</pre>
+      <div style="font-size: var(--sm);">Labels and list lines, sm 15.75 px. <span class="figure">0 of 20, 10 days, 5 due</span></div>
+      <div style="font-size: var(--xs); color: var(--muted-foreground);">Fine print and counts, xs 13.5 px</div>
+    </div>
+  </section>
+
+  <section class="part">
+    <h2>Tokens (each chip: light on the left, dark on the right)</h2>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section class="part">
+    <h2>Study, the one screen: a due card, answer shown</h2>
+    <div class="devices">
+      <div>
+        <p class="device-label">Phone, 375 px</p>
+        <div class="device phone theme"><div class="dir" data-screen></div></div>
+      </div>
+      <div>
+        <p class="device-label">Laptop, 1130 px</p>
+        <div class="device laptop theme"><div class="dir" data-screen></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<template id="screen">
+  <div class="layout">
+    <aside>
+      <h3>Due now</h3>
+      <p class="quiet"><span class="figure">0 of 20</span> cards today, <span class="figure">10</span> days in a row</p>
+      <div class="row"><span class="swatch-mark" style="background: #f59e0b"></span>JavaScript Fundamentals<b class="figure">5</b></div>
+      <div class="row"><span class="swatch-mark" style="background: #863bff"></span>sofi-anki Guide<b class="figure">1</b></div>
+      <p class="quiet" style="margin-top: 18px;">Space turns the card. 1, 2 and 3 mark it.</p>
+    </aside>
+    <div class="study">
+      <div class="top"><button type="button">Decks</button><span class="figure">1 of 6 due</span><button type="button" aria-label="More: pause, undo, leave">More</button></div>
+      <div class="card" style="--deck: #f59e0b">
+        <div class="head"><span>⚡ JavaScript Fundamentals</span><span>Missed last time</span></div>
+        <div class="ruled">
+        <h2>What is a closure?</h2>
+        <div class="answer">
+          <p>A function that <strong>retains access</strong> to its enclosing scope's variables even after the outer function has returned.</p>
+          <pre>function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}
+
+const inc = makeCounter();
+inc(); // 1
+inc(); // 2</pre>
+          <p>Closures power data privacy, partial application, and memoization.</p>
+        </div>
+        </div>
+      </div>
+      <div class="marks">
+        <button class="mark wrong" type="button"><svg viewBox="0 0 30 26"><path d="M6 4 L24 22 M24 4 L6 22"/></svg>Wrong <span class="key">1</span></button>
+        <button class="mark almost" type="button"><svg viewBox="0 0 30 26"><path d="M4 14 L11 21 L21 6"/><path d="M12 8 L19 17"/></svg>Almost <span class="key">2</span></button>
+        <button class="mark right" type="button"><svg viewBox="0 0 30 26"><path d="M4 14 L11 21 L26 4"/></svg>Right <span class="key">3</span></button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  for (const screen of document.querySelectorAll("[data-screen]")) screen.append(document.getElementById("screen").content.cloneNode(true));
+  const roles = ["background", "card", "muted", "border", "foreground", "muted-foreground", "primary", "primary-foreground", "positive", "positive-soft", "caution", "caution-soft", "negative", "negative-soft"];
+  const light = document.createElement("div"); light.className = "dir"; document.body.append(light);
+  const darkHost = document.createElement("div"); darkHost.className = "dark"; const dark = document.createElement("div"); dark.className = "dir"; darkHost.append(dark); document.body.append(darkHost);
+  const read = (el, role) => getComputedStyle(el).getPropertyValue(`--${role}`).trim();
+  document.getElementById("swatches").innerHTML = roles.map((role) => `<div class="swatch"><div class="chip"><span style="background:${read(light, role)}"></span><span style="background:${read(dark, role)}"></span></div><b>${role}</b><code>${read(light, role)}</code></div>`).join("");
+  light.remove(); darkHost.remove();
+</script>
+</body>
+</html>
