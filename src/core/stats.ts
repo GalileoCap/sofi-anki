@@ -8,8 +8,9 @@ import {
   type Deck,
   type Millis,
   type RunRecord,
+  millis,
 } from "@/core/model";
-import { NEW_SPACING, type Schedules, dueCards, dueTime, isAnswer, lastAnswer, nextSpacing } from "@/core/scheduler";
+import { NEW_SPACING, type Schedules, dueCards, dueTime, isAnswer, lastAnswer, nextSpacing, scheduleKey } from "@/core/scheduler";
 
 /** A calendar day in the browser's time zone, as `YYYY-MM-DD`. */
 export type DayKey = string;
@@ -269,3 +270,38 @@ export const daysUntil = (moment: Millis, now: Millis): number => Math.ceil((mom
 
 /** Whole days from `moment` to `now`, rounded down. */
 export const daysSince = (moment: Millis, now: Millis): number => Math.floor((now - moment) / DAY_MS);
+
+/** Cards that fall due after today: tomorrow, and on the five days after it. */
+export function comingUp(decks: readonly Deck[], schedules: Schedules, now: Millis): { tomorrow: number; laterThisWeek: number } {
+  const today = new Date(now);
+  const dayStart = (offset: number) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset).getTime();
+  const count = (from: number, to: number) =>
+    decks.reduce(
+      (sum, deck) =>
+        sum +
+        deck.cards.filter((card) => {
+          const schedule = schedules.get(scheduleKey(deck.id, card.id));
+          if (schedule === undefined) return false;
+          const due = dueTime(schedule);
+          return due >= from && due < to;
+        }).length,
+      0,
+    );
+  return { tomorrow: count(dayStart(1), dayStart(2)), laterThisWeek: count(dayStart(2), dayStart(7)) };
+}
+
+/** The deck of each card studied on the day of `moment`, in the order studied: the day's stickers. */
+export const stickersOn = (runs: readonly RunRecord[], moment: Millis): string[] =>
+  [...runs]
+    .filter((run) => dayKey(run.completedAt) === dayKey(moment))
+    .sort((a, b) => a.completedAt - b.completedAt)
+    .flatMap((run) => run.results.map(() => run.deckId));
+
+/** The last seven days to today, each with the decks studied on it, each deck once. */
+export function lastWeek(runs: readonly RunRecord[], now: Millis): { day: Date; decks: string[] }[] {
+  const today = new Date(now);
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6 + i);
+    return { day, decks: [...new Set(stickersOn(runs, millis(day.getTime())))] };
+  });
+}

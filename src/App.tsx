@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 
 import { Page } from "@/components/page";
 import { useLanguage } from "@/contexts/language-context";
-import type { Card, Deck, SessionGoal, Store } from "@/core/model";
-import { runCards } from "@/core/run";
+import type { Deck, SessionGoal, Store } from "@/core/model";
+import { type RunItem, deckItems, runCards } from "@/core/run";
 import { indexSchedules } from "@/core/scheduler";
 import { decodeDeck, sharedPart } from "@/core/share";
 import { now } from "@/effects/clock";
@@ -20,7 +20,7 @@ type View =
   | { kind: "home" }
   | { kind: "globalStats" }
   | { kind: "deck"; deckId: string }
-  | { kind: "study"; deckId: string; cards: readonly Card[]; goal?: SessionGoal; shuffle: boolean }
+  | { kind: "study"; items: readonly RunItem[]; goal?: SessionGoal; shuffle: boolean; from: string | null }
   | { kind: "stats"; deckId: string }
   | { kind: "shared"; deck: Deck };
 
@@ -52,6 +52,8 @@ export default function App({ initial }: { initial: Store }) {
     [],
   );
   const [openedAt] = useState(now);
+  /** The title of the deck just kept from a link, which home names once. */
+  const [kept, setKept] = useState<string | null>(null);
   const { t } = useLanguage();
   const { decks, runs } = store;
   const schedules = indexSchedules(store.schedules);
@@ -68,22 +70,31 @@ export default function App({ initial }: { initial: Store }) {
     return (
       <Page>
         {banner}
-        <SharedDeckPage deck={view.deck} store={store} update={update} onGoHome={goHome} />
+        <SharedDeckPage
+          deck={view.deck}
+          store={store}
+          update={update}
+          onGoHome={(keptTitle) => {
+            setKept(keptTitle);
+            goHome();
+          }}
+        />
       </Page>
     );
   }
 
-  if (view.kind === "study" && deck) {
+  if (view.kind === "study") {
+    const back = view.from;
     return (
       <>
         {banner}
         <StudyPage
-          deck={deck}
-          cards={view.cards}
+          items={view.items}
+          store={store}
           goal={view.goal}
           shuffle={view.shuffle}
           update={update}
-          onExit={() => setView({ kind: "deck", deckId: deck.id })}
+          onExit={() => setView(back === null ? { kind: "home" } : { kind: "deck", deckId: back })}
         />
       </>
     );
@@ -118,8 +129,8 @@ export default function App({ initial }: { initial: Store }) {
           now={openedAt}
           onBack={() => setView({ kind: "home" })}
           onStudy={(choice, goal, shuffle) => {
-            const cards = runCards(deck, choice, schedules, runs, now());
-            if (cards.length > 0) setView({ kind: "study", deckId: deck.id, cards, goal, shuffle });
+            const items = deckItems(deck, runCards(deck, choice, schedules, runs, now()));
+            if (items.length > 0) setView({ kind: "study", items, goal, shuffle, from: deck.id });
           }}
           onStats={() => setView({ kind: "stats", deckId: deck.id })}
         />
@@ -134,8 +145,10 @@ export default function App({ initial }: { initial: Store }) {
         store={store}
         update={update}
         now={openedAt}
+        kept={kept}
         onOpenDeck={(id) => setView({ kind: "deck", deckId: id })}
         onOpenStats={() => setView({ kind: "globalStats" })}
+        onStudy={(items) => setView({ kind: "study", items, shuffle: false, from: null })}
       />
     </Page>
   );

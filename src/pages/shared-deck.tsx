@@ -1,9 +1,8 @@
 import { useState } from "react";
 
-import { CardHeading } from "@/components/card-heading";
-import { Badge } from "@/components/ui/badge";
+import { Markdown } from "@/components/markdown";
+import { DeckRow } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
-import { CardHeader, Card as UiCard } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import { type Arrival, receiveDeck, unknownCards } from "@/core/decks";
 import type { Deck, Store } from "@/core/model";
@@ -15,60 +14,44 @@ type SharedDeckPageProps = {
   deck: Deck;
   store: Store;
   update: (change: (store: Store) => Store) => void;
-  onGoHome: () => void;
+  /** Goes home, with the title of the deck when it was kept. */
+  onGoHome: (kept: string | null) => void;
 };
 
-/** A deck someone shared by link: its cards, and taking it in, merged with or over a copy already here. */
+/** A deck someone shared by link: the deck and its cards, and keeping it, merged with or over a copy already here. */
 export function SharedDeckPage({ deck, store, update, onGoHome }: SharedDeckPageProps) {
   const { t, tp } = useLanguage();
   const [mergeOpen, setMergeOpen] = useState(false);
-  const [received, setReceived] = useState(false);
   const here = store.decks.find((d) => d.id === deck.id);
 
   function receive(how: Arrival) {
     update((s) => ({ ...s, decks: receiveDeck(s.decks, deck, how) }));
-    setReceived(true);
+    onGoHome(deck.title);
   }
 
+  const meta = [`${deck.cards.length} ${tp(deck.cards.length, "common.card", "common.cards")}`, deck.tags.join(", ")].filter(Boolean).join(", ");
+
   return (
-    <div className={looks.sections}>
-      <div className={looks.spread}>
-        <div>
-          <p className={looks.muted}>{t("sharedDeck.label")}</p>
-          <h1 className={looks.title}>{deck.title}</h1>
+    <div className={looks.narrow}>
+      <p className={looks.topbar}>{t("shared.label")}</p>
+      <DeckRow deck={deck} meta={meta} head />
+      <div>
+        <h2 className={looks.sectionTitle}>{t("shared.cards")}</h2>
+        <div className={looks.list}>
+          {deck.cards.map((card) => (
+            <div key={card.id} className={looks.listRow}>
+              <Markdown inline>{card.title}</Markdown>
+            </div>
+          ))}
         </div>
-        {received ? (
-          <Button onClick={onGoHome}>{t("sharedDeck.goToDecks")}</Button>
-        ) : (
-          <Button onClick={() => (here ? setMergeOpen(true) : receive("merge"))}>{t("sharedDeck.importDeck")}</Button>
-        )}
       </div>
-
-      {received && (
-        <div className="rounded-lg border border-positive/40 bg-positive-soft px-4 py-3 text-sm text-positive">
-          {t("sharedDeck.importedSuccess")}
-        </div>
-      )}
-
-      <div className={looks.actions}>
-        <Badge variant="secondary">
-          {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
-        </Badge>
-        {deck.tags.map((tag) => (
-          <Badge key={tag} variant="outline" className="text-xs">
-            {tag}
-          </Badge>
-        ))}
-      </div>
-
-      <div className={looks.column}>
-        {deck.cards.map((card) => (
-          <UiCard key={card.id} size="sm">
-            <CardHeader>
-              <CardHeading card={card} />
-            </CardHeader>
-          </UiCard>
-        ))}
+      <div className="sticky bottom-0 flex flex-col gap-2 bg-background py-3">
+        <Button size="lg" className="w-full" onClick={() => (here ? setMergeOpen(true) : receive("merge"))}>
+          {t("shared.keep")}
+        </Button>
+        <Button variant="ghost" className={looks.muted} onClick={() => onGoHome(null)}>
+          {t("shared.notNow")}
+        </Button>
       </div>
 
       {here && (

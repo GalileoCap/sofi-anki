@@ -3,23 +3,24 @@ import { useState } from "react";
 
 import { BackupDialog } from "@/components/backup-dialog";
 import { DeckForm } from "@/components/deck-form";
-import { EmptyState, NoMatch } from "@/components/empty-state";
 import { ImportApkgDialog } from "@/components/import-apkg-dialog";
-import { GoalBar } from "@/components/goal-bar";
 import { ImportDeckDialog } from "@/components/import-dialog";
-import { OverflowMenu } from "@/components/overflow-menu";
-import { StudyHeatmap } from "@/components/study-heatmap";
-import { Badge } from "@/components/ui/badge";
+import { LastStudied } from "@/components/last-studied";
+import { Chip, DayStickers, DeckRow, Key, Sheet, Spots } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/language-context";
 import { deckFromJson } from "@/core/deck-json";
-import { addDeck, allTags, matchingDecks, newDeck, receiveAnkiDecks } from "@/core/decks";
-import type { Deck, Millis, RunRecord, Store } from "@/core/model";
-import { cardsToday, streak } from "@/core/stats";
+import { addDeck, matchingDecks, newDeck, receiveAnkiDecks } from "@/core/decks";
+import { type Deck, type Millis, type Store, following, langs } from "@/core/model";
+import { type RunItem, dueItems } from "@/core/run";
+import { indexSchedules } from "@/core/scheduler";
+import { comingUp, deckRows, lastWeek, stickersOn, streak } from "@/core/stats";
 import { newId, now as clockNow } from "@/effects/clock";
-import { chipState, looks } from "@/lib/ui-looks";
+import { useKeys } from "@/hooks/use-keys";
+import { useTheme } from "@/hooks/use-theme";
+import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 type Change = (change: (store: Store) => Store) => void;
@@ -29,239 +30,253 @@ const withDecks = (change: (decks: readonly Deck[]) => readonly Deck[]) => (stor
   decks: change(store.decks),
 });
 
+/** Past this many decks, home offers a search. */
+const SEARCH_FROM = 8;
+
 type HomeProps = {
   store: Store;
   update: Change;
-  /** When the screen opened, which today and the streak count from. */
+  /** When the screen opened, which today, what is due and the streak count from. */
   now: Millis;
+  /** The title of a deck just kept from a link, to say so. */
+  kept: string | null;
   onOpenDeck: (id: string) => void;
   onOpenStats: () => void;
+  onStudy: (items: RunItem[]) => void;
 };
 
-/** The decks, the study streak and today's count against the daily goal. */
-export function Home({ store, update, now, onOpenDeck, onOpenStats }: HomeProps) {
-  const { t } = useLanguage();
+/** Today: what is due, the day's sheet of stickers, one button to study it all, and the decks ranked by due. */
+export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStudy }: HomeProps) {
+  const { t, tp } = useLanguage();
   const { decks, runs } = store;
+  const [dialog, setDialog] = useState<"json" | "apkg" | "backup" | "goal" | null>(null);
   const [search, setSearch] = useState("");
-  const [tagFilter, setTagFilter] = useState<ReadonlySet<string>>(new Set());
-  const [dialog, setDialog] = useState<"json" | "apkg" | "backup" | null>(null);
-  const tags = allTags(decks);
-  const shown = matchingDecks(decks, search, tagFilter);
+  const schedules = indexSchedules(store.schedules);
+  const due = dueItems(
+    deckRows(decks, runs, schedules, now).map((row) => row.deck),
+    schedules,
+    now,
+  );
+  const rows = deckRows(matchingDecks(decks, search, new Set()), runs, schedules, now);
+  const dueDecks = new Set(due.map((item) => item.deckId)).size;
+  const later = comingUp(decks, schedules, now);
+  const goal = store.settings.dailyCardGoal;
 
-  function toggleTag(tag: string) {
-    const next = new Set(tagFilter);
-    if (!next.delete(tag)) next.add(tag);
-    setTagFilter(next);
-  }
+  useKeys((event) => {
+    if (dialog === null && event.key === "s" && due.length > 0) onStudy(due);
+  });
 
   const dialogProps = (name: typeof dialog) => ({
     open: dialog === name,
     onOpenChange: (open: boolean) => setDialog(open ? name : null),
   });
 
+  const newDeckForm = (trigger: React.ReactNode) => (
+    <DeckForm
+      trigger={trigger}
+      onSubmit={(title, tags, color, emoji) => update(withDecks((d) => addDeck(d, newDeck(newId(), { title, tags, color, emoji }, clockNow()))))}
+    />
+  );
+
+  const line =
+    decks.length === 0
+      ? t("home.noDecks")
+      : [
+          due.length === 0
+            ? t("home.nothingDue")
+            : due.length === 1
+              ? t("home.waitingOneCard")
+              : t(dueDecks === 1 ? "home.waitingOneDeck" : "home.waiting").replace("{n}", String(due.length)).replace("{d}", String(dueDecks)),
+          later.tomorrow + later.laterThisWeek > 0 &&
+            t("home.then").replace("{tomorrow}", String(later.tomorrow)).replace("{week}", String(later.laterThisWeek)),
+        ]
+          .filter(Boolean)
+          .join(" ");
+
   return (
-    <div className={looks.sections}>
-      <div className="flex items-center justify-between gap-2">
-        <h1 className={looks.title}>{t("deckList.title")}</h1>
-        <div className={looks.row}>
-          {runs.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={onOpenStats}>
-              {t("common.stats")}
-            </Button>
-          )}
-          <DeckForm
-            trigger={<Button size="sm">{t("deckList.newDeck")}</Button>}
-            onSubmit={(title, tags, color, emoji) =>
-              update(withDecks((d) => addDeck(d, newDeck(newId(), { title, tags, color, emoji }, clockNow()))))
-            }
-          />
-          <OverflowMenu size="icon-sm">
-            <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("json")}>
-              {t("deckList.importJson")}
-            </DropdownMenu.Item>
-            <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("apkg")}>
-              {t("deckList.importApkg")}
-            </DropdownMenu.Item>
-            <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("backup")}>
-              {t("deckList.backupRestore")}
-            </DropdownMenu.Item>
-          </OverflowMenu>
-        </div>
+    <div className={looks.form}>
+      <div className={cn(looks.topbar, "justify-end")}>
+        {runs.length > 0 && (
+          <Button variant="ghost" onClick={onOpenStats}>
+            {t("common.stats")}
+          </Button>
+        )}
+        <HomeMenu onDialog={setDialog} newDeckForm={newDeckForm} />
       </div>
 
-      <ImportDeckDialog
-        {...dialogProps("json")}
-        onImport={(data) => update(withDecks((d) => addDeck(d, deckFromJson(data, clockNow(), newId))))}
-      />
-      <ImportApkgDialog
-        {...dialogProps("apkg")}
-        onImport={(parsed) => update((s) => receiveAnkiDecks(s, parsed.decks, parsed.schedules))}
-      />
+      <ImportDeckDialog {...dialogProps("json")} onImport={(data) => update(withDecks((d) => addDeck(d, deckFromJson(data, clockNow(), newId))))} />
+      <ImportApkgDialog {...dialogProps("apkg")} onImport={(parsed) => update((s) => receiveAnkiDecks(s, parsed.decks, parsed.schedules))} />
       <BackupDialog {...dialogProps("backup")} store={store} onRestore={(restored) => update(() => restored)} />
+      <GoalDialog {...dialogProps("goal")} goal={goal} onGoal={(next) => update((s) => ({ ...s, settings: { ...s.settings, dailyCardGoal: next } }))} />
 
-      {runs.length > 0 && (
-        <TodayCard
-          runs={runs}
-          now={now}
-          goal={store.settings.dailyCardGoal}
-          onGoal={(goal) => update((s) => ({ ...s, settings: { ...s.settings, dailyCardGoal: goal } }))}
-        />
-      )}
-
-      {decks.length > 0 && (
-        <div className={looks.filters}>
-          <Input
-            placeholder={t("deckList.searchPlaceholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-xs"
-          />
-          {tags.length > 0 && (
-            <div className={looks.chips}>
-              {tags.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => toggleTag(tag)}
-                  className={cn(looks.chip, chipState(tagFilter.has(tag)))}
-                >
-                  {tag}
-                </button>
-              ))}
-              {tagFilter.size > 0 && (
-                <Button variant="ghost" size="xs" onClick={() => setTagFilter(new Set())}>
-                  {t("common.clear")}
-                </Button>
-              )}
-            </div>
+      <div className="grid gap-x-12 gap-y-4 lg:grid-cols-[24rem_1fr]">
+        <div className={looks.form}>
+          <div>
+            <h1 className={looks.title}>{t("home.today")}</h1>
+            {kept !== null ? (
+              <p className={looks.good}>{t("home.kept").replace("{title}", kept)}</p>
+            ) : (
+              <p className={looks.muted}>{line}</p>
+            )}
+          </div>
+          {decks.length > 0 && <TodaySheet store={store} now={now} goal={goal} />}
+          {due.length > 0 && (
+            <Button size="lg" className="w-full" onClick={() => onStudy(due)}>
+              {due.length === 1 ? t("home.studyOne") : t("home.study").replace("{n}", String(due.length))}
+              <Key>S</Key>
+            </Button>
           )}
         </div>
-      )}
 
-      {decks.length === 0 ? (
-        <EmptyState message={t("deckList.noDecks")} hint={t("deckList.noDecksHint")} />
-      ) : shown.length === 0 ? (
-        <NoMatch message={t("deckList.noMatch")} />
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {shown.map((deck) => (
-            <DeckTile key={deck.id} deck={deck} onOpen={() => onOpenDeck(deck.id)} />
-          ))}
-        </div>
-      )}
+        {decks.length === 0 ? (
+          <div className="flex min-h-52 flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border p-6 text-center">
+            <p className={cn(looks.muted, "max-w-64")}>{t("home.emptyHint")}</p>
+            {newDeckForm(<Button>{t("home.makeDeck")}</Button>)}
+            <Button variant="ghost" onClick={() => setDialog("apkg")}>
+              {t("home.fromAnki")}
+            </Button>
+          </div>
+        ) : (
+          <div className={looks.stack}>
+            <div className={looks.row}>
+              <h2 className="flex-1 text-lg font-bold">{t("home.decks")}</h2>
+              {newDeckForm(
+                <Button variant="outline" className="hidden lg:inline-flex">
+                  {t("home.newDeck")}
+                </Button>,
+              )}
+            </div>
+            {decks.length > SEARCH_FROM && (
+              <Input placeholder={t("deckList.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} />
+            )}
+            <div className={looks.column}>
+              {rows.map(({ deck, due: count, lastRun }) => (
+                <DeckRow
+                  key={deck.id}
+                  deck={deck}
+                  onOpen={() => onOpenDeck(deck.id)}
+                  meta={
+                    <>
+                      {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")},{" "}
+                      {kept === deck.title ? t("home.keptToday") : <LastStudied at={lastRun} now={now} />}
+                    </>
+                  }
+                  end={count > 0 && <Chip urgent>{count === 1 ? t("home.dueOne") : t("home.due").replace("{n}", String(count))}</Chip>}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-/** A deck in the grid: its color band or emoji, title, card count and tags. */
-function DeckTile({ deck, onOpen }: { deck: Deck; onOpen: () => void }) {
-  const { tp } = useLanguage();
+/** Today's sheet: the goal as spots filled by the day's stickers, the last seven days, and the streak. */
+function TodaySheet({ store, now, goal }: { store: Store; now: Millis; goal: number }) {
+  const { t, tp, lang } = useLanguage();
+  const stickers = stickersOn(store.runs, now);
+  const met = goal > 0 && stickers.length >= goal;
+  const days = streak(store.runs, now);
+  const weekday = new Intl.DateTimeFormat(lang, { weekday: "narrow" });
   return (
-    <button type="button" onClick={onOpen} className="text-left">
-      <Card className="h-full cursor-pointer overflow-hidden transition-colors hover:bg-muted/50" size="sm">
-        {deck.color ? (
-          <div className="flex h-24 items-center justify-center text-emoji" style={{ backgroundColor: deck.color }}>
-            {deck.emoji}
-          </div>
-        ) : (
-          deck.emoji && <div className="pt-3 text-center text-emoji">{deck.emoji}</div>
-        )}
-        <CardHeader>
-          <CardTitle>{deck.title}</CardTitle>
-          <CardDescription className={looks.chips}>
-            <Badge variant="secondary">
-              {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
-            </Badge>
-            {deck.tags.map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    </button>
+    <Sheet
+      label={t("home.sheet")}
+      value={goal > 0 ? t("home.ofGoal").replace("{n}", String(stickers.length)).replace("{goal}", String(goal)) : stickers.length}
+      met={met}
+    >
+      <Spots stickers={stickers} goal={goal} decks={store.decks} />
+      {met && stickers.length > goal && (
+        <p className={cn(looks.fine, "mt-2")}>{t("home.pastGoal").replace("{n}", String(stickers.length - goal))}</p>
+      )}
+      <div className="mt-3.5 grid grid-cols-7 gap-1.5 text-center text-xs text-muted-foreground">
+        {lastWeek(store.runs, now).map(({ day, decks }, i) => (
+          <span key={i} className="grid justify-items-center gap-0.5">
+            <DayStickers deckIds={decks} decks={store.decks} />
+            {i === 6 ? t("home.todayShort") : weekday.format(day)}
+          </span>
+        ))}
+      </div>
+      {days > 0 && (
+        <p className={cn(looks.fine, "mt-1.5 text-center")}>
+          {days} {tp(days, "home.dayInARow", "home.daysInARow")}
+        </p>
+      )}
+    </Sheet>
   );
 }
 
-type TodayCardProps = {
-  runs: readonly RunRecord[];
-  now: Millis;
-  goal: number;
-  onGoal: (goal: number) => void;
+type HomeMenuProps = {
+  onDialog: (dialog: "json" | "apkg" | "backup" | "goal") => void;
+  newDeckForm: (trigger: React.ReactNode) => React.ReactNode;
 };
 
-/** The streak, today's cards against the daily goal, which edits in place, and the heatmap. */
-function TodayCard({ runs, now, goal, onGoal }: TodayCardProps) {
-  const { t, tp } = useLanguage();
-  const [goalInput, setGoalInput] = useState<string | null>(null);
-  const days = streak(runs, now);
-  const today = cardsToday(runs, now);
-
-  /** A goal that does not read as a whole number leaves the goal as it was. */
-  function saveGoal() {
-    const next = Number.parseInt(goalInput ?? "", 10);
-    if (Number.isFinite(next)) onGoal(Math.max(0, next));
-    setGoalInput(null);
-  }
-
+/** Home's menu: what is done now and then, from a new deck to the theme and the language. */
+function HomeMenu({ onDialog, newDeckForm }: HomeMenuProps) {
+  const { t, lang, setLang } = useLanguage();
+  const { theme, cycleTheme } = useTheme();
+  const item = (label: string, onSelect: () => void) => (
+    <DropdownMenu.Item className={looks.menuItem} onSelect={onSelect}>
+      {label}
+    </DropdownMenu.Item>
+  );
   return (
-    <Card size="sm">
-      <CardHeader>
-        <div className="flex flex-wrap items-center gap-4 text-sm">
-          <div className={looks.pair}>
-            <span className="text-muted-foreground">{t("deckList.streak")}</span>
-            <span className="font-mono font-medium text-foreground">
-              {days} {tp(days, "common.day", "common.days")}
-            </span>
-          </div>
-          <div className={looks.pair}>
-            <span className="text-muted-foreground">{t("deckList.today")}</span>
-            <span
-              className={cn(looks.value, goal > 0 && today >= goal ? looks.positive : "text-foreground")}
-            >
-              {today}
-            </span>
-            {goal > 0 && (
-              <>
-                <span className="text-muted-foreground">/</span>
-                {goalInput !== null ? (
-                  <span className={looks.tightRow}>
-                    <input
-                      type="number"
-                      value={goalInput}
-                      onChange={(e) => setGoalInput(e.target.value)}
-                      onBlur={saveGoal}
-                      onKeyDown={(e) => e.key === "Enter" && saveGoal()}
-                      className="w-14 rounded border bg-transparent px-1.5 py-0.5 text-center font-mono text-sm"
-                      autoFocus
-                    />
-                    <span className="text-muted-foreground">{t("common.cards")}</span>
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setGoalInput(String(goal))}
-                    className="inline-flex items-center gap-1 rounded border border-dashed border-muted-foreground/30 px-1.5 py-0.5 font-mono font-medium text-foreground transition-colors hover:border-foreground/50 hover:bg-muted/50"
-                    title={t("deckList.editGoal")}
-                  >
-                    {goal} {t("common.cards")}
-                    <span className={looks.fine}>&#9998;</span>
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-          {goal > 0 && (
-            <div className="min-w-20 flex-1">
-              <GoalBar share={today / goal} />
-            </div>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <Button variant="ghost">{t("home.more")}</Button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
+          {newDeckForm(
+            <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => e.preventDefault()}>
+              {t("home.newDeck")}
+            </DropdownMenu.Item>,
           )}
-        </div>
-      </CardHeader>
-      <div className="px-6 pb-4">
-        <StudyHeatmap runs={runs} now={now} />
-      </div>
-    </Card>
+          {item(t("home.fromAnki"), () => onDialog("apkg"))}
+          {item(t("home.fromJson"), () => onDialog("json"))}
+          {item(t("home.backup"), () => onDialog("backup"))}
+          <DropdownMenu.Separator className={looks.menuRule} />
+          {item(t("home.dailyGoal"), () => onDialog("goal"))}
+          <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => (e.preventDefault(), cycleTheme())}>
+            {t("theme.label")}: {t(`theme.${theme}`)}
+          </DropdownMenu.Item>
+          <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => (e.preventDefault(), setLang(following(langs, lang)))}>
+            {t("language.label")}: {t("language.name")}
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+
+type GoalDialogProps = { open: boolean; onOpenChange: (open: boolean) => void; goal: number; onGoal: (goal: number) => void };
+
+/** The daily goal in cards. A value that does not read as a whole number leaves it as it was. */
+function GoalDialog({ open, onOpenChange, goal, onGoal }: GoalDialogProps) {
+  const { t } = useLanguage();
+  const [text, setText] = useState(String(goal));
+  function save() {
+    const next = Number.parseInt(text, 10);
+    if (Number.isFinite(next)) onGoal(Math.max(0, next));
+    onOpenChange(false);
+  }
+  return (
+    <Dialog open={open} onOpenChange={(next) => (setText(String(goal)), onOpenChange(next))}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("home.dailyGoal")}</DialogTitle>
+        </DialogHeader>
+        <label className={looks.form}>
+          <span className={looks.muted}>{t("home.goalPrompt")}</span>
+          <Input type="number" min={0} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && save()} />
+        </label>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            {t("common.cancel")}
+          </Button>
+          <Button onClick={save}>{t("common.save")}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

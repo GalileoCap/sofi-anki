@@ -112,6 +112,12 @@ export function scheduleRun(
   return next;
 }
 
+/** The days until a card comes back if `result` is its answer at `now`: 0 is again today. */
+export function intervalAfter(schedule: CardSchedule | undefined, result: AnswerResult, now: Millis): number {
+  const daysSince = schedule === undefined ? Infinity : (now - lastAnsweredAt(schedule)) / DAY_MS;
+  return nextSpacing(schedule ?? NEW_SPACING, result, daysSince).intervalDays;
+}
+
 /** Cards due at `now`. A card never studied is due. */
 export const dueCards = (deck: Deck, schedules: Schedules, now: Millis): Card[] =>
   deck.cards.filter((card) => {

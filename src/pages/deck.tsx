@@ -2,32 +2,18 @@ import { DropdownMenu } from "radix-ui";
 import { type ReactNode, useState } from "react";
 
 import { CardForm } from "@/components/card-form";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DeckForm } from "@/components/deck-form";
 import { EmptyState, NoMatch } from "@/components/empty-state";
 import { ExportDialog } from "@/components/export-dialog";
 import { ImportCardsDialog } from "@/components/import-dialog";
-import { OverflowMenu } from "@/components/overflow-menu";
-import { RunStartDialog } from "@/pages/run-start-dialog";
-import { Badge } from "@/components/ui/badge";
+import { DeckRow, Key } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
-import { CardContent, Card as UiCard } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/contexts/language-context";
 import { cardFromJson } from "@/core/deck-json";
-import {
-  type CardDraft,
-  addCards,
-  allTags,
-  cardFromDraft,
-  complexityCounts,
-  matchingCards,
-  removeCard,
-  removeDeck,
-  replaceCard,
-  restyleDeck,
-} from "@/core/decks";
-import { type Complexity, type Deck, type Millis, type RunMode, type SessionGoal, type Store, complexities } from "@/core/model";
+import { type CardDraft, addCards, cardFromDraft, matchingCards, removeCard, removeDeck, replaceCard, restyleDeck } from "@/core/decks";
+import { type Deck, type Millis, type RunMode, type SessionGoal, type Store, runModes } from "@/core/model";
 import type { RunChoice } from "@/core/run";
 import { deckSchedules, dueCards, indexSchedules, newCards, weakCards, withoutDeck } from "@/core/scheduler";
 import { shareUrl } from "@/core/share";
@@ -35,9 +21,12 @@ import { cardPerformance, studyOrder } from "@/core/stats";
 import { newId, now as clockNow } from "@/effects/clock";
 import { copyText, download } from "@/effects/files";
 import { pageBase } from "@/effects/page";
-import { chipState, looks } from "@/lib/ui-looks";
+import { useKeys } from "@/hooks/use-keys";
+import type { TranslationKey } from "@/lib/translations";
+import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 import { CardList } from "@/pages/deck-card-list";
+import { RunStartDialog } from "@/pages/run-start-dialog";
 
 type DeckPageProps = {
   deck: Deck;
@@ -50,36 +39,49 @@ type DeckPageProps = {
   onStats: () => void;
 };
 
-const toggled = <T,>(set: ReadonlySet<T>, item: T): Set<T> => {
-  const next = new Set(set);
-  if (!next.delete(item)) next.add(item);
-  return next;
-};
+/** How long a line saying what the share did stays. */
+const NOTICE_MS = 4000;
 
-/** One deck: how to study it, its cards, and what can be done with it. */
+const filterWords: Record<RunMode, TranslationKey> = { all: "deck.filterAll", due: "common.due", weak: "common.weak", new: "common.new" };
+
+/** One deck: studying it, adding to it, its cards as a table, and one menu for what is done now and then. */
 export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }: DeckPageProps) {
   const { t, tp } = useLanguage();
   const schedules = indexSchedules(store.schedules);
   const performance = cardPerformance(deck, store.runs, deckSchedules(schedules, deck.id));
-  const counts = { due: dueCards(deck, schedules, now).length, weak: weakCards(deck, schedules).length, new: newCards(deck, store.runs).length };
+  const byMode = { all: deck.cards, due: dueCards(deck, schedules, now), weak: weakCards(deck, schedules), new: newCards(deck, store.runs) };
   const hasRuns = store.runs.some((run) => run.deckId === deck.id);
 
   const [search, setSearch] = useState("");
-  const [complexityFilter, setComplexityFilter] = useState<ReadonlySet<Complexity>>(new Set());
-  const [tagFilter, setTagFilter] = useState<ReadonlySet<string>>(new Set());
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [startDialog, setStartDialog] = useState<{ mode: RunMode; label: string } | "pick" | null>(null);
-  const [dialog, setDialog] = useState<"import" | "export" | null>(null);
-  const [exporting, setExporting] = useState(false);
+  const [filter, setFilter] = useState<RunMode>("all");
+  const [dialog, setDialog] = useState<"import" | "export" | "choose" | "delete" | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const shown = studyOrder(matchingCards(deck.cards, { search, complexities: complexityFilter, tags: tagFilter }), performance, now);
-  const cardCounts = complexityCounts(deck.cards);
-  const allShownOpen = shown.every((card) => expanded.has(card.id));
-  const chosenComplexities = complexityFilter.size > 0 ? [...complexityFilter] : null;
-
+  const kept = new Set(byMode[filter].map((card) => card.id));
+  const shown = studyOrder(
+    matchingCards(deck.cards, { search, complexities: new Set(), tags: new Set() }).filter((card) => kept.has(card.id)),
+    performance,
+    now,
+  );
   const change = (decks: (decks: readonly Deck[]) => readonly Deck[]) => update((s) => ({ ...s, decks: decks(s.decks) }));
   const draftCard = (draft: CardDraft, id: string) => cardFromDraft(draft, id, newId);
+  const studyNow = () => onStudy({ mode: byMode.due.length > 0 ? "due" : "all", complexities: null }, undefined, false);
+
+  function say(key: TranslationKey) {
+    setNotice(t(key));
+    setTimeout(() => setNotice(null), NOTICE_MS);
+  }
+
+  async function share() {
+    const url = shareUrl(pageBase(), deck);
+    if (url === null) return say("deck.shareTooLarge");
+    say((await copyText(url)).isOk() ? "deck.shareCopied" : "common.copyRefused");
+  }
+
+  async function exportApkg() {
+    const { writeApkg } = await import("@/effects/anki-file");
+    await writeApkg(deck, schedules, clockNow()).map((bytes) => download(`${deck.title}.apkg`, bytes, "application/zip"));
+  }
 
   function deleteDeck() {
     update((s) => ({
@@ -91,263 +93,141 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
     onBack();
   }
 
-  async function exportApkg() {
-    setExporting(true);
-    const { writeApkg } = await import("@/effects/anki-file");
-    await writeApkg(deck, schedules, clockNow()).map((bytes) => download(`${deck.title}.apkg`, bytes, "application/zip"));
-    setExporting(false);
-  }
-
-  const start = (mode: RunMode, goal: SessionGoal | undefined, shuffle: boolean) => onStudy({ mode, complexities: chosenComplexities }, goal, shuffle);
-
-  const editDeck = (trigger: ReactNode) => (
-    <DeckForm
-      trigger={trigger}
-      onSubmit={(title, tags, color, emoji) => change((d) => restyleDeck(d, deck.id, { title, tags, color, emoji }))}
-      initialTitle={deck.title}
-      initialTags={deck.tags}
-      initialColor={deck.color}
-      initialEmoji={deck.emoji}
-      dialogTitle={t("deckDetail.editDeck")}
-      submitLabel={t("common.save")}
-    />
+  const addCard = (trigger: ReactNode) => (
+    <CardForm trigger={trigger} onSubmit={(draft) => change((d) => addCards(d, deck.id, [draftCard(draft, newId())]))} />
   );
 
-  const modeButton = (mode: Exclude<RunMode, "all">, label: string, title: string) => (
-    <Button variant="secondary" onClick={() => setStartDialog({ mode, label: title })} disabled={counts[mode] === 0}>
+  useKeys((event) => {
+    if (dialog === null && event.key === "s" && deck.cards.length > 0) studyNow();
+  });
+
+  const item = (label: string, onSelect: () => void, className?: string) => (
+    <DropdownMenu.Item className={cn(looks.menuItem, className)} onSelect={onSelect}>
       {label}
-      <Badge variant="outline" className="ml-1 text-xs">
-        {counts[mode]}
-      </Badge>
-    </Button>
+    </DropdownMenu.Item>
   );
 
-  const importCards = (
-    <ImportCardsDialog
-      open={dialog === "import"}
-      onOpenChange={(open) => setDialog(open ? "import" : null)}
-      onImport={(cards) => change((d) => addCards(d, deck.id, cards.map((card) => cardFromJson(card, newId))))}
-    />
-  );
+  const meta = [`${deck.cards.length} ${tp(deck.cards.length, "common.card", "common.cards")}`, deck.tags.join(", ")].filter(Boolean).join(", ");
 
   return (
-    <div className={looks.sections}>
-      <div className={looks.spread}>
-        <div className="flex min-w-0 items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={onBack}>
-            {t("common.back")}
+    <div className="grid gap-x-10 gap-y-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
+      <div className={cn(looks.form, "lg:self-start")}>
+        <div className={looks.topbar}>
+          <Button variant="ghost" className="-ml-3" onClick={onBack}>
+            {t("deck.back")}
           </Button>
-          {deck.emoji && <span className="shrink-0 text-2xl leading-none">{deck.emoji}</span>}
-          <h1 className={cn(looks.title, "truncate")}>{deck.title}</h1>
-          <div className="hidden shrink-0 sm:block">
-            {editDeck(
-              <Button variant="ghost" size="xs">
-                {t("common.edit")}
-              </Button>,
-            )}
-          </div>
         </div>
-        <Badge variant="secondary" className="shrink-0 text-sm">
-          {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")}
-        </Badge>
-      </div>
-
-      <UiCard size="sm">
-        <CardContent className={looks.form}>
-          <p className="text-sm font-medium text-foreground">{t("deckDetail.study")}</p>
-          <Button className="w-full sm:hidden" onClick={() => setStartDialog("pick")} disabled={deck.cards.length === 0}>
-            {t("common.start")}
-          </Button>
-          <div className="hidden flex-wrap gap-2 sm:flex">
-            <Button onClick={() => setStartDialog({ mode: "all", label: t("runStart.allCards") })} disabled={shown.length === 0}>
-              {t("deckDetail.allCards")} ({chosenComplexities ? shown.length : deck.cards.length})
-            </Button>
-            {modeButton("due", t("common.due"), t("deckDetail.dueCards"))}
-            {modeButton("weak", t("common.weak"), t("deckDetail.weakCards"))}
-            {modeButton("new", t("common.new"), t("common.new"))}
-            <Button variant="outline" onClick={onStats} disabled={!hasRuns}>
-              {t("common.stats")}
-            </Button>
-          </div>
-          {hasRuns && (
-            <Button variant="ghost" size="sm" className="-mt-2 -ml-2 self-start text-muted-foreground sm:hidden" onClick={onStats}>
-              {t("deckDetail.viewStats")}
-            </Button>
+        <DeckRow deck={deck} meta={meta} head />
+        <Button size="lg" className="w-full" onClick={studyNow} disabled={deck.cards.length === 0}>
+          {byMode.due.length > 0
+            ? t("deck.studyDue").replace("{n}", String(byMode.due.length))
+            : t("deck.studyAll").replace("{n}", String(deck.cards.length))}
+          <Key>S</Key>
+        </Button>
+        <div className={looks.buttons}>
+          {addCard(
+            <Button variant="outline" className="flex-1">
+              {t("deck.addCard")}
+            </Button>,
           )}
-        </CardContent>
-      </UiCard>
-
-      <RunStartDialog
-        open={startDialog === "pick"}
-        onOpenChange={(open) => setStartDialog(open ? "pick" : null)}
-        mode={null}
-        counts={counts}
-        onStart={start}
-      />
-      <RunStartDialog
-        open={startDialog !== null && startDialog !== "pick"}
-        onOpenChange={(open) => !open && setStartDialog(null)}
-        mode={startDialog !== null && startDialog !== "pick" ? startDialog : { mode: "all", label: "" }}
-        counts={counts}
-        onStart={start}
-      />
-
-      <div className={looks.actions}>
-        <CardForm
-          trigger={
-            <Button variant="outline" size="sm">
-              {t("deckDetail.addCard")}
-            </Button>
-          }
-          onSubmit={(draft) => change((d) => addCards(d, deck.id, [draftCard(draft, newId())]))}
-        />
-        <div className="hidden items-center gap-2 sm:flex">
-          <Button variant="outline" size="sm" onClick={() => setDialog("import")}>
-            {t("deckDetail.importCards")}
-          </Button>
-          <ExportDialog
-            trigger={
-              <Button variant="outline" size="sm">
-                {t("deckDetail.exportJson")}
-              </Button>
-            }
-            deck={deck}
-          />
-          <Button variant="outline" size="sm" disabled={exporting} onClick={exportApkg}>
-            {exporting ? t("deckDetail.exporting") : t("deckDetail.exportAnki")}
-          </Button>
-          <ShareLinkButton deck={deck} />
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <Button variant="outline">{t("home.more")}</Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
+                {item(t("deck.chooseCards"), () => setDialog("choose"))}
+                {hasRuns && item(t("common.stats"), onStats)}
+                <DropdownMenu.Separator className={looks.menuRule} />
+                {item(t("deck.shareLink"), share)}
+                {item(t("deck.exportFile"), () => setDialog("export"))}
+                {item(t("deck.exportAnki"), exportApkg)}
+                {item(t("deck.bringIn"), () => setDialog("import"))}
+                <DeckForm
+                  trigger={
+                    <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => e.preventDefault()}>
+                      {t("deck.editCover")}
+                    </DropdownMenu.Item>
+                  }
+                  onSubmit={(title, tags, color, emoji) => change((d) => restyleDeck(d, deck.id, { title, tags, color, emoji }))}
+                  initialTitle={deck.title}
+                  initialTags={deck.tags}
+                  initialColor={deck.color}
+                  initialEmoji={deck.emoji}
+                  dialogTitle={t("deck.editCover")}
+                  submitLabel={t("common.save")}
+                />
+                <DropdownMenu.Separator className={looks.menuRule} />
+                {item(t("deck.delete"), () => setDialog("delete"), looks.menuDanger)}
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
         </div>
-        <div className="sm:hidden">
-          <OverflowMenu size="icon-xs">
-            {editDeck(
-              <DropdownMenu.Item className={looks.menuItem} onSelect={(e) => e.preventDefault()}>
-                {t("deckDetail.editDeck")}
-              </DropdownMenu.Item>,
-            )}
-            <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("import")}>
-              {t("deckDetail.importCards")}
-            </DropdownMenu.Item>
-            <DropdownMenu.Item className={looks.menuItem} onSelect={() => setDialog("export")}>
-              {t("deckDetail.shareExport")}
-            </DropdownMenu.Item>
-            <DropdownMenu.Item className={looks.menuItem} onSelect={exportApkg}>
-              {t("deckDetail.exportApkg")}
-            </DropdownMenu.Item>
-          </OverflowMenu>
-        </div>
-        {importCards}
-        <ExportDialog open={dialog === "export"} onOpenChange={(open) => setDialog(open ? "export" : null)} deck={deck} includeShareUrl />
-
-        <div className="flex-1" />
-        {confirmDelete ? (
-          <div className={looks.row}>
-            <Button variant="destructive" size="sm" onClick={deleteDeck}>
-              {t("common.confirm")}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
-              {t("common.cancel")}
-            </Button>
-          </div>
-        ) : (
-          <Button variant="ghost" size="sm" className={looks.danger} onClick={() => setConfirmDelete(true)}>
-            {t("deckDetail.deleteDeck")}
-          </Button>
+        {notice !== null && (
+          <p role="status" className={looks.muted}>
+            {notice}
+          </p>
         )}
       </div>
 
-      <Separator />
-
-      {deck.cards.length > 0 && (
-        <div className={looks.filters}>
-          <Input
-            placeholder={t("deckDetail.searchPlaceholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-xs"
-          />
-          <div className={looks.chips}>
-            {complexities.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setComplexityFilter(toggled(complexityFilter, c))}
-                className={cn(looks.chip, chipState(complexityFilter.has(c)))}
-              >
-                {t(`complexity.${c}`)}
-                <span className={looks.figure}>{cardCounts[c]}</span>
-              </button>
-            ))}
-            {allTags(deck.cards).map((tag) => (
-              <button key={tag} type="button" onClick={() => setTagFilter(toggled(tagFilter, tag))} className={cn(looks.chip, chipState(tagFilter.has(tag)))}>
-                {tag}
-              </button>
-            ))}
-            {(complexityFilter.size > 0 || tagFilter.size > 0) && (
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={() => {
-                  setComplexityFilter(new Set());
-                  setTagFilter(new Set());
-                }}
-              >
-                {t("common.clear")}
-              </Button>
-            )}
+      <div className={looks.stack}>
+        {deck.cards.length > 0 && (
+          <div className={looks.filters}>
+            <Input placeholder={t("deckDetail.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} className="sm:flex-1" />
+            <div role="group" aria-label={t("deck.filter")} className="inline-flex gap-1 self-start rounded-full border-2 border-border p-1">
+              {runModes.map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-pressed={filter === mode}
+                  onClick={() => setFilter(mode)}
+                  className={cn(
+                    "min-h-9 cursor-pointer rounded-full px-3.5 text-sm font-bold transition-colors",
+                    filter === mode ? looks.ink : "text-muted-foreground hover:bg-muted",
+                  )}
+                >
+                  {t(filterWords[mode])}
+                </button>
+              ))}
+            </div>
           </div>
-          <Button variant="ghost" size="xs" onClick={() => setExpanded(allShownOpen ? new Set() : new Set(shown.map((card) => card.id)))}>
-            {allShownOpen ? t("deckDetail.collapseAll") : t("deckDetail.expandAll")}
-          </Button>
-        </div>
-      )}
+        )}
+        {deck.cards.length === 0 ? (
+          <EmptyState message={t("deckDetail.noCards")} hint={t("deckDetail.noCardsHint")} />
+        ) : shown.length === 0 ? (
+          <NoMatch message={t("deckDetail.noMatch")} />
+        ) : (
+          <CardList
+            cards={shown}
+            performance={performance}
+            now={now}
+            onEdit={(id, draft) => change((d) => replaceCard(d, deck.id, draftCard(draft, id)))}
+            onDelete={(id) => change((d) => removeCard(d, deck.id, id))}
+          />
+        )}
+      </div>
 
-      {deck.cards.length === 0 ? (
-        <EmptyState message={t("deckDetail.noCards")} hint={t("deckDetail.noCardsHint")} />
-      ) : shown.length === 0 ? (
-        <NoMatch message={t("deckDetail.noMatch")} />
-      ) : (
-        <CardList
-          cards={shown}
-          performance={performance}
-          now={now}
-          expanded={expanded}
-          onToggle={(id) => setExpanded(toggled(expanded, id))}
-          onEdit={(id, draft) => change((d) => replaceCard(d, deck.id, draftCard(draft, id)))}
-          onDelete={(id) => change((d) => removeCard(d, deck.id, id))}
-        />
-      )}
+      <RunStartDialog
+        open={dialog === "choose"}
+        onOpenChange={(open) => setDialog(open ? "choose" : null)}
+        mode={null}
+        counts={{ due: byMode.due.length, weak: byMode.weak.length, new: byMode.new.length }}
+        onStart={(mode, goal, shuffle) => onStudy({ mode, complexities: null }, goal, shuffle)}
+      />
+      <ImportCardsDialog
+        open={dialog === "import"}
+        onOpenChange={(open) => setDialog(open ? "import" : null)}
+        onImport={(cards) => change((d) => addCards(d, deck.id, cards.map((card) => cardFromJson(card, newId))))}
+      />
+      <ExportDialog open={dialog === "export"} onOpenChange={(open) => setDialog(open ? "export" : null)} deck={deck} includeShareUrl />
+      <ConfirmDialog
+        open={dialog === "delete"}
+        onOpenChange={(open) => setDialog(open ? "delete" : null)}
+        title={t("deck.deleteTitle").replace("{title}", deck.title)}
+        body={t("deck.deleteBody")}
+        confirm={t("deck.delete")}
+        onConfirm={deleteDeck}
+      />
     </div>
-  );
-}
-
-type ShareState = "idle" | "copying" | "copied" | "tooLarge" | "refused";
-
-/** How long the button says what happened before it reads as a share button again. */
-const SHARE_NOTICE_MS = 3000;
-
-/** Copies a link that carries the deck and all its cards, or says why it did not. */
-function ShareLinkButton({ deck }: { deck: Deck }) {
-  const { t } = useLanguage();
-  const [state, setState] = useState<ShareState>("idle");
-
-  async function share() {
-    const url = shareUrl(pageBase(), deck);
-    setState(url === null ? "tooLarge" : "copying");
-    if (url !== null) setState((await copyText(url)).isOk() ? "copied" : "refused");
-    setTimeout(() => setState("idle"), SHARE_NOTICE_MS);
-  }
-
-  const label = {
-    idle: "deckDetail.shareLink",
-    copying: "deckDetail.shareLink",
-    copied: "deckDetail.shareLinkCopied",
-    tooLarge: "deckDetail.shareLinkTooLarge",
-    refused: "common.copyRefused",
-  } as const;
-  return (
-    <Button variant="outline" size="sm" disabled={state === "copying"} onClick={share}>
-      {t(label[state])}
-    </Button>
   );
 }

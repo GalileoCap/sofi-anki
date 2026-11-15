@@ -1,7 +1,7 @@
 /** The class strings shared by things that look alike (CODE.md: a look shared is an entry here). */
 export const looks = {
   /** A screen's column. */
-  page: "mx-auto w-[80%] p-4 sm:p-8",
+  page: "mx-auto w-full max-w-6xl px-4 py-4 sm:px-10 sm:py-6",
   /** The row of toggles at a screen's top. */
   toolbar: "flex justify-end mb-4",
   /** The sections of a screen, one under another. */
@@ -43,6 +43,22 @@ export const looks = {
   /** A dialog wide enough for JSON. */
   wideDialog: "max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl",
 
+  /** A screen read in one column, such as the run's end, narrower than the page. */
+  narrow: "mx-auto flex max-w-xl flex-col gap-4",
+  /** The bar at a screen's top: a way back or out, where the screen is, and its menu. */
+  topbar: "flex min-h-11 items-center justify-between gap-2 text-sm text-muted-foreground",
+  /** A section's title under a screen's title. */
+  sectionTitle: "mb-1 text-lg font-bold",
+  /** A list of lines split by rules. */
+  list: "flex flex-col text-sm",
+  /** One line of such a list. */
+  listRow: "flex items-center justify-between gap-3 border-b-[1.5px] border-border py-3 last:border-b-0",
+  /** Solid ink, for what asks to be done now. */
+  ink: "bg-primary text-primary-foreground",
+  /** Shown on a laptop alone. */
+  laptopOnly: "hidden lg:block",
+  /** A sentence that says something went well. */
+  good: "text-sm font-bold text-positive",
   /** Small text that says less than what is around it. */
   muted: "text-sm text-muted-foreground",
   /** Smaller text that says less still. */
@@ -60,11 +76,11 @@ export const looks = {
   /** A line's title, which takes the room left and cuts off. */
   lineTitle: "flex-1 truncate text-foreground",
   /** A figure: a count or a duration. */
-  figure: "font-mono text-muted-foreground",
+  figure: "tabular-nums text-muted-foreground",
   /** A small figure. */
-  fineFigure: "font-mono text-xs text-muted-foreground",
+  fineFigure: "tabular-nums text-xs text-muted-foreground",
   /** A figure that is the point of its line. */
-  value: "font-mono font-medium",
+  value: "tabular-nums font-bold",
   /** Code or pasted data. */
   code: "font-mono text-xs",
   /** A message that something failed. */
@@ -74,15 +90,19 @@ export const looks = {
   /** A line that opens something when clicked. */
   clickable: "cursor-pointer hover:bg-muted/50",
   /** A screen's title. */
-  title: "text-2xl font-medium text-foreground",
+  title: "text-2xl font-extrabold leading-tight text-foreground",
   /** A filter chip, and its look when chosen. */
   chip: "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors",
   chosen: "border-foreground/20 bg-foreground/5 text-foreground",
   /** A dropdown menu's panel. */
-  menu: "z-50 min-w-36 rounded-lg border bg-popover p-1 shadow-md",
+  menu: "z-50 min-w-56 rounded-md bg-popover p-1.5 text-sm shadow-md",
+  /** A rule between groups of a menu's entries. */
+  menuRule: "mx-1.5 my-1 h-0.5 bg-border",
   /** An entry in a dropdown menu. */
   menuItem:
-    "flex w-full cursor-pointer select-none items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
+    "flex min-h-11 w-full cursor-pointer select-none items-center gap-2 rounded-sm px-3 text-sm outline-none transition-colors data-[highlighted]:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
+  /** A menu entry that deletes. */
+  menuDanger: "text-destructive",
   /** A card's hint, in amber. */
   hint: "rounded-lg border border-caution/40 bg-caution-soft px-3 py-2 text-sm text-caution",
   /** Text that reads as good, as a warning, and as bad. */

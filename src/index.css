@@ -2,7 +2,11 @@
 @import "tailwindcss" source(".");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/figtree";
+/* M PLUS Rounded 1c, its Latin set alone, which holds every Spanish accent. */
+@import "@fontsource/m-plus-rounded-1c/latin-400.css";
+@import "@fontsource/m-plus-rounded-1c/latin-500.css";
+@import "@fontsource/m-plus-rounded-1c/latin-700.css";
+@import "@fontsource/m-plus-rounded-1c/latin-800.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -13,64 +17,72 @@
  */
 
 :root {
-  /* Neutrals: four surfaces, two strokes, three text tones. */
-  --background: oklch(1 0 0);
-  --card: oklch(1 0 0);
-  --popover: oklch(1 0 0);
-  --muted: oklch(0.97 0 0);
-  --secondary: oklch(0.97 0 0);
-  --accent: oklch(0.97 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* Neutrals from pink sticker-sheet paper: four surfaces, two strokes, three text tones in berry ink. */
+  --background: oklch(0.97 0.012 10);
+  --card: oklch(0.995 0.004 10);
+  --popover: oklch(0.995 0.004 10);
+  --muted: oklch(0.94 0.02 10);
+  --secondary: oklch(0.94 0.02 10);
+  --accent: oklch(0.94 0.02 10);
+  --border: oklch(0.88 0.035 10);
+  --input: oklch(0.88 0.035 10);
+  --foreground: oklch(0.3 0.06 350);
+  --card-foreground: oklch(0.3 0.06 350);
+  --popover-foreground: oklch(0.3 0.06 350);
+  --secondary-foreground: oklch(0.3 0.06 350);
+  --accent-foreground: oklch(0.3 0.06 350);
+  --muted-foreground: oklch(0.52 0.05 350);
 
-  /* The accent, and the focus ring. */
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --ring: oklch(0.708 0 0);
+  /* The accent is ink of low chroma, so the only saturated colours are the decks' and the grades'. */
+  --primary: oklch(0.38 0.08 352);
+  --primary-foreground: oklch(0.985 0.008 10);
+  --ring: oklch(0.6 0.12 352);
 
-  /* Meaning: a good, a middling and a bad result, and deletion. */
-  --positive: oklch(0.527 0.154 150.069);
-  --positive-soft: oklch(0.982 0.018 155.826);
-  --caution: oklch(0.555 0.163 48.998);
-  --caution-soft: oklch(0.987 0.022 95.277);
-  --negative: oklch(0.505 0.213 27.518);
-  --negative-soft: oklch(0.971 0.013 17.38);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* Meaning: a right, an almost and a wrong answer, and deletion. */
+  --positive: oklch(0.52 0.13 150);
+  --positive-soft: oklch(0.95 0.035 150);
+  --caution: oklch(0.52 0.125 62);
+  --caution-soft: oklch(0.95 0.04 75);
+  --negative: oklch(0.52 0.18 27);
+  --negative-soft: oklch(0.95 0.025 25);
+  --destructive: oklch(0.52 0.18 27);
+
+  /* Two depths: a sticker stuck on, and the card or menu over the page. */
+  --lift-sm: 0 1px 2px oklch(0.3 0.06 350 / 0.25);
+  --lift-md: 0 8px 20px -6px oklch(0.3 0.06 350 / 0.22);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --card: oklch(0.205 0 0);
-  --popover: oklch(0.205 0 0);
-  --muted: oklch(0.269 0 0);
-  --secondary: oklch(0.269 0 0);
-  --accent: oklch(0.269 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --foreground: oklch(0.985 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --background: oklch(0.2 0.025 350);
+  --card: oklch(0.25 0.03 350);
+  --popover: oklch(0.25 0.03 350);
+  --muted: oklch(0.3 0.035 350);
+  --secondary: oklch(0.3 0.035 350);
+  --accent: oklch(0.3 0.035 350);
+  --border: oklch(0.38 0.04 350);
+  --input: oklch(0.38 0.04 350);
+  --foreground: oklch(0.95 0.015 10);
+  --card-foreground: oklch(0.95 0.015 10);
+  --popover-foreground: oklch(0.95 0.015 10);
+  --secondary-foreground: oklch(0.95 0.015 10);
+  --accent-foreground: oklch(0.95 0.015 10);
+  --muted-foreground: oklch(0.76 0.03 10);
 
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --ring: oklch(0.556 0 0);
+  --primary: oklch(0.84 0.05 355);
+  --primary-foreground: oklch(0.22 0.04 350);
+  --ring: oklch(0.7 0.1 355);
 
-  --positive: oklch(0.792 0.209 151.711);
-  --positive-soft: oklch(0.266 0.065 152.934);
-  --caution: oklch(0.828 0.189 84.429);
-  --caution-soft: oklch(0.279 0.077 45.635);
-  --negative: oklch(0.704 0.191 22.216);
-  --negative-soft: oklch(0.258 0.092 26.042);
-  --destructive: oklch(0.704 0.191 22.216);
+  /* The three grades at one lightness, so no bar of a chart glows beside another (col-8). */
+  --positive: oklch(0.77 0.14 150);
+  --positive-soft: oklch(0.3 0.05 150);
+  --caution: oklch(0.77 0.13 75);
+  --caution-soft: oklch(0.3 0.05 70);
+  --negative: oklch(0.77 0.13 25);
+  --negative-soft: oklch(0.3 0.06 25);
+  --destructive: oklch(0.72 0.16 25);
+
+  --lift-sm: 0 1px 2px oklch(0 0 0 / 0.5);
+  --lift-md: 0 8px 20px -6px oklch(0 0 0 / 0.6);
 }
 
 @theme {
@@ -98,45 +110,31 @@
   --text-2xl--line-height: calc(2 / 1.5);
   /* Code inside running text, sized to the text around it. */
   --text-code: 0.82em;
-  /* A deck's emoji on its cover. */
-  --text-emoji: 2.25rem;
+  /* A deck's emoji on its sticker. */
+  --text-emoji: 1.45rem;
   --text-emoji--line-height: 1;
 
-  --font-sans: 'Figtree Variable', sans-serif;
-  --font-heading: 'Figtree Variable', sans-serif;
+  --font-sans: 'M PLUS Rounded 1c', sans-serif;
+  --font-heading: 'M PLUS Rounded 1c', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
 
-  /* Three radii, the round one, and the pill. The names shadcn's components use share these values. */
-  --radius: 0.375rem;
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.625rem;
-  --radius-xl: 0.875rem;
-  --radius-2xl: 0.875rem;
-  --radius-4xl: 1.625rem;
-
-  /* Two depths: a thing lifted a little (a tooltip), and a thing over the page (a menu). */
-  --shadow-sm: 0 1px 3px 0 oklch(0 0 0 / 0.1), 0 1px 2px -1px oklch(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.1);
-
-  /* Confetti falling, for the daily goal reached. */
-  --animate-confetti-fall: confetti-fall linear forwards;
-  @keyframes confetti-fall {
-    0% {
-      transform: translateY(0) translateX(0) rotate(0deg);
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(100vh) translateX(var(--drift, 0px)) rotate(720deg);
-      opacity: 0;
-    }
-  }
+  /* Three radii by the size of the thing, and the pill. The names shadcn's components use share these values. */
+  --radius: 8px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 12px;
+  --radius-xl: 22px;
+  --radius-2xl: 22px;
+  --radius-4xl: 999px;
 
   /* The scrim behind shadcn's dialog, its only use. */
   --color-black: oklch(0 0 0);
 }
 
 @theme inline {
+  /* Two depths, each mode's own: a thing stuck on or lifted a little, and a thing over the page. */
+  --shadow-sm: var(--lift-sm);
+  --shadow-md: var(--lift-md);
   --color-background: var(--background);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);

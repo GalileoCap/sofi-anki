@@ -2,7 +2,7 @@
 
 T2 of the design trial in [design-research.md](../design-research.md), serving `O6` (the app looks made for its people, the same on every screen, and is easy to use). The source of truth is [src/index.css](../../src/index.css). This page names each token's role, and the static design gate (T3) holds the code to them.
 
-The values in place on 2026-11-15 are shadcn's greys and Tailwind's greens, ambers and reds, carried over unchanged so the app looks as it did. The direction the owner picks under T7 changes the values. The roles and their number stay unless that direction gives a reason.
+The values are those of the sticker chart (`A12`, the app takes the sticker-chart direction), taken from its mock in `mocks/sticker-chart/sticker.css` on 2026-11-15: neutrals tinted from pink sticker-sheet paper, text and accent in berry ink of low chroma, so the only saturated colours are the decks' and the three grades'. The roles and their number are those the app had before.
 
 ## How it is held
 
@@ -32,7 +32,7 @@ The decks' own colours (`src/lib/deck-colors.ts`) are the people's data and sit 
 
 ## Type
 
-One family, Figtree, set for both `sans` and `heading`. `mono` is the system's monospace, for code only.
+One family, M PLUS Rounded 1c in its Latin set (weights 400, 500, 700 and 800), set for both `sans` and `heading`. `mono` is the system's monospace, for code only.
 
 | Token | Size at the 18 px root | Used for |
 |---|---|---|
@@ -43,26 +43,26 @@ One family, Figtree, set for both `sans` and `heading`. `mono` is the system's m
 | `text-xl` | 22.5 px | A dialog's title |
 | `text-2xl` | 27 px | A screen's title |
 | `text-code` | 0.82 em | Code inside running text, sized to the text around it |
-| `text-emoji` | 40.5 px | A deck's emoji on its cover |
+| `text-emoji` | 26 px | A deck's emoji on its large sticker, at the top of the deck's page |
 
 ## Space and shape
 
 - Space is Tailwind's single `--spacing` unit and its multiples, so every gap is a step of the same scale (`sp-1`). The shared gaps are named in `src/lib/ui-looks.ts`.
-- Radii: `sm` (0.375 rem) for chips, menu entries and small marks, `md` and `lg` (0.625 rem) for controls and rows, `xl` and `2xl` (0.875 rem) for cards and dialogs, `4xl` (1.625 rem), which makes a pill of a button, a badge or a field and rounds a dialog's corners, and `full` for a pill of any size. shadcn's components name all of these, so the names share three values.
-- Shadows: `shadow-sm` for a thing lifted a little (a tooltip), `shadow-md` for a thing over the page (a menu).
+- Radii: `sm` (8 px) for menu entries and small marks, `md` and `lg` (12 px) for fields, rows and menus, `xl` and `2xl` (22 px) for the sheet, the study card and dialogs, `4xl` (999 px), which makes a pill of a button, and `full` for a round sticker or chip. shadcn's components name all of these, so the names share three values and the pill.
+- Shadows: `shadow-sm` for a sticker stuck on the sheet, `shadow-md` for the study card and what floats over the page (a menu, a dialog). Each mode has its own pair, `--lift-sm` and `--lift-md`.
 
 ## Motion
 
-The card turning in study, bars growing to their new width, and colour changes on hover and press. Confetti marks the daily goal reached. Each transition names its property (`mo-2`).
+Colour changes on hover and press, and nothing else moves. The sheet filling with a sticker after each grade is the feedback for the daily goal. Each transition names its property (`mo-2`).
 
 ## Budgets
 
-The census on 2026-11-15, with the values above. Each budget is the count now, so any growth is a decision. A count that drops fails too, and the budget is lowered to keep the gain.
+The census on 2026-11-15, after the restyle to the sticker chart. Each budget is the count now, so any growth is a decision. A count that drops fails too, and the budget is lowered to keep the gain.
 
 | Dimension | Count | What it holds |
 |---|---|---|
-| Colours | 31 | The light and dark tokens, and Tailwind's own transparent, current colour and ring defaults |
+| Colours | 41 | The light and dark tokens, each mode's two shadow colours, and Tailwind's own transparent, current colour and ring defaults. The tinted neutrals of each mode share fewer values than shadcn's greys did |
 | Type sizes | 12 | The eight tokens, the 18 px root, and the browser defaults Tailwind's reset keeps (`1em`, `75 %`, `80 %`) |
-| Families | 3 | Figtree, the monospace, and Tailwind's fallback stack |
+| Families | 3 | M PLUS Rounded 1c, the monospace, and Tailwind's fallback stack |
 | Radii | 6 | None, the three radii, the round one, and the pill |
 | Shadows | 3 | None, and the two depths |

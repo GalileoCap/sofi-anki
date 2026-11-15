@@ -18,6 +18,7 @@ import {
   dueCards,
   indexSchedules,
   newCards,
+  scheduleKey,
   scheduleRun,
   wasAnswered,
   weakCards,
@@ -172,6 +173,53 @@ export const withRun = (store: Store, run: RunRecord): Store => ({
   runs: [...store.runs, run],
   schedules: [...scheduleRun(indexSchedules(store.schedules), run.deckId, run.results, run.completedAt).values()],
 });
+
+/** A card in a run, with the deck it comes from. */
+export type RunItem = { readonly deckId: string; readonly card: Card };
+
+/** A run's queue: each card under its schedule key, since a card id is unique only within its deck. */
+export const runQueue = (items: readonly RunItem[]): Card[] =>
+  items.map(({ deckId, card }) => ({ ...card, id: scheduleKey(deckId, card.id) }));
+
+/**
+ * The runs a run is kept as, one per deck it studied, so each stored run belongs to one deck as
+ * every run before did. Each card is back under its own id, and each deck takes the share of
+ * `totalTimeMs` its cards took.
+ */
+export function runsByDeck(
+  results: readonly CardRunResult[],
+  items: readonly RunItem[],
+  completedAt: Millis,
+  totalTimeMs: number,
+  newId: () => string,
+): RunRecord[] {
+  const byKey = new Map(items.map((item) => [scheduleKey(item.deckId, item.card.id), item]));
+  const groups = new Map<string, CardRunResult[]>();
+  for (const result of results) {
+    const item = byKey.get(result.card.id);
+    if (item === undefined) continue;
+    groups.set(item.deckId, [...(groups.get(item.deckId) ?? []), { card: item.card, attempts: result.attempts }]);
+  }
+  const spent = (list: readonly CardRunResult[]) => list.reduce((sum, r) => sum + r.attempts.reduce((s, a) => s + a.durationMs, 0), 0);
+  const whole = spent([...groups.values()].flat());
+  return [...groups].map(([deckId, list]) => ({
+    id: newId(),
+    deckId,
+    completedAt,
+    totalTimeMs: Math.round(whole > 0 ? (totalTimeMs * spent(list)) / whole : totalTimeMs / groups.size),
+    results: list,
+  }));
+}
+
+/** The store with each of `runs` kept. */
+export const withRuns = (store: Store, runs: readonly RunRecord[]): Store => runs.reduce(withRun, store);
+
+/** The cards due at `now` across `decks`, deck by deck in the order given. */
+export const dueItems = (decks: readonly Deck[], schedules: Schedules, now: Millis): RunItem[] =>
+  decks.flatMap((deck) => dueCards(deck, schedules, now).map((card) => ({ deckId: deck.id, card })));
+
+/** `cards` of `deck` as a run's items. */
+export const deckItems = (deck: Deck, cards: readonly Card[]): RunItem[] => cards.map((card) => ({ deckId: deck.id, card }));
 
 /** The cards behind, put off to later in the run, and still ahead. */
 export function progress(state: RunState): { done: number; redo: number; pending: number; total: number } {
