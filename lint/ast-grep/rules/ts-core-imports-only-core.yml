@@ -1,0 +1,14 @@
+# Written by session-codeintel layers from .claude/claude-kit.json: edit the settings and run it again, since this file is replaced.
+id: ts-core-imports-only-core
+language: typescript
+severity: error
+message: >-
+  `src/core` imports only `src/core`: an effect module, a page, a component or a
+  framework is outside it.
+files:
+  - src/core/**/*.ts
+rule:
+  kind: import_statement
+  has:
+    field: source
+    regex: "^['\"](react|react-dom|@tanstack\\/|@\\/effects\\/|@\\/hooks\\/|@\\/components\\/|@\\/pages\\/|@\\/lib\\/|@\\/contexts\\/|sql\\.js|turndown|marked)"

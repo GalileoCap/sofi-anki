@@ -1,6 +1,38 @@
 {
-  "test_commands": ["pnpm test"],
-  "iterate": { "static": ["pnpm check:static"] },
-  "tells": { "readers": ["typescript"] },
-  "looks": { "src": "src", "skip": ["src/components/ui"] }
+  "test_commands": [
+    "pnpm test"
+  ],
+  "iterate": {
+    "static": [
+      "pnpm check:static"
+    ]
+  },
+  "tells": {
+    "readers": [
+      "typescript"
+    ]
+  },
+  "looks": {
+    "src": "src",
+    "skip": [
+      "src/components/ui"
+    ]
+  },
+  "layers": {
+    "typescript": {
+      "core": "src/core",
+      "effects": "src/effects",
+      "outside": [
+        "@/effects/",
+        "@/hooks/",
+        "@/components/",
+        "@/pages/",
+        "@/lib/",
+        "@/contexts/",
+        "sql.js",
+        "turndown",
+        "marked"
+      ]
+    }
+  }
 }

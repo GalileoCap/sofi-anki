@@ -1,5 +1,5 @@
 import type { AppSettings, CardSRS, Deck, RunRecord } from "@/types";
-import { checkBackup } from "@/core/backup";
+import { readBackup } from "@/core/backup";
 
 const DECKS_KEY = "anki-decks";
 const RUNS_KEY = "anki-runs";
@@ -67,7 +67,7 @@ export function exportAllData(): string {
 
 /** Throws, and changes nothing, when the text is not a backup. */
 export function importAllData(json: string, mode: "replace" | "merge"): void {
-  if (checkBackup(json).isErr()) throw new Error("Not a backup file.");
+  if (readBackup(json).isErr()) throw new Error("Not a backup file.");
   const data = JSON.parse(json) as BackupData;
 
   if (mode === "replace") {

@@ -8,3 +8,5 @@ eslint . --max-warnings 0
 session-suppressions check
 session-docs check
 session-intent check
+ast-grep test -c sgconfig.yml --skip-snapshot-tests
+ast-grep scan -c sgconfig.yml --error

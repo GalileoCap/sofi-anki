@@ -6,7 +6,7 @@ The working rules are session-kit's (`~/.claude/CLAUDE.md`), and the shape of th
 
 @~/.claude/plugins/marketplaces/galileo-kit/global/CODE.md
 
-This file adds the project's own. `.claude/settings.json` declares the plugin, and `.claude/claude-kit.json` points `session-tells` at the TypeScript comments and `session-codeintel looks` at `src/`. Comments, documents and replies are in English. The interface is in English and Spanish.
+This file adds the project's own. `.claude/settings.json` declares the plugin, and `.claude/claude-kit.json` points `session-tells` at the TypeScript comments and `session-codeintel looks` at `src/`. Its `layers` block names `src/core` and `src/effects`, and `session-codeintel layers` writes the ast-grep rules under `lint/ast-grep/` from it: rerun it after changing the block, never edit the rules. Comments, documents and replies are in English. The interface is in English and Spanish.
 
 ## Intent
 

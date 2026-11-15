@@ -1,0 +1,25 @@
+# Written by session-codeintel layers from .claude/claude-kit.json: edit the settings and run it again, since this file is replaced.
+id: ts-core-no-effects
+language: typescript
+severity: error
+message: >-
+  `src/core` is pure: an effect (the network, the clock, randomness, storage, the DOM,
+  a timer, await) belongs in `src/effects`, and the value it produces is passed in.
+files:
+  - src/core/**/*.ts
+rule:
+  any:
+    - kind: await_expression
+    - all:
+        - any:
+            - kind: function_declaration
+            - kind: arrow_function
+            - kind: method_definition
+            - kind: function_expression
+        - regex: "^async\\b"
+    - pattern: Date.now($$$ARGS)
+    - pattern: Math.random($$$ARGS)
+    - pattern: new Date()
+    - all:
+        - kind: identifier
+        - regex: "^(fetch|EventSource|WebSocket|XMLHttpRequest|window|document|navigator|localStorage|sessionStorage|indexedDB|console|setTimeout|setInterval|clearTimeout|clearInterval|requestAnimationFrame|queueMicrotask|crypto|performance|alert)$"

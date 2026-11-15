@@ -1,0 +1,16 @@
+# Written by session-codeintel layers from .claude/claude-kit.json: edit the settings and run it again, since this file is replaced.
+id: ts-core-no-effects
+valid:
+  - "export function add(a: number, b: number): number { return a + b }"
+  - "export const at = (now: number): string => String(now)"
+  - "const o = { fetch: 1 }; export const f = o.fetch"
+invalid:
+  - "export async function load(): Promise<void> {}"
+  - "export const load = async () => {}"
+  - "export function now(): number { return Date.now() }"
+  - "export function roll(): number { return Math.random() }"
+  - "export function today(): Date { return new Date() }"
+  - "export function get(u: string) { return fetch(u) }"
+  - "export function w() { return window.innerWidth }"
+  - "export function log(x: string) { console.log(x) }"
+  - "export function later(f: () => void) { setTimeout(f, 1) }"

@@ -1,0 +1,5 @@
+# Written by session-codeintel layers from .claude/claude-kit.json: edit the settings and run it again, since this file is replaced.
+ruleDirs:
+  - lint/ast-grep/rules
+testConfigs:
+  - testDir: lint/ast-grep/tests

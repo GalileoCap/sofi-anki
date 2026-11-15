@@ -1,0 +1,8 @@
+# Written by session-codeintel layers from .claude/claude-kit.json: edit the settings and run it again, since this file is replaced.
+id: ts-core-imports-only-core
+valid:
+  - "import {{ add }} from './math'"
+  - "import type {{ Millis }} from '@/core/model'"
+invalid:
+  - "import {{ useState }} from 'react'"
+  - "import {{ queryOptions }} from '@tanstack/react-query'"

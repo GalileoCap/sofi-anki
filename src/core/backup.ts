@@ -1,23 +1,67 @@
-import { Result, err, ok } from "neverthrow";
+import type { Result } from "neverthrow";
 import { z } from "zod";
 
-/** A backup's outer shape, as every version of the app has written it. The records inside are read as they are. */
-const backupShape = z.object({
+import { type DecodeError, decodeJson } from "@/core/decode";
+import {
+  type CardSchedule,
+  type Millis,
+  type Store,
+  deckSchema,
+  millisSchema,
+  runSchema,
+  scheduleSchema,
+  settingsSchema,
+} from "@/core/model";
+
+/** A backup file: the whole store, as written since the first version. */
+export const backupSchema = z.object({
   version: z.literal(1),
-  decks: z.array(z.unknown()),
-  runs: z.array(z.unknown()),
-  srs: z.array(z.unknown()),
-  settings: z.object({}).loose(),
+  exportedAt: millisSchema.optional(),
+  decks: z.array(deckSchema),
+  runs: z.array(runSchema),
+  srs: z.array(scheduleSchema),
+  settings: settingsSchema,
 });
+export type Backup = z.infer<typeof backupSchema>;
 
-export type NotABackup = { kind: "notABackup" };
+export type RestoreMode = "replace" | "merge";
 
-/** Accepts the text of a file only when it is a backup, so a restore never reads a missing list as an empty one. */
-export function checkBackup(json: string): Result<string, NotABackup> {
-  const notABackup: NotABackup = { kind: "notABackup" };
-  return parseJson(json)
-    .mapErr(() => notABackup)
-    .andThen((value) => (backupShape.safeParse(value).success ? ok(json) : err(notABackup)));
+/** The backup file's text for `store`, written at `now`. */
+export function writeBackup(store: Store, now: Millis): string {
+  const backup: Backup = {
+    version: 1,
+    exportedAt: now,
+    decks: [...store.decks],
+    runs: [...store.runs],
+    srs: [...store.schedules],
+    settings: store.settings,
+  };
+  return JSON.stringify(backup, null, 2);
 }
 
-const parseJson = Result.fromThrowable((text: string): unknown => JSON.parse(text));
+/** `text` as a backup, or why it is not one. A file that is not a backup changes nothing. */
+export const readBackup = (text: string): Result<Backup, DecodeError> => decodeJson(backupSchema, text);
+
+const scheduleKey = (schedule: CardSchedule): string => `${schedule.deckId}:${schedule.cardId}`;
+
+/** Items of `incoming` whose key is not among `current`'s, after `current`. */
+function added<T>(current: readonly T[], incoming: readonly T[], key: (item: T) => string): T[] {
+  const known = new Set(current.map(key));
+  return [...current, ...incoming.filter((item) => !known.has(key(item)))];
+}
+
+/**
+ * The store after restoring `backup`. Replace takes the backup whole. Merge adds the decks, runs
+ * and schedules the store lacks, by id, and keeps the store's settings.
+ */
+export function restore(store: Store, backup: Backup, mode: RestoreMode): Store {
+  if (mode === "replace") {
+    return { decks: backup.decks, runs: backup.runs, schedules: backup.srs, settings: backup.settings };
+  }
+  return {
+    decks: added(store.decks, backup.decks, (deck) => deck.id),
+    runs: added(store.runs, backup.runs, (run) => run.id),
+    schedules: added(store.schedules, backup.srs, scheduleKey),
+    settings: store.settings,
+  };
+}
