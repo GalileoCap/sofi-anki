@@ -264,6 +264,9 @@ const en_translations = {
   "sharedDeck.importedSuccess": "Deck imported successfully!",
   // Import merge dialog
   "importMerge.title": "Deck Already Exists",
+  "importMerge.existsWith": "is already here, with {n}. The shared copy has {m}.",
+  "importMerge.mergeAdds": "Merging adds {n}.",
+  "importMerge.newCount": "{n} new",
   // Study heatmap
   "heatmap.less": "Less",
   "heatmap.more": "More",
@@ -584,6 +587,9 @@ const translations: Record<Lang, Translation> = {
     "sharedDeck.goToDecks": "Ir a los mazos",
     "sharedDeck.importedSuccess": "¡Mazo importado con éxito!",
     "importMerge.title": "El mazo ya existe",
+    "importMerge.existsWith": "ya está aquí, con {n}. La copia compartida tiene {m}.",
+    "importMerge.mergeAdds": "Fusionar añade {n}.",
+    "importMerge.newCount": "{n} nuevas",
     "heatmap.less": "Menos",
     "heatmap.more": "Más",
     "import.deck.schemaPrompt": `Generá un mazo de 50 tarjetas tipo anki sobre "" en el siguiente formato JSON:

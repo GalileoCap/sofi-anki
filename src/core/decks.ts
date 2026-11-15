@@ -61,10 +61,13 @@ export type Arrival = "overwrite" | "merge";
 export function receiveDeck(decks: readonly Deck[], incoming: Deck, how: Arrival): Deck[] {
   if (!decks.some((deck) => deck.id === incoming.id)) return addDeck(decks, incoming);
   if (how === "overwrite") return replaceDeck(decks, incoming.id, () => incoming);
-  return replaceDeck(decks, incoming.id, (deck) => {
-    const known = new Set(deck.cards.map((card) => card.id));
-    return { ...deck, cards: [...deck.cards, ...incoming.cards.filter((card) => !known.has(card.id))] };
-  });
+  return replaceDeck(decks, incoming.id, (deck) => ({ ...deck, cards: [...deck.cards, ...unknownCards(deck, incoming)] }));
+}
+
+/** The cards of `incoming` that `deck` lacks, by id: what a merge adds. */
+export function unknownCards(deck: Deck, incoming: Deck): Card[] {
+  const known = new Set(deck.cards.map((card) => card.id));
+  return incoming.cards.filter((card) => !known.has(card.id));
 }
 
 /** Every tag on `items` (decks or cards), sorted, each once. */

@@ -1,9 +1,7 @@
 import { useState } from "react";
 
 import { Page } from "@/components/page";
-import { SharedDeckView } from "@/components/shared-deck-view";
 import { useLanguage } from "@/contexts/language-context";
-import { receiveDeck } from "@/core/decks";
 import type { Card, Deck, SessionGoal, Store } from "@/core/model";
 import { runCards } from "@/core/run";
 import { indexSchedules } from "@/core/scheduler";
@@ -14,6 +12,7 @@ import { useStore } from "@/hooks/use-store";
 import { DeckPage } from "@/pages/deck";
 import { DeckStatsPage } from "@/pages/deck-stats";
 import { Home } from "@/pages/home";
+import { SharedDeckPage } from "@/pages/shared-deck";
 import { StatsPage } from "@/pages/stats";
 import { StudyPage } from "@/pages/study";
 
@@ -38,8 +37,6 @@ function openingView(): View {
   );
 }
 
-const withDecks = (change: (decks: readonly Deck[]) => Deck[]) => (store: Store): Store => ({ ...store, decks: change(store.decks) });
-
 export default function App({ initial }: { initial: Store }) {
   const { store, update, saveError } = useStore(initial);
   const [view, setView] = useState<View>(openingView);
@@ -57,19 +54,11 @@ export default function App({ initial }: { initial: Store }) {
   const deck = "deckId" in view ? decks.find((d) => d.id === view.deckId) : undefined;
 
   if (view.kind === "shared") {
-    const shared = view.deck;
     return (
-      <>
+      <Page>
         {banner}
-        <SharedDeckView
-          deck={shared}
-          existingDeck={decks.find((d) => d.id === shared.id)}
-          onImportNew={() => update(withDecks((d) => receiveDeck(d, shared, "merge")))}
-          onOverwrite={() => update(withDecks((d) => receiveDeck(d, shared, "overwrite")))}
-          onMerge={() => update(withDecks((d) => receiveDeck(d, shared, "merge")))}
-          onGoHome={goHome}
-        />
-      </>
+        <SharedDeckPage deck={view.deck} store={store} update={update} onGoHome={goHome} />
+      </Page>
     );
   }
 
