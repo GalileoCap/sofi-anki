@@ -11,7 +11,7 @@ supersedes: []
 
 # A12 The app takes the sticker-chart direction
 
-Of four directions drawn under T7 (`mocks/directions/`), the owner picked the sticker chart on 2026-11-15. Home opens on today's sticker sheet: the daily goal as spots, each filled after a card is studied by a sticker in that card's deck's colour, with the week's stickers as the streak. Studying is one button from home, across every deck with cards due. Decks are notebook covers in their own colour, with their emoji as a sticker. Grades are round rubber stamps. Neutrals are tinted from pink sticker-sheet paper, text and accent are berry ink, and the family is M PLUS Rounded 1c. The full mock in `mocks/sticker-chart/` carries it to every screen before the app changes.
+Of four directions drawn under T7 (`mocks/directions/`), the owner picked the sticker chart on 2026-11-15. Home opens on today's sticker sheet: the daily goal as one row of spots, each filled after a card is studied by a sticker in that card's deck's colour, with the week's stickers as the streak. A line under the title says what is due today and what comes tomorrow and later this week. Studying is one button from home, across every deck with cards due. Decks are a list ranked by due, each row a notebook with its spine in the deck's colour and its emoji as a sticker. Grades are round rubber stamps, each with a teacher's mark (cross, half tick, tick) and a line saying where the card goes next. On a laptop each step has a key. Neutrals are tinted from pink sticker-sheet paper, text and accent are berry ink, and the family is M PLUS Rounded 1c. The full mock in `mocks/sticker-chart/` carries it to every screen before the app changes.
 
 ## Context
 
@@ -19,7 +19,7 @@ The owner asked for a "cute, cozy, study" restyle, and found the first mocks mac
 
 ## Options
 
-The Leitner box (the schedule as a box), the index card (the app opens on the next card) and the reading room (a keyboard ledger for the laptop) were drawn beside it, each a different structure. The owner chose this one after seeing home and study for all four side by side.
+The Leitner box (the schedule as a box), the index card (the app opens on the next card) and the reading room (a keyboard ledger for the laptop) were drawn beside it, each a different structure. The owner chose this one after seeing home and study for all four side by side. After the review of all four full mocks (`mocks/review.md`), the owner asked for the sticker chart to take the good things of the others: from the Leitner box, what comes after today and grades that say where the card goes; from the index card, grades carried by the shape of a mark; from the reading room, decks as a list ranked by due and keys on the laptop. The same pass fixed the review's faults in the sticker chart: the grid of covers, the empty sheet filling home, and the caution colour under AA contrast.
 
 ## Consequences
 

@@ -17,7 +17,7 @@
   --ring: oklch(0.6 0.12 352);
   --positive: oklch(0.52 0.13 150);
   --positive-soft: oklch(0.95 0.035 150);
-  --caution: oklch(0.56 0.13 65);
+  --caution: oklch(0.52 0.125 62);
   --caution-soft: oklch(0.95 0.04 75);
   --negative: oklch(0.52 0.18 27);
   --negative-soft: oklch(0.95 0.025 25);
@@ -89,7 +89,8 @@
 /* The sticker sheet: spots to fill, and stickers in a deck's colour. */
 .sheet { background: var(--card); border: 2px dashed var(--border); border-radius: var(--r-xl); padding: 14px 16px; }
 .sheet .label { display: flex; justify-content: space-between; font-size: var(--sm); font-weight: 700; margin-bottom: 10px; }
-.spots { display: grid; grid-template-columns: repeat(10, 1fr); gap: 7px; }
+/* One row of twenty, small, so an empty sheet does not take the screen before studying starts. */
+.spots { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
 .spot { aspect-ratio: 1; border-radius: 50%; border: 2px dotted var(--border); }
 .sticker-dot { aspect-ratio: 1; border-radius: 50%; border: 2.5px solid var(--card); box-shadow: var(--shadow-sm); }
 .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: var(--xs); color: var(--muted-foreground); margin-top: 14px; }
@@ -117,12 +118,16 @@
 
 /* Grades as round rubber stamps: the word carries the grade, the colour repeats it. */
 .stamps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; justify-items: center; }
-.stamp { width: 100%; max-width: 104px; aspect-ratio: 1; border-radius: 50%; border: 3px solid currentColor; background: var(--card); display: grid; place-items: center; font: inherit; font-weight: 800; font-size: var(--sm); cursor: pointer; position: relative; padding: 0 8px; }
+.stamp { width: 100%; max-width: 104px; aspect-ratio: 1; border-radius: 50%; border: 3px solid currentColor; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font: inherit; font-weight: 800; font-size: var(--sm); cursor: pointer; position: relative; padding: 0 8px; }
 .stamp::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: 1.5px dashed currentColor; opacity: 0.6; }
 .stamp.wrong { color: var(--negative); }
 .stamp.almost { color: var(--caution); }
 .stamp.right { color: var(--positive); }
 .stamp:hover { background: var(--muted); }
+/* The teacher's mark carries the grade by its shape, and the line under the stamp says where the card goes. */
+.stamp svg { width: 28px; height: 24px; fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.grade { display: grid; justify-items: center; gap: 6px; width: 100%; }
+.goes { font-size: var(--xs); color: var(--muted-foreground); text-align: center; }
 .stamp .kbd { position: absolute; bottom: 12px; }
 .mini { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
 
@@ -159,3 +164,11 @@ textarea.input { min-height: 180px; font-family: ui-monospace, Menlo, monospace;
 .segmented { display: inline-flex; border: 2px solid var(--border); border-radius: 999px; padding: 3px; gap: 3px; }
 .segmented span { padding: 4px 14px; border-radius: 999px; font-size: var(--sm); font-weight: 700; color: var(--muted-foreground); }
 .segmented span.on { background: var(--primary); color: var(--primary-foreground); }
+
+/* Decks as a list ranked by due, each row a notebook with its spine in the deck's colour. */
+.decklist { display: flex; flex-direction: column; gap: 8px; }
+.deckrow { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; min-height: 64px; padding: 8px 14px 8px 12px; border: 0; border-left: 10px solid var(--deck); border-radius: 6px var(--r-md) var(--r-md) 6px; background: var(--card); font: inherit; text-align: left; color: var(--foreground); cursor: pointer; }
+.deckrow:hover { background: var(--muted); }
+.deckrow .emoji-sticker { background: var(--deck); border: 2.5px solid var(--card); }
+.deckrow .name { display: flex; flex-direction: column; line-height: 1.35; }
+.deckrow .name b { font-size: var(--sm); font-weight: 700; }

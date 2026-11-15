@@ -28,6 +28,7 @@
   </div>
   <div class="notes" style="margin-top: 18px;">
     <p>The direction the owner picked (<code>A12</code>), carried to every screen the brief's six tasks reach, at the width each task is done on. Every deck, card and figure is the demo decks' own, as the app shows them on 2026-11-15. The values are in <code>sticker.css</code>, by the roles of <code>docs/design/system.md</code>.</p>
+    <p>After the review of the four mocks (<code>../review.md</code>), it takes the best of the other three: what comes after today and grades that say where the card goes (the Leitner box), grades carried by a teacher's mark (the index card), decks as a list ranked by due and a key for each step on a laptop (the reading room). The sheet is now one row, so it no longer fills home before studying starts.</p>
     <p>Two things here are new to the app, beyond the look: studying starts from home across every deck with cards due, and the daily goal fills a sheet of stickers after each grade, in place of the confetti.</p>
   </div>
 
@@ -39,7 +40,7 @@
       <div class="shot"><p>Home</p><div class="device phone theme"><div class="dir">
         <div class="screen">
           <div class="topbar"><span></span><div class="actions"><button class="btn ghost">Stats</button><button class="btn ghost" aria-label="More: new deck, import, back up">More</button></div></div>
-          <div><h1>Today</h1><p class="quiet small"><span class="figure">6</span> cards are waiting, from <span class="figure">2</span> decks</p></div>
+          <div><h1>Today</h1><p class="quiet small"><span class="figure">6</span> cards are waiting, from <span class="figure">2</span> decks. Then <span class="figure">3</span> tomorrow and <span class="figure">15</span> later this week.</p></div>
           <div class="sheet">
             <div class="label"><span>Today's sheet</span><span class="quiet figure" style="font-weight: 500">0 of 20</span></div>
             <div class="spots" data-fill="20"></div>
@@ -47,9 +48,9 @@
             <p class="fine quiet" style="text-align: center; margin-top: 6px;"><span class="figure">10</span> days in a row</p>
           </div>
           <button class="btn primary big">Study 6 cards</button>
-          <div class="covers">
-            <button class="cover" style="background: #f59e0b;"><span class="emoji-sticker">⚡</span><span class="labelblock"><b>JavaScript Fundamentals</b><span><span class="figure">5</span> due of 12</span></span></button>
-            <button class="cover" style="background: #863bff;"><span class="emoji-sticker">📖</span><span class="labelblock"><b>sofi-anki Guide</b><span><span class="figure">1</span> due of 12</span></span></button>
+          <div class="decklist">
+            <button class="deckrow" style="--deck: #f59e0b"><span class="emoji-sticker small">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">12 cards, studied yesterday</span></span><span class="chip due">5 due</span></button>
+            <button class="deckrow" style="--deck: #863bff"><span class="emoji-sticker small">📖</span><span class="name"><b>sofi-anki Guide</b><span class="fine quiet">12 cards, studied yesterday</span></span><span class="chip due">1 due</span></button>
           </div>
         </div>
       </div></div></div>
@@ -57,7 +58,7 @@
       <div class="shot"><p>Home in Spanish, to check every label fits (copy-5)</p><div class="device phone theme"><div class="dir" lang="es">
         <div class="screen">
           <div class="topbar"><span></span><div class="actions"><button class="btn ghost">Estadísticas</button><button class="btn ghost" aria-label="Más">Más</button></div></div>
-          <div><h1>Hoy</h1><p class="quiet small"><span class="figure">6</span> cartas esperan, de <span class="figure">2</span> mazos</p></div>
+          <div><h1>Hoy</h1><p class="quiet small"><span class="figure">6</span> cartas esperan, de <span class="figure">2</span> mazos. Después <span class="figure">3</span> mañana y <span class="figure">15</span> más esta semana.</p></div>
           <div class="sheet">
             <div class="label"><span>La hoja de hoy</span><span class="quiet figure" style="font-weight: 500">0 de 20</span></div>
             <div class="spots" data-fill="20"></div>
@@ -65,9 +66,9 @@
             <p class="fine quiet" style="text-align: center; margin-top: 6px;"><span class="figure">10</span> días seguidos</p>
           </div>
           <button class="btn primary big">Estudiar 6 cartas</button>
-          <div class="covers">
-            <button class="cover" style="background: #f59e0b;"><span class="emoji-sticker">⚡</span><span class="labelblock"><b>JavaScript Fundamentals</b><span><span class="figure">5</span> pendientes de 12</span></span></button>
-            <button class="cover" style="background: #863bff;"><span class="emoji-sticker">📖</span><span class="labelblock"><b>sofi-anki Guide</b><span><span class="figure">1</span> pendiente de 12</span></span></button>
+          <div class="decklist">
+            <button class="deckrow" style="--deck: #f59e0b"><span class="emoji-sticker small">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">12 cartas, estudiado ayer</span></span><span class="chip due">5 pendientes</span></button>
+            <button class="deckrow" style="--deck: #863bff"><span class="emoji-sticker small">📖</span><span class="name"><b>sofi-anki Guide</b><span class="fine quiet">12 cartas, estudiado ayer</span></span><span class="chip due">1 pendiente</span></button>
           </div>
         </div>
       </div></div></div>
@@ -85,7 +86,7 @@
         </div>
       </div></div></div>
 
-      <div class="shot"><p>The answer shown, graded with a stamp</p><div class="device phone theme"><div class="dir">
+      <div class="shot"><p>The answer shown, graded with a stamp that says where the card goes</p><div class="device phone theme"><div class="dir">
         <div class="screen" style="min-height: 700px;">
           <div class="topbar"><button class="btn ghost">Leave</button><span class="figure">1 of 6</span><button class="btn ghost" aria-label="More">More</button></div>
           <div class="mini" data-fill="20"></div>
@@ -102,7 +103,7 @@ const inc = makeCounter();
 inc(); // 1</code></pre>
             <p>Closures power data privacy, partial application, and memoization.</p>
           </div>
-          <div class="stamps"><button class="stamp wrong">Wrong</button><button class="stamp almost">Almost</button><button class="stamp right">Right</button></div>
+          <div class="stamps"><div class="grade"><button class="stamp wrong"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M7 5 L23 21 M23 5 L7 21"/></svg>Wrong</button><span class="goes">Back to today</span></div><div class="grade"><button class="stamp almost"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M4 14 L11 21 L21 6"/><path d="M12 8 L19 17"/></svg>Almost</button><span class="goes">Tomorrow</span></div><div class="grade"><button class="stamp right"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M4 14 L11 21 L26 4"/></svg>Right</button><span class="goes">In 2 days</span></div></div>
         </div>
       </div></div></div>
 
@@ -176,6 +177,37 @@ inc(); // 1</code></pre>
           </div>
         </div>
       </div></div></div>
+
+      <div class="shot"><p>Studying on a laptop: the card in the middle, the sheet and the run beside it, a key for each step</p><div class="device laptop theme"><div class="dir">
+        <div style="display: grid; grid-template-columns: 280px 1fr; gap: 40px; padding: 28px 40px;">
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <button class="btn ghost" style="align-self: flex-start; padding: 0;">Leave <span class="kbd">Esc</span></button>
+            <div class="sheet"><div class="label"><span>Today's sheet</span><span class="quiet figure" style="font-weight: 500">0 of 20</span></div><div class="spots" data-fill="20"></div></div>
+            <div><h3 style="margin-bottom: 4px;">In this run</h3><div class="rows small">
+              <div class="row"><span>JavaScript Fundamentals</span><span class="figure">5</span></div>
+              <div class="row"><span>sofi-anki Guide</span><span class="figure">1</span></div>
+            </div></div>
+            <p class="fine quiet"><span class="kbd">Space</span> turns the card, <span class="kbd">H</span> shows the hint, <span class="kbd">⌘Z</span> takes a grade back.</p>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 16px; max-width: 720px;">
+            <div class="topbar"><span class="figure">1 of 6</span><span></span></div>
+            <div class="studycard">
+              <div class="from"><span class="emoji-sticker small" style="background: #f59e0b">⚡</span>JavaScript Fundamentals</div>
+              <h2>What is a closure?</h2>
+              <div class="rule"></div>
+              <p>A function that <strong>retains access</strong> to its enclosing scope's variables even after the outer function has returned.</p>
+              <pre><code>function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}
+const inc = makeCounter();
+inc(); // 1</code></pre>
+              <p>Closures power data privacy, partial application, and memoization.</p>
+            </div>
+            <div class="stamps"><div class="grade"><button class="stamp wrong"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M7 5 L23 21 M23 5 L7 21"/></svg>Wrong</button><span class="goes">Back to today <span class=kbd>1</span></span></div><div class="grade"><button class="stamp almost"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M4 14 L11 21 L21 6"/><path d="M12 8 L19 17"/></svg>Almost</button><span class="goes">Tomorrow <span class=kbd>2</span></span></div><div class="grade"><button class="stamp right"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M4 14 L11 21 L26 4"/></svg>Right</button><span class="goes">In 2 days <span class=kbd>3</span></span></div></div>
+          </div>
+        </div>
+      </div></div></div>
     </div>
   </section>
 
@@ -184,6 +216,28 @@ inc(); // 1</code></pre>
     <h2>2 and 3. On a laptop: make a deck, write cards, bring cards in</h2>
     <p class="lead">The deck is one page: its cover and actions on the left, its cards on the right. The rare and destructive actions sit in one menu, drawn open.</p>
     <div class="shots">
+      <div class="shot"><p>Home on a laptop: today on the left, the decks ranked by due on the right</p><div class="device laptop theme"><div class="dir">
+        <div style="display: grid; grid-template-columns: 400px 1fr; gap: 48px; padding: 28px 40px;">
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div><h1>Today</h1><p class="quiet small"><span class="figure">6</span> cards are waiting, from <span class="figure">2</span> decks. Then <span class="figure">3</span> tomorrow and <span class="figure">15</span> later this week.</p></div>
+            <div class="sheet">
+              <div class="label"><span>Today's sheet</span><span class="quiet figure" style="font-weight: 500">0 of 20</span></div>
+              <div class="spots" data-fill="20"></div>
+              <div class="week" data-week="en"></div>
+              <p class="fine quiet" style="text-align: center; margin-top: 6px;"><span class="figure">10</span> days in a row</p>
+            </div>
+            <button class="btn primary big">Study 6 cards <span class="kbd">S</span></button>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;"><h3 style="flex: 1;">Decks</h3><button class="btn">New deck <span class="kbd">N</span></button><button class="btn ghost">Stats</button><button class="btn ghost" aria-label="More: import, back up">More</button></div>
+            <div class="decklist">
+            <button class="deckrow" style="--deck: #f59e0b"><span class="emoji-sticker small">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">12 cards, studied yesterday</span></span><span class="chip due">5 due</span></button>
+            <button class="deckrow" style="--deck: #863bff"><span class="emoji-sticker small">📖</span><span class="name"><b>sofi-anki Guide</b><span class="fine quiet">12 cards, studied yesterday</span></span><span class="chip due">1 due</span></button>
+          </div>
+          </div>
+        </div>
+      </div></div></div>
+
       <div class="shot"><p>A deck, its menu open</p><div class="device laptop theme"><div class="dir">
         <div style="display: grid; grid-template-columns: 300px 1fr; gap: 40px; padding: 28px 40px;">
           <div style="display: flex; flex-direction: column; gap: 14px;">
@@ -282,7 +336,9 @@ function makeCounter() {
           <div style="background: var(--positive-soft); color: var(--positive); border-radius: var(--r-md); padding: 10px 14px; font-size: var(--sm); font-weight: 700;">JavaScript Fundamentals is yours now.</div>
           <div class="sheet"><div class="label"><span>Today's sheet</span><span class="quiet figure" style="font-weight: 500">0 of 20</span></div><div class="spots" data-fill="20"></div></div>
           <button class="btn primary big">Study 12 new cards</button>
-          <div class="covers"><button class="cover" style="background: #f59e0b;"><span class="emoji-sticker">⚡</span><span class="labelblock"><b>JavaScript Fundamentals</b><span><span class="figure">12</span> new</span></span></button></div>
+          <div class="decklist">
+            <button class="deckrow" style="--deck: #f59e0b"><span class="emoji-sticker small">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">12 cards, kept today</span></span><span class="chip due">12 new</span></button>
+          </div>
         </div>
       </div></div></div>
     </div>
