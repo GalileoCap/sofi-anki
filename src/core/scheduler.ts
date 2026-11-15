@@ -22,25 +22,45 @@ export const MIN_EASE = 1.3;
 export type Spacing = { readonly intervalDays: number; readonly easeFactor: number };
 export const NEW_SPACING: Spacing = { intervalDays: 0, easeFactor: DEFAULT_EASE };
 
+/** No interval runs past a year: a card comes back at least once a year. */
+export const MAX_INTERVAL_DAYS = 365;
+
 /**
- * The spacing after an answer. Correct multiplies the interval by the ease (one day the first
- * time) and raises the ease. Approximate keeps the interval, at least a day. Wrong starts over
- * and lowers the ease.
+ * The spacing after an answer given `daysSince` days after the card's last answer (`Infinity`
+ * for its first). Correct grows the interval by the ease (one day the first time) and raises
+ * the ease. Answered before it was due, the card grows only from the days that passed, keeps at
+ * least its interval, and keeps its ease. Approximate keeps the interval, at least a day. Wrong
+ * starts over and lowers the ease. No interval passes `MAX_INTERVAL_DAYS`.
  */
-export function nextSpacing(spacing: Spacing, result: AnswerResult): Spacing {
+export function nextSpacing(spacing: Spacing, result: AnswerResult, daysSince: number): Spacing {
   const { intervalDays, easeFactor } = spacing;
+  const capped = (days: number): number => Math.min(MAX_INTERVAL_DAYS, days);
   switch (result) {
-    case "correct":
+    case "correct": {
+      if (intervalDays === 0) return { intervalDays: 1, easeFactor: easeFactor + 0.1 };
+      const early = daysSince < intervalDays;
+      const grown = Math.round(Math.min(intervalDays, daysSince) * easeFactor);
       return {
-        intervalDays: Math.max(1, Math.round(intervalDays === 0 ? 1 : intervalDays * easeFactor)),
-        easeFactor: easeFactor + 0.1,
+        intervalDays: capped(Math.max(1, intervalDays, grown)),
+        easeFactor: early ? easeFactor : easeFactor + 0.1,
       };
+    }
     case "approximate":
-      return { intervalDays: Math.max(1, intervalDays), easeFactor };
+      return { intervalDays: capped(Math.max(1, intervalDays)), easeFactor };
     case "wrong":
       return { intervalDays: 0, easeFactor: Math.max(MIN_EASE, easeFactor - 0.2) };
   }
 }
+
+/** When the card was last answered: its due moment less its interval. */
+const lastAnsweredAt = (schedule: CardSchedule): number => schedule.dueAt - schedule.intervalDays * DAY_MS;
+
+/**
+ * When a card is due. A schedule stored before the ceiling may lie decades out, so it counts as
+ * due at most `MAX_INTERVAL_DAYS` after its last answer. The stored value is left as it is.
+ */
+export const dueTime = (schedule: CardSchedule): Millis =>
+  millis(Math.min(schedule.dueAt, lastAnsweredAt(schedule) + MAX_INTERVAL_DAYS * DAY_MS));
 
 /** Whether a disposition is an answer, as against a skip or a postponement. */
 export const isAnswer = (result: CardDisposition): result is AnswerResult =>
@@ -78,7 +98,9 @@ export function scheduleRun(
     const answer = lastAnswer(attempts);
     if (answer === null) continue;
     const key = scheduleKey(deckId, card.id);
-    const spacing = nextSpacing(next.get(key) ?? NEW_SPACING, answer);
+    const previous = next.get(key);
+    const daysSince = previous === undefined ? Infinity : (now - lastAnsweredAt(previous)) / DAY_MS;
+    const spacing = nextSpacing(previous ?? NEW_SPACING, answer, daysSince);
     next.set(key, {
       cardId: card.id,
       deckId,
@@ -94,7 +116,7 @@ export function scheduleRun(
 export const dueCards = (deck: Deck, schedules: Schedules, now: Millis): Card[] =>
   deck.cards.filter((card) => {
     const schedule = schedules.get(scheduleKey(deck.id, card.id));
-    return schedule === undefined || schedule.dueAt <= now;
+    return schedule === undefined || dueTime(schedule) <= now;
   });
 
 /** Cards whose last answer was wrong or approximate. */

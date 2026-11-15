@@ -12,6 +12,7 @@ import { CardAction, CardHeader, Card as UiCard } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import type { CardDraft } from "@/core/decks";
 import type { AnswerResult, Card, Millis } from "@/core/model";
+import { MAX_INTERVAL_DAYS, dueTime } from "@/core/scheduler";
 import { type CardPerformance, daysUntil } from "@/core/stats";
 import { accuracyLook, looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
@@ -113,7 +114,7 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
   const { t, tp } = useLanguage();
   const schedule = performance?.schedule;
   const studied = performance !== undefined && performance.runs > 0;
-  const due = schedule !== undefined && schedule.dueAt <= now;
+  const due = schedule !== undefined && dueTime(schedule) <= now;
   const last = schedule?.lastResult ?? null;
 
   return (
@@ -230,13 +231,13 @@ function CardRow({ card, performance, now, open, onToggle, onEdit, onEditInDialo
                       <span>
                         {t("deckDetail.interval")}{" "}
                         <span className={looks.strong}>
-                          {schedule.intervalDays === 0 ? t("deckDetail.review") : `${schedule.intervalDays}d`}
+                          {schedule.intervalDays === 0 ? t("deckDetail.review") : `${Math.min(schedule.intervalDays, MAX_INTERVAL_DAYS)}d`}
                         </span>
                       </span>
                       <span>
                         {t("deckDetail.due")}{" "}
                         <span className={cn("font-medium", due ? "text-amber-600 dark:text-amber-400" : "text-foreground")}>
-                          <DueLabel dueAt={schedule.dueAt} now={now} />
+                          <DueLabel dueAt={dueTime(schedule)} now={now} />
                         </span>
                       </span>
                       <span>

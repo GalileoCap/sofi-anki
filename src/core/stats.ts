@@ -9,7 +9,7 @@ import {
   type Millis,
   type RunRecord,
 } from "@/core/model";
-import { NEW_SPACING, type Schedules, dueCards, isAnswer, lastAnswer, nextSpacing } from "@/core/scheduler";
+import { NEW_SPACING, type Schedules, dueCards, dueTime, isAnswer, lastAnswer, nextSpacing } from "@/core/scheduler";
 
 /** A calendar day in the browser's time zone, as `YYYY-MM-DD`. */
 export type DayKey = string;
@@ -177,8 +177,13 @@ export function cardTimeline(cardId: string, runs: readonly RunRecord[]): Timeli
     )
     .sort((a, b) => a.at - b.at);
   let spacing = NEW_SPACING;
+  let answeredAt: Millis | null = null;
   return entries.map((entry) => {
-    if (isAnswer(entry.result)) spacing = nextSpacing(spacing, entry.result);
+    if (isAnswer(entry.result)) {
+      const daysSince = answeredAt === null ? Infinity : (entry.at - answeredAt) / DAY_MS;
+      spacing = nextSpacing(spacing, entry.result, daysSince);
+      answeredAt = entry.at;
+    }
     return { ...entry, intervalAfter: spacing.intervalDays };
   });
 }
@@ -222,7 +227,7 @@ export function cardPerformance(
 function listRank(record: CardPerformance | undefined, now: Millis): number {
   if (record === undefined || record.runs === 0) return 2;
   const last = record.schedule?.lastResult;
-  const due = record.schedule !== undefined && record.schedule.dueAt <= now;
+  const due = record.schedule !== undefined && dueTime(record.schedule) <= now;
   if (due) return last === "wrong" ? 0 : 1;
   return last === "wrong" ? 3 : last === "approximate" ? 4 : 5;
 }

@@ -10,7 +10,7 @@ import { CardContent, CardHeader, CardTitle, Card as UiCard } from "@/components
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/contexts/language-context";
 import type { CardSchedule, Deck, Millis, RunRecord, Store } from "@/core/model";
-import { deckSchedules, dueCards, indexSchedules, weakCards } from "@/core/scheduler";
+import { deckSchedules, dueCards, dueTime, indexSchedules, weakCards } from "@/core/scheduler";
 import { type CardStat, cardStats, cardTimeline, daysUntil, firstTries, newestFirst, timing, totals } from "@/core/stats";
 import { clockFace, longClockFace, shortDuration } from "@/core/time";
 import { accuracyLook, looks } from "@/lib/ui-looks";
@@ -223,7 +223,7 @@ function CardLine({ stat, runs, now }: { stat: CardStat; runs: readonly RunRecor
 /** When a card comes up next: new, due now, or in so many days. */
 function DueBadge({ schedule, now }: { schedule: CardSchedule | undefined; now: Millis }) {
   const { t } = useLanguage();
-  const days = schedule && daysUntil(schedule.dueAt, now);
+  const days = schedule && daysUntil(dueTime(schedule), now);
   return (
     <Badge variant="outline" className={cn("text-xs", days !== undefined && days <= 0 ? looks.caution : "text-muted-foreground")}>
       {days === undefined ? t("deckStats.new") : days <= 0 ? t("deckStats.dueNow") : `${days}d`}

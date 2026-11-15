@@ -35,6 +35,6 @@ Kept: the restore regression (`A3`), the decoding of every stored shape the hist
 
 ## Later
 
-- A card answered before it is due grows its interval as if it came up on time, so a deck studied every day with All Cards pushes a card out by years (the seed's `typeof null` card reaches 5142 days after twelve correct answers in twelve days). `O3` (cards come back around when they would be forgotten) wants an early answer to count for less, and an interval with a ceiling. The first version did the same.
 - A share link pasted into a tab that already has the app open changes only the hash, and the app reads the link at load, so nothing happens until a reload. The first version did the same.
 - The study heatmap's weekday letters are English (`M`, `W`, `F`) in the Spanish interface too. The first version did the same.
+- Sync between people. The owner, 2026-11-15: "we'll consider sync later". It would need a server, which `C1` (keep it simple) puts to the owner first.
