@@ -5,7 +5,7 @@ import { CardForm } from "@/components/card-form";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { DeckForm } from "@/components/deck-form";
 import { EmptyState, NoMatch } from "@/components/empty-state";
-import { Fold } from "@/components/fold";
+import { FilterFold } from "@/components/filter-fold";
 import { ExportDialog } from "@/components/export-dialog";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { DeckRow, Key, Segmented, Toggle } from "@/components/sticker";
@@ -203,47 +203,32 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
         )}
         {deck.cards.length > 0 && (
           <div className="flex items-start justify-between gap-2">
-            <Fold
+            <FilterFold
               className="min-w-0 flex-1"
-              open={difficulties.size + tags.size > 0}
-              summary={
-                <span className={looks.muted}>
-                  {t("deck.moreFilters")}
-                  {difficulties.size + tags.size > 0 && ` (${t("deck.filtersOn").replace("{n}", String(difficulties.size + tags.size))})`}
-                </span>
-              }
+              label={t("deck.moreFilters")}
+              on={difficulties.size + tags.size}
+              onClear={() => {
+                setDifficulties(new Set());
+                setTags(new Set());
+              }}
             >
-              <div className={cn(looks.stack, "pt-1 pb-2")}>
-                <div role="group" aria-label={t("cardForm.difficulty")} className={looks.chips}>
-                  {complexities.map((c) => (
-                    <Toggle key={c} pressed={difficulties.has(c)} onClick={() => setDifficulties(toggled(difficulties, c))}>
-                      {t(`complexity.${c}`)}
+              <div role="group" aria-label={t("cardForm.difficulty")} className={looks.chips}>
+                {complexities.map((c) => (
+                  <Toggle key={c} pressed={difficulties.has(c)} onClick={() => setDifficulties(toggled(difficulties, c))}>
+                    {t(`complexity.${c}`)}
+                  </Toggle>
+                ))}
+              </div>
+              {deckTags.length > 0 && (
+                <div role="group" aria-label={t("common.tags")} className={looks.chips}>
+                  {deckTags.map((tag) => (
+                    <Toggle key={tag} pressed={tags.has(tag)} onClick={() => setTags(toggled(tags, tag))}>
+                      {tag}
                     </Toggle>
                   ))}
                 </div>
-                {deckTags.length > 0 && (
-                  <div role="group" aria-label={t("common.tags")} className={looks.chips}>
-                    {deckTags.map((tag) => (
-                      <Toggle key={tag} pressed={tags.has(tag)} onClick={() => setTags(toggled(tags, tag))}>
-                        {tag}
-                      </Toggle>
-                    ))}
-                  </div>
-                )}
-                {(difficulties.size > 0 || tags.size > 0) && (
-                  <Button
-                    variant="ghost"
-                    className="-ml-3 self-start"
-                    onClick={() => {
-                      setDifficulties(new Set());
-                      setTags(new Set());
-                    }}
-                  >
-                    {t("deck.clearFilters")}
-                  </Button>
-                )}
-              </div>
-            </Fold>
+              )}
+            </FilterFold>
             {shown.length > 0 && (
               <Button variant="ghost" className="shrink-0" onClick={() => setOpened(allOpen ? new Set() : new Set(shown.map((card) => card.id)))}>
                 {allOpen ? t("deck.foldAll") : t("deck.openAll")}

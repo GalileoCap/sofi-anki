@@ -1,12 +1,15 @@
 import { useState } from "react";
 
 import { Markdown } from "@/components/markdown";
+import { LanguageSwitch, ThemeSwitch } from "@/components/preferences";
 import { DeckRow } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import { type Arrival, receiveDeck, unknownCards } from "@/core/decks";
 import type { Deck, Store } from "@/core/model";
+import { kindWords } from "@/lib/sticker-looks";
 import { looks } from "@/lib/ui-looks";
+import { cn } from "@/lib/utils";
 import { SharedMergeDialog } from "@/pages/shared-merge-dialog";
 
 type SharedDeckPageProps = {
@@ -33,14 +36,25 @@ export function SharedDeckPage({ deck, store, update, onGoHome }: SharedDeckPage
 
   return (
     <div className={looks.narrow}>
-      <p className={looks.topbar}>{t("shared.label")}</p>
-      <DeckRow deck={deck} meta={meta} head />
+      <div className={cn(looks.topbar, "justify-end")}>
+        <LanguageSwitch />
+        <ThemeSwitch />
+      </div>
+      <div className={looks.tight}>
+        <p className={looks.muted}>{t("shared.label")}</p>
+        <DeckRow deck={deck} meta={meta} head />
+      </div>
       <div>
         <h2 className={looks.sectionTitle}>{t("shared.cards")}</h2>
         <div className={looks.list}>
           {deck.cards.map((card) => (
             <div key={card.id} className={looks.listRow}>
-              <Markdown inline>{card.title}</Markdown>
+              <span className={looks.titled}>
+                <Markdown inline className="min-w-0">
+                  {card.title}
+                </Markdown>
+                <span className={looks.fine}>{[...kindWords(card, t), ...card.tags].join(", ")}</span>
+              </span>
             </div>
           ))}
         </div>

@@ -80,7 +80,14 @@ function ApkgBody({ onImport, onDone }: { onImport: (parsed: ParsedApkg) => void
 
       {state.kind === "parsed" ? (
         <div>
-          <p className={looks.muted}>{t("importApkg.found").replace("{file}", state.fileName)}</p>
+          <p className={looks.muted}>
+            {state.result.decks.length === 1
+              ? t("importApkg.found").replace("{file}", state.fileName)
+              : t("importApkg.foundAll")
+                  .replace("{file}", state.fileName)
+                  .replace("{n}", String(state.result.decks.reduce((sum, deck) => sum + deck.cards.length, 0)))
+                  .replace("{d}", String(state.result.decks.length))}
+          </p>
           <div className={looks.list}>
             {state.result.decks.map((deck) => (
               <div key={deck.id} className={looks.listRow}>

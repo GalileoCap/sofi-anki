@@ -3,17 +3,19 @@ import { useState } from "react";
 
 import { BackupDialog } from "@/components/backup-dialog";
 import { DeckForm } from "@/components/deck-form";
+import { FilterFold } from "@/components/filter-fold";
 import { ImportApkgDialog } from "@/components/import-apkg-dialog";
 import { ImportDeckDialog } from "@/components/import-dialog";
 import { LastStudied } from "@/components/last-studied";
-import { Chip, DayStickers, DeckRow, Key, Sheet, Spots } from "@/components/sticker";
+import { LanguageSwitch } from "@/components/preferences";
+import { Chip, DayStickers, DeckRow, Key, Sheet, Spots, Toggle } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/language-context";
 import { deckFromJson } from "@/core/deck-json";
-import { addDeck, matchingDecks, newDeck, receiveAnkiDecks } from "@/core/decks";
-import { type Deck, type Millis, type Store, following, langs } from "@/core/model";
+import { addDeck, matchingDecks, newDeck, receiveAnkiDecks, toggled } from "@/core/decks";
+import type { Deck, Millis, Store } from "@/core/model";
 import { type RunItem, dueItems } from "@/core/run";
 import { indexSchedules } from "@/core/scheduler";
 import { comingUp, deckRows, lastWeek, stickersOn, streak } from "@/core/stats";
@@ -30,9 +32,6 @@ const withDecks = (change: (decks: readonly Deck[]) => readonly Deck[]) => (stor
   decks: change(store.decks),
 });
 
-/** Past this many decks, home offers a search. */
-const SEARCH_FROM = 8;
-
 type HomeProps = {
   store: Store;
   update: Change;
@@ -47,17 +46,19 @@ type HomeProps = {
 
 /** Today: what is due, the day's sheet of stickers, one button to study it all, and the decks ranked by due. */
 export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStudy }: HomeProps) {
-  const { t, tp, lang, setLang } = useLanguage();
+  const { t, tp } = useLanguage();
   const { decks, runs } = store;
   const [dialog, setDialog] = useState<"newDeck" | "json" | "apkg" | "backup" | "goal" | null>(null);
   const [search, setSearch] = useState("");
+  const [tagFilter, setTagFilter] = useState<ReadonlySet<string>>(new Set());
+  const allTags = [...new Set(decks.flatMap((deck) => deck.tags))].sort((a, b) => a.localeCompare(b));
   const schedules = indexSchedules(store.schedules);
   const due = dueItems(
     deckRows(decks, runs, schedules, now).map((row) => row.deck),
     schedules,
     now,
   );
-  const rows = deckRows(matchingDecks(decks, search, new Set()), runs, schedules, now);
+  const rows = deckRows(matchingDecks(decks, search, tagFilter), runs, schedules, now);
   const dueDecks = new Set(due.map((item) => item.deckId)).size;
   const later = comingUp(decks, schedules, now);
   const goal = store.settings.dailyCardGoal;
@@ -102,9 +103,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
             {t("common.stats")}
           </Button>
         )}
-        <Button variant="ghost" lang={following(langs, lang)} onClick={() => setLang(following(langs, lang))}>
-          {t("language.other")}
-        </Button>
+        <LanguageSwitch />
         <HomeMenu onDialog={setDialog} />
       </div>
 
@@ -124,7 +123,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
               <p className={looks.muted}>{line}</p>
             )}
           </div>
-          {decks.length > 0 && <TodaySheet store={store} now={now} goal={goal} />}
+          {decks.length > 0 && <TodaySheet store={store} now={now} goal={goal} onGoal={() => setDialog("goal")} />}
           {due.length > 0 && (
             <Button size="lg" className="w-full" onClick={() => onStudy(due)}>
               {due.length === 1 ? t("home.studyOne") : t("home.study").replace("{n}", String(due.length))}
@@ -151,9 +150,19 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
                 </Button>,
               )}
             </div>
-            {decks.length > SEARCH_FROM && (
-              <Input placeholder={t("deckList.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input placeholder={t("deckList.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} />
+            {allTags.length > 0 && (
+              <FilterFold label={t("common.tags")} on={tagFilter.size} onClear={() => setTagFilter(new Set())}>
+                <div role="group" aria-label={t("common.tags")} className={looks.chips}>
+                  {allTags.map((tag) => (
+                    <Toggle key={tag} pressed={tagFilter.has(tag)} onClick={() => setTagFilter(toggled(tagFilter, tag))}>
+                      {tag}
+                    </Toggle>
+                  ))}
+                </div>
+              </FilterFold>
             )}
+            {rows.length === 0 && <p className={looks.muted}>{t("home.noMatch")}</p>}
             <div className={looks.column}>
               {rows.map(({ deck, due: count, lastRun }) => (
                 <DeckRow
@@ -164,6 +173,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
                     <>
                       {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")},{" "}
                       {kept === deck.title ? t("home.keptToday") : <LastStudied at={lastRun} now={now} />}
+                      {deck.tags.length > 0 && `, ${deck.tags.join(", ")}`}
                     </>
                   }
                   end={count > 0 && <Chip urgent>{count === 1 ? t("home.dueOne") : t("home.due").replace("{n}", String(count))}</Chip>}
@@ -177,17 +187,29 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
   );
 }
 
-/** Today's sheet: the goal as spots filled by the day's stickers, the last seven days, and the streak. */
-function TodaySheet({ store, now, goal }: { store: Store; now: Millis; goal: number }) {
+/** Today's sheet: the goal as spots filled by the day's stickers, the goal's figure changing it, the last seven days, and the streak. */
+function TodaySheet({ store, now, goal, onGoal }: { store: Store; now: Millis; goal: number; onGoal: () => void }) {
   const { t, tp, lang } = useLanguage();
   const stickers = stickersOn(store.runs, now);
   const met = goal > 0 && stickers.length >= goal;
   const days = streak(store.runs, now);
   const weekday = new Intl.DateTimeFormat(lang, { weekday: "narrow" });
+  const figure = goal > 0 ? t("home.ofGoal").replace("{n}", String(stickers.length)).replace("{goal}", String(goal)) : String(stickers.length);
   return (
     <Sheet
       label={t("home.sheet")}
-      value={goal > 0 ? t("home.ofGoal").replace("{n}", String(stickers.length)).replace("{goal}", String(goal)) : stickers.length}
+      value={
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-my-3 font-extrabold text-inherit"
+          aria-label={`${figure}, ${t("home.changeGoal")}`}
+          title={t("home.changeGoal")}
+          onClick={onGoal}
+        >
+          {figure}
+        </Button>
+      }
       met={met}
     >
       <Spots stickers={stickers} goal={goal} decks={store.decks} />

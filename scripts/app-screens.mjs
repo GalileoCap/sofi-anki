@@ -19,6 +19,13 @@ const startStudy = (page) => click(page, "button", /^Study \d+ cards?/);
 export const screens = [
   { name: "home", go: async () => {} },
   { name: "home, new deck", go: (page) => click(page, "button", /^New deck$/) },
+  {
+    name: "home, a tag picked",
+    go: async (page) => {
+      await page.locator("main summary").first().click();
+      await page.locator("main details button[aria-pressed]").first().click();
+    },
+  },
   { name: "home, daily goal", go: (page) => homeMenu(page, "Daily goal") },
   { name: "home, back up and restore", go: (page) => homeMenu(page, "Back up and restore") },
   { name: "home, bring in from Anki", go: (page) => homeMenu(page, "Bring in from Anki") },

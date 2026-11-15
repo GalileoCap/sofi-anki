@@ -56,12 +56,12 @@ Each screen is a commit, with `pnpm check` green, the audit walk clean, and the 
 
 ## Home, shared deck and imports
 
-- [ ] Home's tag filter (old `home.tsx:119-137`), and the deck search whenever there are decks (old `home.tsx:113-118`).
-- [ ] Each deck row on home names its tags (old `home.tsx:175-179`).
-- [ ] The daily goal changed in one step from the sheet (old `home.tsx:242-250`).
-- [ ] Theme and language reachable from a shared link's page as well as from home (old `page.tsx:11-14`).
-- [ ] The shared deck lists each card's difficulty, kind and tags (old `shared-deck.tsx:65-71`).
-- [ ] The Anki import names the total cards across its decks.
+- [x] Home's tag filter (old `home.tsx:119-137`), and the deck search whenever there are decks (old `home.tsx:113-118`). The tags sit folded under the search, as the deck page's filters do, through one `FilterFold`.
+- [x] Each deck row on home names its tags (old `home.tsx:175-179`).
+- [x] The daily goal changed in one step from the sheet (old `home.tsx:242-250`). The sheet's figure opens the goal's dialog, which More also keeps.
+- [x] Theme and language reachable from a shared link's page as well as from home (old `page.tsx:11-14`), as two buttons in its top bar.
+- [x] The shared deck lists each card's difficulty, kind and tags (old `shared-deck.tsx:65-71`).
+- [x] The Anki import names the total cards across its decks, when the file holds more than one.
 
 ## Also known and kept out
 
