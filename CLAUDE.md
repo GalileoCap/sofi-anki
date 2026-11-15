@@ -37,6 +37,10 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 
 Before calling a change done: `pnpm check`, the tests, and the flows it touches driven in the browser, saying which ran.
 
+## Branches
+
+Work happens on `dev`. A push to `main` deploys the site, so merging `dev` into `main` and pushing it is one action, taken only on the owner's word each time (owner, 2026-11-15).
+
 ## Stored data
 
 The deployed site holds people's real decks. Whatever the app stores (the `localStorage` keys `anki-decks`, `anki-runs`, `anki-srs`, `anki-settings`, `lang`, `anki-theme`), a backup file, a share link and an `.apkg` must keep reading as before. A change to what is stored reads the old shape, and its step is written in `OWED.md`.
