@@ -122,7 +122,7 @@ export type AnkiCollection = {
   readonly lastEase: ReadonlyMap<number, number>;
 };
 
-/** A card forgotten more than three times is hard; any other comes in as medium. */
+/** A card forgotten more than three times comes in hard, and any other comes in medium. */
 const complexityFromLapses = (lapses: number): Complexity => (lapses > 3 ? "hard" : "medium");
 
 const answerFromEase = (ease: number | undefined): AnswerResult | null =>
@@ -134,6 +134,13 @@ function dueAt(row: AnkiRow, created: number, importedAt: Millis): Millis {
   if (row.queue === 1 || row.queue === 3) return millis(row.due * 1000);
   return importedAt;
 }
+
+/**
+ * An answer template without the question it repeats: `{{FrontSide}}` and the rule Anki draws
+ * under it (`<hr id=answer>` in its own note types) go.
+ */
+const answerSide = (afmt: string): string =>
+  afmt.replace(/^\s*\{\{FrontSide\}\}\s*(<hr[^>]*>)?/i, "").replace(/\{\{FrontSide\}\}/gi, "");
 
 /** The title an Anki deck gets when the collection does not name it. */
 export const UNNAMED_DECK = "Imported Deck";
@@ -158,7 +165,7 @@ export function decksFromCollection(
     const fields = Object.fromEntries(type.fields.map((name, i) => [name, values[i] ?? ""]));
     const front = toMarkdown(renderTemplate(template.qfmt, fields));
     if (!front) continue;
-    const back = toMarkdown(renderTemplate(template.afmt.replace(/\{\{FrontSide\}\}/gi, ""), fields));
+    const back = toMarkdown(renderTemplate(answerSide(template.afmt), fields));
     const card: StandardCard = {
       id: `apkg-${row.noteId}-${row.ord}`,
       type: "standard",

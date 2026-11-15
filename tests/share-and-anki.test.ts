@@ -60,12 +60,26 @@ describe("O4, a deck made in Anki can be studied", () => {
         title: "Spanish",
         tags: [],
         createdAt: 9_000,
-        cards: [{ id: "apkg-1-0", type: "standard", title: "Q", response: "<hr>A", complexity: "hard", tags: ["a", "b"] }],
+        cards: [{ id: "apkg-1-0", type: "standard", title: "Q", response: "A", complexity: "hard", tags: ["a", "b"] }],
       },
     ]);
     expect(schedules).toEqual([
       { cardId: "apkg-1-0", deckId: "apkg-5-9000", intervalDays: 4, easeFactor: 2.6, dueAt: (1_000 + 3 * 86_400) * 1000, lastResult: "approximate" },
     ]);
+  });
+
+  test("an answer leaves out the question and the rule Anki draws under it", () => {
+    const basic = JSON.stringify({
+      "10": { id: 10, type: 0, flds: [{ name: "Front", ord: 0 }, { name: "Back", ord: 1 }], tmpls: [{ ord: 0, qfmt: "{{Front}}", afmt: "{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}" }] },
+    });
+    const collection: AnkiCollection = {
+      created: 1_000,
+      noteTypes: noteTypesFromJson(basic)._unsafeUnwrap(),
+      deckNames: new Map(),
+      rows: [row],
+      lastEase: new Map(),
+    };
+    expect(decksFromCollection(collection, millis(9_000), (html) => html.trim()).decks[0].cards[0]).toMatchObject({ title: "Q", response: "A" });
   });
 
   test("a template's conditionals and substitutions fill from the fields", () => {
