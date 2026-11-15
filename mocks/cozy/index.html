@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sofi-anki · cozy restyle mocks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700;800&family=Quicksand:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="variants.css">
+<style>
+  /* The mock's own chrome, kept plain so the variants are what you look at. */
+  body { margin: 0; background: #ececea; color: #222; font: 14px/1.4 system-ui, sans-serif; }
+  body.chrome-dark { background: #161616; color: #ddd; }
+  header.bar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 20px; background: inherit; border-bottom: 1px solid rgb(127 127 127 / 0.25); }
+  header.bar h1 { margin: 0 8px 0 0; font-size: 15px; }
+  .group { display: flex; gap: 4px; align-items: center; }
+  .group span { margin-right: 4px; opacity: 0.6; font-size: 12px; }
+  .group button { padding: 5px 10px; border: 1px solid rgb(127 127 127 / 0.35); border-radius: 7px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+  .group button.on { background: #222; color: #fff; border-color: #222; }
+  body.chrome-dark .group button.on { background: #eee; color: #111; border-color: #eee; }
+  .about { max-width: 1100px; padding: 16px 20px 0; }
+  .about h2 { margin: 0 0 4px; font-size: 20px; }
+  .about p { margin: 4px 0; max-width: 80ch; }
+  .swatches { display: flex; gap: 6px; margin: 8px 0; }
+  .swatches i { width: 26px; height: 26px; border-radius: 6px; border: 1px solid rgb(127 127 127 / 0.3); }
+  .stage { display: flex; gap: 24px; overflow-x: auto; padding: 18px 20px 40px; align-items: flex-start; }
+  .frame { flex: none; width: 410px; }
+  .frame-label { margin: 0 0 8px 4px; font-weight: 600; font-size: 13px; opacity: 0.75; }
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1>Cozy restyle · mocks</h1>
+  <div class="group" id="mode"><span>View</span></div>
+  <div class="group" id="variant"><span>Variant</span></div>
+  <div class="group" id="screen"><span>Screen</span></div>
+  <div class="group" id="theme"><span>Theme</span></div>
+</header>
+<section class="about" id="about"></section>
+<main class="stage" id="stage"></main>
+
+<script>
+const VARIANTS = [
+  {
+    id: "cocoa", name: "A · Cocoa & Cream",
+    mood: "A café table on a rainy afternoon. Warm paper, cocoa ink, a terracotta accent and a bookish serif for headings. The calmest of the four, and the closest to a grown-up app.",
+    fonts: "Fraunces (headings, cards) · Nunito (text)",
+    swatches: ["#f7efe3", "#fffaf2", "#4a3426", "#c8754f", "#dcab7d", "#557d43"],
+  },
+  {
+    id: "mochi", name: "B · Pastel Mochi",
+    mood: "The cutest. Strawberry-milk pink, very round corners, chunky buttons that squish down when pressed, polka-dot covers and emoji faces on the grade buttons. Loud for a long session, joyful for a short one.",
+    fonts: "Fredoka (everything)",
+    swatches: ["#fff4f7", "#ffffff", "#5b4a6b", "#ff8fb1", "#ffd1e0", "#2f9a78"],
+  },
+  {
+    id: "notebook", name: "C · Matcha Notebook",
+    mood: "A study desk. Graph paper behind everything, washi tape holding the cards down, the study card as a ruled index card, hand-written headings in Caveat. Dark mode becomes a chalkboard.",
+    fonts: "Caveat (headings) · Nunito (text, cards)",
+    swatches: ["#f4f2e6", "#fffef8", "#34402f", "#7da35a", "#f0be78", "#e58f86"],
+  },
+  {
+    id: "lamp", name: "D · Lamplight",
+    mood: "Late-night studying under a desk lamp. Made for dark mode: deep indigo, a warm amber glow, faint stars. The light mode is a dusk lavender. Grades are clouds, half-moons and stars.",
+    fonts: "Quicksand (everything)",
+    swatches: ["#1b1830", "#252141", "#ece8ff", "#f5c46b", "#6a5aa8", "#f3f0fa"],
+  },
+];
+const SCREENS = [
+  { id: "home", name: "Home" },
+  { id: "deck", name: "Deck" },
+  { id: "study", name: "Study" },
+  { id: "stats", name: "Stats" },
+];
+
+const DECKS = [
+  { e: "🌮", t: "Spanish Verbs", c: "#fda4af", n: 42, tags: ["language"], last: "Today", acc: 86 },
+  { e: "🧬", t: "Cell Biology", c: "#86efac", n: 31, tags: ["science"], last: "Yesterday", acc: 74 },
+  { e: "🗺️", t: "World Capitals", c: "#7dd3fc", n: 120, tags: ["geography"], last: "3 days ago", acc: 91 },
+  { e: "🎵", t: "Music Theory", c: "#c4b5fd", n: 18, tags: ["music"], last: "2 weeks ago", acc: 58 },
+  { e: "🍙", t: "Japanese Kana", c: "#f9a8d4", n: 92, tags: ["language"], last: "Today", acc: 81 },
+  { e: "⚗️", t: "Organic Chem", c: "#fcd34d", n: 25, tags: ["science"], last: "5 days ago", acc: 63 },
+];
+const CARDS = [
+  ["escribir: past participle", "hard", "Due today", true],
+  ["ser or estar: «la fiesta ___ en mi casa»", "medium", "Due today", true],
+  ["ir: preterite, yo", "medium", "Weak", false],
+  ["tener: present, nosotros", "easy", "In 4 days", false],
+  ["decir: past participle", "hard", "New", false],
+  ["poder: preterite, ellos", "medium", "In 12 days", false],
+  ["hacer: imperative, tú", "easy", "In 3 weeks", false],
+];
+
+function heatmap() {
+  const cells = [];
+  for (let i = 0; i < 126; i++) {
+    if (i > 121) { cells.push('<i data-l="x"></i>'); continue; }
+    const r = Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1;
+    const recent = i / 126;
+    const l = r < 0.35 - recent * 0.25 ? 0 : Math.min(4, Math.floor(r * 3 + recent * 2));
+    cells.push(`<i data-l="${l}"></i>`);
+  }
+  return `<div class="heat-wrap"><div class="heat-days"><span></span><span>M</span><span></span><span>W</span><span></span><span>F</span><span></span></div><div class="heat">${cells.join("")}</div></div>`;
+}
+
+const topbar = `<header class="topbar"><div class="brand">sofi</div><div class="toggles"><button class="icon-btn">ES</button><button class="icon-btn">◐</button></div></header>`;
+
+function home() {
+  const decks = DECKS.map((d) => `
+    <div class="panel deck tape" style="--c:${d.c}">
+      <div class="deck-cover">${d.e}</div>
+      <div class="deck-body">
+        <div class="deck-title">${d.t}</div>
+        <div class="chips"><span class="badge">${d.n} cards</span>${d.tags.map((t) => `<span class="badge outline">${t}</span>`).join("")}</div>
+      </div>
+    </div>`).join("");
+  return `<div class="screen">${topbar}
+    <div class="head-row"><h1 class="title">Your Decks</h1>
+      <div class="row"><button class="btn ghost">Stats</button><button class="btn primary">+ New Deck</button><button class="icon-btn">⋯</button></div></div>
+    <section class="panel tape" style="display:flex;flex-direction:column;gap:12px">
+      <div class="spread"><div class="streak"><span class="streak-icon"></span><b>6</b> days in a row</div><div class="muted"><b style="color:var(--ink)">23</b> / 30 today ✎</div></div>
+      <div class="goal"><div class="goal-fill" style="width:77%"></div></div>
+      ${heatmap()}
+    </section>
+    <input class="search" placeholder="Search decks and cards…">
+    <div class="chips"><button class="chip on">language</button><button class="chip">science</button><button class="chip">geography</button><button class="chip">music</button></div>
+    <div class="deck-grid">${decks}</div>
+  </div>`;
+}
+
+function deck() {
+  const rows = CARDS.map(([q, cx, when, due]) => `
+    <div class="list-row"><span class="q">${q}</span><span class="badge ${cx}">${cx[0].toUpperCase() + cx.slice(1)}</span><span class="when ${due ? "due" : ""}">${when}</span></div>`).join("");
+  return `<div class="screen" style="--c:#fda4af">${topbar}
+    <button class="back">← Back</button>
+    <div class="hero"><div class="hero-cover">🌮</div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px"><h1 class="title">Spanish Verbs</h1>
+        <div class="chips"><span class="badge">42 cards</span><span class="badge outline">language</span></div></div>
+      <button class="btn soft">Edit</button></div>
+    <section class="panel tape" style="display:flex;flex-direction:column;gap:12px">
+      <div class="spread"><h2 class="sub">Study</h2><span class="fine">≈ 9 min</span></div>
+      <div class="seg"><button class="on"><b>12</b>Due</button><button><b>5</b>Weak</button><button><b>8</b>New</button><button><b>42</b>All</button></div>
+      <button class="btn primary big">Start · 12 cards</button>
+      <div class="spread"><span class="muted">Last studied today · 86% right</span><button class="btn ghost" style="padding:4px 8px;font-size:13px">Stats →</button></div>
+    </section>
+    <section style="display:flex;flex-direction:column;gap:10px">
+      <div class="spread"><h2 class="sub">Cards</h2><div class="row"><button class="btn soft" style="padding:6px 12px;font-size:13px">+ Add card</button><button class="icon-btn">⋯</button></div></div>
+      <input class="search" placeholder="Search cards…">
+      <div class="panel list" style="padding:4px 14px">${rows}</div>
+    </section>
+  </div>`;
+}
+
+function study() {
+  return `<div class="screen">
+    <div class="spread"><button class="btn ghost" style="padding:6px 8px">✕ Exit</button>
+      <div class="row"><button class="btn ghost" style="padding:6px 8px">↶ Undo</button><button class="btn soft" style="padding:6px 12px">Pause</button></div></div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="spread"><span class="muted"><b style="color:var(--ink)">7</b> of 12 · Spanish Verbs</span><span class="fine">≈ 4 min left</span></div>
+      <div class="progress"><div style="width:52%"></div></div>
+    </div>
+    <article class="panel study-card tape">
+      <div class="chips"><span class="badge">Standard</span><span class="badge hard">Hard</span></div>
+      <div class="question">What is the past participle of <em>escribir</em>?</div>
+      <div class="hint">💡 It is irregular: it drops the <b>-ib-</b>.</div>
+      <div class="divider"></div>
+      <div class="answer">escrito</div>
+      <div class="muted">«He escrito una carta.»: I have written a letter.</div>
+    </article>
+    <div class="grades">
+      <button class="grade wrong">Wrong <kbd>1</kbd></button>
+      <button class="grade approx">Almost <kbd>2</kbd></button>
+      <button class="grade correct">Correct <kbd>3</kbd></button>
+    </div>
+    <div class="spread"><label class="check"><i>✓</i>Again later in this run</label>
+      <div class="row"><button class="btn ghost" style="padding:4px 8px;font-size:13px">Skip</button><button class="btn ghost" style="padding:4px 8px;font-size:13px">Postpone</button></div></div>
+    <div class="counts"><span><b>6</b> done</span><span><b>1</b> again later</span><span><b>5</b> to go</span></div>
+  </div>`;
+}
+
+function stats() {
+  const pts = [62, 66, 64, 71, 69, 75, 78, 74, 80, 83, 81, 86];
+  const W = 340, H = 110, step = W / (pts.length - 1);
+  const xy = pts.map((p, i) => [i * step, H - ((p - 50) / 50) * H]);
+  const line = xy.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const area = `0,${H} ${line} ${W},${H}`;
+  const decks = DECKS.map((d) => `
+    <div class="deck-stat"><span style="font-size:18px">${d.e}</span><span>${d.t}<br><span class="fine">${d.last}</span></span>
+      <span class="${d.acc >= 80 ? "good" : "mid"}">${d.acc}%</span><div class="bar"><div style="width:${d.acc}%"></div></div></div>`).join("");
+  const tile = (v, l) => `<div class="panel tile"><div class="tile-v">${v}</div><div class="tile-l">${l}</div></div>`;
+  return `<div class="screen">${topbar}
+    <button class="back">← Back</button>
+    <h1 class="title">Stats</h1>
+    <div class="tiles">${tile("6", "Decks")}${tile("328", "Cards")}${tile("47", "Sessions")}${tile("11h 20m", "Time")}${tile("84%", "Right")}${tile("6 🔥", "Streak")}</div>
+    <section class="panel tape" style="display:flex;flex-direction:column;gap:10px"><h2 class="sub">Study activity</h2>${heatmap()}</section>
+    <section class="panel" style="display:flex;flex-direction:column;gap:10px"><div class="spread"><h2 class="sub">Accuracy trend</h2><span class="fine">last 12 sessions</span></div>
+      <svg viewBox="-6 -6 ${W + 12} ${H + 12}" width="100%">
+        <line class="trend-grid" x1="0" x2="${W}" y1="${H / 2}" y2="${H / 2}"/>
+        <polygon class="trend-area" points="${area}"/><polyline class="trend-line" points="${line}"/>
+        ${xy.map(([x, y]) => `<circle class="trend-dot" cx="${x}" cy="${y}" r="3.5"/>`).join("")}
+      </svg></section>
+    <section class="panel" style="padding:6px 16px"><div class="list">${decks}</div></section>
+  </div>`;
+}
+
+const RENDER = { home, deck, study, stats };
+
+const state = Object.assign({ mode: "variant", v: "cocoa", s: "home", dark: "0" }, Object.fromEntries(new URLSearchParams(location.hash.slice(1))));
+
+function frame(variant, screen, label) {
+  return `<div class="frame ${"v-" + variant}${state.dark === "1" ? " dark" : ""}"><div class="frame-label">${label}</div><div class="app">${RENDER[screen]()}</div></div>`;
+}
+
+function buttons(id, items, key) {
+  const el = document.getElementById(id);
+  el.querySelectorAll("button").forEach((b) => b.remove());
+  for (const [value, label] of items) {
+    const b = document.createElement("button");
+    b.textContent = label;
+    b.className = state[key] === value ? "on" : "";
+    b.onclick = () => { state[key] = value; render(); };
+    el.append(b);
+  }
+}
+
+function render() {
+  location.hash = new URLSearchParams(state).toString();
+  document.body.classList.toggle("chrome-dark", state.dark === "1");
+  buttons("mode", [["variant", "One variant, every screen"], ["compare", "One screen, every variant"]], "mode");
+  buttons("variant", VARIANTS.map((v) => [v.id, v.name.split(" · ")[0]]), "v");
+  buttons("screen", SCREENS.map((s) => [s.id, s.name]), "s");
+  buttons("theme", [["0", "Light"], ["1", "Dark"]], "dark");
+  document.getElementById("variant").style.display = state.mode === "variant" ? "" : "none";
+  document.getElementById("screen").style.display = state.mode === "compare" ? "" : "none";
+  const about = document.getElementById("about");
+  const stage = document.getElementById("stage");
+  if (state.mode === "variant") {
+    const v = VARIANTS.find((x) => x.id === state.v);
+    about.innerHTML = `<h2>${v.name}</h2><p>${v.mood}</p><p style="opacity:.7">${v.fonts}</p><div class="swatches">${v.swatches.map((c) => `<i style="background:${c}"></i>`).join("")}</div>`;
+    stage.innerHTML = SCREENS.map((s) => frame(v.id, s.id, s.name)).join("");
+  } else {
+    const s = SCREENS.find((x) => x.id === state.s);
+    about.innerHTML = `<h2>${s.name}, in every variant</h2><p>The same screen and the same data in each variant, side by side.</p>`;
+    stage.innerHTML = VARIANTS.map((v) => frame(v.id, s.id, v.name)).join("");
+  }
+}
+window.addEventListener("hashchange", () => {
+  Object.assign(state, Object.fromEntries(new URLSearchParams(location.hash.slice(1))));
+  render();
+});
+render();
+</script>
+</body>
+</html>
