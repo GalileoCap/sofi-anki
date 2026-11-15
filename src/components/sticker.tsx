@@ -156,7 +156,7 @@ export function DeckRow({ deck, meta, end, onOpen, head }: DeckRowProps) {
     <>
       <EmojiSticker deck={deck} large={head} />
       <span className="flex min-w-0 flex-col leading-snug">
-        <span className={head ? "text-lg font-extrabold" : "truncate text-sm font-bold"}>{deck.title}</span>
+        {head ? <h1 className="text-lg font-extrabold">{deck.title}</h1> : <span className="truncate text-sm font-bold">{deck.title}</span>}
         <span className={looks.fine}>{meta}</span>
       </span>
       {end}

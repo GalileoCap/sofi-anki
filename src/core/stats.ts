@@ -1,16 +1,14 @@
 import {
   type Card,
   type CardDisposition,
-  type CardRunResult,
   type CardSchedule,
-  type Complexity,
   DAY_MS,
   type Deck,
   type Millis,
   type RunRecord,
   millis,
 } from "@/core/model";
-import { NEW_SPACING, type Schedules, dueCards, dueTime, isAnswer, lastAnswer, nextSpacing, scheduleKey } from "@/core/scheduler";
+import { type Schedules, dueCards, dueTime, isAnswer, lastAnswer, scheduleKey } from "@/core/scheduler";
 
 /** A calendar day in the browser's time zone, as `YYYY-MM-DD`. */
 export type DayKey = string;
@@ -36,47 +34,6 @@ export function streak(runs: readonly RunRecord[], now: Millis): number {
   return count;
 }
 
-/** Cards studied on each day that has a run. */
-export function cardsByDay(runs: readonly RunRecord[]): Map<DayKey, number> {
-  const out = new Map<DayKey, number>();
-  for (const run of runs) {
-    const key = dayKey(run.completedAt);
-    out.set(key, (out.get(key) ?? 0) + run.results.length);
-  }
-  return out;
-}
-
-/** Cards studied today. */
-export const cardsToday = (runs: readonly RunRecord[], now: Millis): number =>
-  cardsByDay(runs).get(dayKey(now)) ?? 0;
-
-/**
- * The heatmap's weeks: the last `days` days to today, starting on a Monday, as columns of
- * up to seven days from Monday.
- */
-export function heatmapWeeks(now: Millis, days: number): Date[][] {
-  const today = new Date(now);
-  const first = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (days - 1));
-  const fromMonday = (first.getDay() + 6) % 7;
-  const weeks: Date[][] = [];
-  for (
-    let d = new Date(first.getFullYear(), first.getMonth(), first.getDate() - fromMonday);
-    d <= today;
-    d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)
-  ) {
-    if (d.getDay() === 1 || weeks.length === 0) weeks.push([]);
-    weeks[weeks.length - 1].push(d);
-  }
-  return weeks;
-}
-
-/** Percent of answers that were correct, rounded, or null when nothing was answered. */
-export function accuracy(runs: readonly RunRecord[]): number | null {
-  const answers = runs.flatMap((run) => run.results.flatMap((r) => r.attempts)).filter((a) => isAnswer(a.result));
-  if (answers.length === 0) return null;
-  return Math.round((answers.filter((a) => a.result === "correct").length / answers.length) * 100);
-}
-
 export type DispositionCounts = Record<CardDisposition, number>;
 
 /** How each card of a run went the first time it came up. */
@@ -92,102 +49,11 @@ export function firstTries(run: RunRecord): DispositionCounts {
 export const newestFirst = (runs: readonly RunRecord[]): RunRecord[] =>
   [...runs].sort((a, b) => b.completedAt - a.completedAt);
 
-export type Timing = { readonly average: number; readonly fastest: number; readonly slowest: number; readonly perCard: number };
-
-/** Run lengths and the mean time an attempt took, or null with no runs. */
-export function timing(runs: readonly RunRecord[]): Timing | null {
-  if (runs.length === 0) return null;
-  const times = runs.map((run) => run.totalTimeMs);
-  const attempts = runs.flatMap((run) => run.results.flatMap((r) => r.attempts));
-  return {
-    average: times.reduce((a, b) => a + b, 0) / times.length,
-    fastest: Math.min(...times),
-    slowest: Math.max(...times),
-    perCard: attempts.length > 0 ? attempts.reduce((sum, a) => sum + a.durationMs, 0) / attempts.length : 0,
-  };
-}
-
-export type CardStat = {
-  readonly cardId: string;
-  readonly title: string;
-  readonly complexity: Complexity;
-  readonly timesStudied: number;
-  readonly correct: number;
-  readonly approximate: number;
-  readonly wrong: number;
-  /** Percent correct of the answers, or null when never answered. */
-  readonly accuracy: number | null;
-  /** Mean time spent on the card in a run. */
-  readonly averageMs: number;
-  readonly schedule: CardSchedule | undefined;
-};
-
-/**
- * One row per card of the deck, and per card studied in a run and since removed, with what
- * the deck's runs say of it, in the order of `statRank`. `schedules` is the deck's, by card id.
- */
-export function cardStats(deck: Deck, runs: readonly RunRecord[], schedules: ReadonlyMap<string, CardSchedule>): CardStat[] {
-  const seen = new Map<string, { card: CardRunResult["card"]; results: CardRunResult[] }>();
-  for (const card of deck.cards) seen.set(card.id, { card, results: [] });
-  for (const run of runs) {
-    for (const result of run.results) {
-      const entry = seen.get(result.card.id) ?? { card: result.card, results: [] };
-      seen.set(result.card.id, { ...entry, results: [...entry.results, result] });
-    }
-  }
-  const rows = [...seen.values()].map(({ card, results }): CardStat => {
-    const attempts = results.flatMap((r) => r.attempts);
-    const count = (kind: CardDisposition) => attempts.filter((a) => a.result === kind).length;
-    const answered = attempts.filter((a) => isAnswer(a.result)).length;
-    const times = results.map((r) => r.attempts.reduce((sum, a) => sum + a.durationMs, 0));
-    return {
-      cardId: card.id,
-      title: card.title,
-      complexity: card.complexity,
-      timesStudied: results.length,
-      correct: count("correct"),
-      approximate: count("approximate"),
-      wrong: count("wrong"),
-      accuracy: answered > 0 ? Math.round((count("correct") / answered) * 100) : null,
-      averageMs: times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0,
-      schedule: schedules.get(card.id),
-    };
-  });
-  return rows.sort((a, b) => statRank(a) - statRank(b));
-}
-
-/** Cards never studied first, then those studied and never answered, then by accuracy, lowest first. */
-const statRank = (stat: CardStat): number =>
-  stat.timesStudied === 0 ? -2 : stat.accuracy === null ? -1 : stat.accuracy;
-
 /** The time spent over `runs` and the cards they went through. */
 export const totals = (runs: readonly RunRecord[]): { timeMs: number; cards: number } => ({
   timeMs: runs.reduce((sum, run) => sum + run.totalTimeMs, 0),
   cards: runs.reduce((sum, run) => sum + run.results.length, 0),
 });
-
-export type TimelineEntry = { readonly at: Millis; readonly result: CardDisposition; readonly intervalAfter: number };
-
-/** Each run that reached a card, oldest first, with the interval the scheduler gave after it. */
-export function cardTimeline(cardId: string, runs: readonly RunRecord[]): TimelineEntry[] {
-  const entries = runs
-    .flatMap((run) =>
-      run.results
-        .filter((result) => result.card.id === cardId)
-        .map((result) => ({ at: run.completedAt, result: lastAnswer(result.attempts) ?? result.attempts[0]?.result ?? "skip" })),
-    )
-    .sort((a, b) => a.at - b.at);
-  let spacing = NEW_SPACING;
-  let answeredAt: Millis | null = null;
-  return entries.map((entry) => {
-    if (isAnswer(entry.result)) {
-      const daysSince = answeredAt === null ? Infinity : (entry.at - answeredAt) / DAY_MS;
-      spacing = nextSpacing(spacing, entry.result, daysSince);
-      answeredAt = entry.at;
-    }
-    return { ...entry, intervalAfter: spacing.intervalDays };
-  });
-}
 
 export type CardPerformance = {
   /** Runs in which the card was answered. */
@@ -241,7 +107,8 @@ export type DeckRow = {
   readonly deck: Deck;
   readonly runs: number;
   readonly lastRun: Millis | null;
-  readonly accuracy: number | null;
+  /** Percent right on the first try, or null when nothing was answered. */
+  readonly firstRight: number | null;
   readonly due: number;
 };
 
@@ -253,7 +120,7 @@ export function deckRows(decks: readonly Deck[], runs: readonly RunRecord[], sch
       deck,
       runs: own.length,
       lastRun: own.length > 0 ? newestFirst(own)[0].completedAt : null,
-      accuracy: accuracy(own),
+      firstRight: firstTryRight(own),
       due: dueCards(deck, schedules, now).length,
     };
   });
@@ -296,6 +163,27 @@ export const stickersOn = (runs: readonly RunRecord[], moment: Millis): string[]
     .filter((run) => dayKey(run.completedAt) === dayKey(moment))
     .sort((a, b) => a.completedAt - b.completedAt)
     .flatMap((run) => run.results.map(() => run.deckId));
+
+/** Percent of the cards answered on their first try that were right, rounded, or null when none was answered. */
+export function firstTryRight(runs: readonly RunRecord[]): number | null {
+  const firsts = runs.flatMap((run) => run.results.flatMap((result) => result.attempts[0]?.result ?? [])).filter(isAnswer);
+  if (firsts.length === 0) return null;
+  return Math.round((firsts.filter((result) => result === "correct").length / firsts.length) * 100);
+}
+
+/** `rows` with the deck that most needs study first: the fewest right the first time, then decks never answered. */
+export const neediestFirst = (rows: readonly DeckRow[]): DeckRow[] =>
+  [...rows].sort((a, b) => (a.firstRight ?? Infinity) - (b.firstRight ?? Infinity));
+
+/** Each day of the month of `now`, from the first, with the decks studied on it, each deck once. */
+export function monthDays(runs: readonly RunRecord[], now: Millis): { day: Date; decks: string[] }[] {
+  const today = new Date(now);
+  const length = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  return Array.from({ length }, (_, i) => {
+    const day = new Date(today.getFullYear(), today.getMonth(), i + 1);
+    return { day, decks: [...new Set(stickersOn(runs, millis(day.getTime())))] };
+  });
+}
 
 /** The last seven days to today, each with the decks studied on it, each deck once. */
 export function lastWeek(runs: readonly RunRecord[], now: Millis): { day: Date; decks: string[] }[] {

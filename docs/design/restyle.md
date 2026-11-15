@@ -30,3 +30,5 @@ The owner approved the mock, which leaves these out of the screens. Each is reco
 - The theme and language toggles move to home's More menu.
 - The daily goal is changed from home's More menu.
 - The confetti goes. The sheet filling is the feedback for the daily goal.
+- Stats measure accuracy as right on the first try, as the run's end does, and rank the decks by it, the lowest first. The stat tiles (decks, cards, sessions, total time) go (`data-2`).
+- A deck's stats are its line of runs, average time and first tries, its month, its chart, and its runs, each opening to its cards' tries. Each card's accuracy, time and interval history go, since the deck page's table shows each card's last grade, how often it was right and when it comes back.
