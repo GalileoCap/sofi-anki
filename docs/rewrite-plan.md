@@ -31,8 +31,10 @@ Kept: the restore regression (`A3`), the decoding of every stored shape the hist
 3. Effects and hooks.
 4. Pages and components rebuilt on them, one screen at a time, with the looks file. The old `src/lib`, `src/hooks` and `src/components` files go as each screen moves.
 5. The layers gate, looks at zero, tells and lengths at zero, build without warnings (code-split the `.apkg` import).
-6. Every flow driven in the browser against data written by the old version.
+6. Every flow driven in the browser against data written by the old version. Done 2026-11-15: the old app (76f454b) ran a study run and wrote a backup, a deck JSON, a share link and an `.apkg`, then the new code was served on the same origin. It opened the old store without writing to it, studied on it, restored the old backup by merge and by replace to the same content, restored its own backup, opened the old share link and overwrote with it keeping the schedules, and imported the old JSON (as a deck and as cards) and the old `.apkg`. Nothing broke.
 
 ## Later
 
 - A card answered before it is due grows its interval as if it came up on time, so a deck studied every day with All Cards pushes a card out by years (the seed's `typeof null` card reaches 5142 days after twelve correct answers in twelve days). `O3` (cards come back around when they would be forgotten) wants an early answer to count for less, and an interval with a ceiling. The first version did the same.
+- A share link pasted into a tab that already has the app open changes only the hash, and the app reads the link at load, so nothing happens until a reload. The first version did the same.
+- The study heatmap's weekday letters are English (`M`, `W`, `F`) in the Spanish interface too. The first version did the same.
