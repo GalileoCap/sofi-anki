@@ -1,6 +1,7 @@
 import type { Result } from "neverthrow";
 import { useState } from "react";
 
+import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
@@ -8,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/language-context";
 import type { DecodeError } from "@/core/decode";
 import { type DeckImport, type ImportCard, readCardsJson, readDeckJson } from "@/core/deck-json";
-import { copyText } from "@/effects/files";
 import { looks } from "@/lib/looks";
 import type { TranslationKey } from "@/lib/translations";
 
@@ -21,9 +21,6 @@ const decodeMessage: Record<DecodeError["kind"], TranslationKey> = {
   notJson: "importDialog.invalidJson",
   badShape: "importDialog.invalidFormat",
 };
-
-type Copy = "idle" | "copied" | "refused";
-const copyLabel: Record<Copy, TranslationKey> = { idle: "common.copy", copied: "common.copied", refused: "common.copyRefused" };
 
 type DialogProps<T> = {
   open: boolean;
@@ -44,7 +41,6 @@ function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description,
   const { t } = useLanguage();
   const [json, setJson] = useState("");
   const [error, setError] = useState<DecodeError | null>(null);
-  const [copy, setCopy] = useState<Copy>("idle");
 
   function changeOpen(next: boolean) {
     onOpenChange(next);
@@ -64,15 +60,6 @@ function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description,
     );
   }
 
-  /** The label says for two seconds whether the prompt was copied. */
-  function copyPrompt() {
-    void copyText(t(prompt)).match(
-      () => setCopy("copied"),
-      () => setCopy("refused"),
-    );
-    setTimeout(() => setCopy("idle"), 2000);
-  }
-
   return (
     <Dialog open={open} onOpenChange={changeOpen}>
       <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-2xl">
@@ -84,9 +71,7 @@ function JsonImportDialog<T>({ open, onOpenChange, onImport, title, description,
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">{t("importDialog.llmPromptTemplate")}</p>
-            <Button variant="outline" size="sm" onClick={copyPrompt}>
-              {t(copyLabel[copy])}
-            </Button>
+            <CopyButton text={t(prompt)} />
           </div>
           <pre className="max-h-36 overflow-auto rounded-lg bg-muted p-3 text-xs leading-relaxed whitespace-pre-wrap break-all">{t(prompt)}</pre>
         </div>

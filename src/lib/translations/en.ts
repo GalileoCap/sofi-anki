@@ -224,7 +224,6 @@ export const en = {
   // Export dialog
   "exportDialog.title": "Export & Share",
   "exportDialog.shareLink": "Share Link",
-  "exportDialog.computingLink": "Computing link…",
   "exportDialog.tooLarge": "Deck is too large to share via URL.",
   "exportDialog.deckData": "Deck Data",
   // Import dialog

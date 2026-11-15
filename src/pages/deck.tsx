@@ -327,27 +327,30 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
   );
 }
 
-type ShareState = "idle" | "copying" | "copied" | "tooLarge";
+type ShareState = "idle" | "copying" | "copied" | "tooLarge" | "refused";
 
-/** Copies a link that carries the deck and all its cards, or says the deck is too large for one. */
+/** How long the button says what happened before it reads as a share button again. */
+const SHARE_NOTICE_MS = 3000;
+
+/** Copies a link that carries the deck and all its cards, or says why it did not. */
 function ShareLinkButton({ deck }: { deck: Deck }) {
   const { t } = useLanguage();
   const [state, setState] = useState<ShareState>("idle");
 
   async function share() {
     const url = shareUrl(pageBase(), deck);
-    if (url === null) {
-      setState("tooLarge");
-      setTimeout(() => setState("idle"), 3000);
-      return;
-    }
-    setState("copying");
-    const copied = await copyText(url);
-    setState(copied.isOk() ? "copied" : "idle");
-    if (copied.isOk()) setTimeout(() => setState("idle"), 2000);
+    setState(url === null ? "tooLarge" : "copying");
+    if (url !== null) setState((await copyText(url)).isOk() ? "copied" : "refused");
+    setTimeout(() => setState("idle"), SHARE_NOTICE_MS);
   }
 
-  const label = { idle: "deckDetail.shareLink", copying: "deckDetail.shareLink", copied: "deckDetail.shareLinkCopied", tooLarge: "deckDetail.shareLinkTooLarge" } as const;
+  const label = {
+    idle: "deckDetail.shareLink",
+    copying: "deckDetail.shareLink",
+    copied: "deckDetail.shareLinkCopied",
+    tooLarge: "deckDetail.shareLinkTooLarge",
+    refused: "common.copyRefused",
+  } as const;
   return (
     <Button variant="outline" size="sm" disabled={state === "copying"} onClick={share}>
       {t(label[state])}

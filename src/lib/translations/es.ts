@@ -212,7 +212,6 @@ export const es: Translation = {
   "deckStats.approx": "Aprox",
   "exportDialog.title": "Exportar y compartir",
   "exportDialog.shareLink": "Enlace para compartir",
-  "exportDialog.computingLink": "Calculando enlace…",
   "exportDialog.tooLarge":
     "El mazo es demasiado grande para compartir por URL.",
   "exportDialog.deckData": "Datos del mazo",
