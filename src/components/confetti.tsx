@@ -1,49 +1,43 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-const COLORS = [
-  "#22c55e", "#3b82f6", "#f59e0b", "#ef4444", "#a855f7",
-  "#ec4899", "#14b8a6", "#f97316",
-];
+import { randoms } from "@/effects/clock";
 
-interface Particle {
-  id: number;
-  x: number;
-  color: string;
-  delay: number;
-  duration: number;
-  size: number;
-  drift: number;
-  round: boolean;
+const colors = ["#22c55e", "#3b82f6", "#f59e0b", "#ef4444", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
+
+const PIECES = 50;
+/** How long the confetti falls before it goes. */
+const SHOWN_MS = 3500;
+
+/** One piece of confetti, from seven numbers in [0, 1). */
+function piece([x, color, delay, duration, size, drift, round]: number[]) {
+  return {
+    x: x * 100,
+    color: colors[Math.floor(color * colors.length)],
+    delay: delay * 0.5,
+    duration: 1.5 + duration * 1.5,
+    size: 4 + size * 6,
+    drift: (drift - 0.5) * 60,
+    round: round > 0.5,
+  };
 }
 
+/** Confetti falling over its parent for a few seconds. */
 export function Confetti() {
-  const [particles] = useState<Particle[]>(() =>
-    Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      delay: Math.random() * 0.5,
-      duration: 1.5 + Math.random() * 1.5,
-      size: 4 + Math.random() * 6,
-      drift: (Math.random() - 0.5) * 60,
-      round: Math.random() > 0.5,
-    }))
-  );
-
-  const [visible, setVisible] = useState(true);
+  const [pieces] = useState(() => Array.from({ length: PIECES }, () => piece(randoms(7))));
+  const [falling, setFalling] = useState(true);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setVisible(false), 3500);
-    return () => clearTimeout(timeout);
+    const timer = setTimeout(() => setFalling(false), SHOWN_MS);
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!visible) return null;
+  if (!falling) return null;
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {particles.map((p) => (
+      {pieces.map((p, i) => (
         <div
-          key={p.id}
+          key={i}
           className="absolute animate-confetti-fall"
           style={{
             left: `${p.x}%`,

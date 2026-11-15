@@ -2,6 +2,7 @@ import type {
   AnswerResult,
   Card,
   CardAttempt,
+  CardDisposition,
   CardRunResult,
   ChoiceCard,
   Complexity,
@@ -10,8 +11,17 @@ import type {
   RunMode,
   RunRecord,
   SessionGoal,
+  Store,
 } from "@/core/model";
-import { type Schedules, dueCards, newCards, wasAnswered, weakCards } from "@/core/scheduler";
+import {
+  type Schedules,
+  dueCards,
+  indexSchedules,
+  newCards,
+  scheduleRun,
+  wasAnswered,
+  weakCards,
+} from "@/core/scheduler";
 
 /** `items` reordered by a Fisher-Yates shuffle driven by `randoms`, one number in [0, 1) per item. */
 export function shuffled<T>(items: readonly T[], randoms: readonly number[]): T[] {
@@ -155,6 +165,37 @@ export const answeredResults = (state: RunState): CardRunResult[] =>
 /** Whether the run has met its goal, given the time studied so far. */
 export const goalReached = (goal: SessionGoal, state: RunState, elapsedMs: number): boolean =>
   goal.type === "cards" ? state.completed >= goal.value : elapsedMs >= goal.value * 60_000;
+
+/** The store with `run` kept and the schedules of the cards it answered moved on. */
+export const withRun = (store: Store, run: RunRecord): Store => ({
+  ...store,
+  runs: [...store.runs, run],
+  schedules: [...scheduleRun(indexSchedules(store.schedules), run.deckId, run.results, run.completedAt).values()],
+});
+
+/** The cards behind, put off to later in the run, and still ahead. */
+export function progress(state: RunState): { done: number; redo: number; pending: number; total: number } {
+  const total = state.queue.length;
+  return { done: state.index, redo: state.redoLater.size, pending: total - state.index - state.redoLater.size, total };
+}
+
+/** The run's whole time at the pace so far, or null before any card is done. */
+export const estimatedTotal = (state: RunState, elapsedMs: number): number | null =>
+  state.completed === 0 ? null : elapsedMs + (elapsedMs / state.completed) * (state.queue.length - state.index);
+
+/** The results grouped by what was done with each card the first time. */
+export function byFirstTry(results: readonly CardRunResult[]): Map<CardDisposition, CardRunResult[]> {
+  const groups = new Map<CardDisposition, CardRunResult[]>();
+  for (const result of results) {
+    const first = result.attempts[0]?.result ?? "skip";
+    groups.set(first, [...(groups.get(first) ?? []), result]);
+  }
+  return groups;
+}
+
+/** Whether every card was right the first time. */
+export const isPerfect = (results: readonly CardRunResult[]): boolean =>
+  results.length > 0 && results.every((result) => result.attempts[0]?.result === "correct");
 
 /** What a run studies: the mode's cards of `deck`, kept to `complexities` when given. */
 export type RunChoice = { readonly mode: RunMode; readonly complexities: readonly Complexity[] | null };

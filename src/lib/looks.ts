@@ -13,4 +13,6 @@ export const looks = {
   /** An entry in a dropdown menu. */
   menuItem:
     "flex w-full cursor-pointer select-none items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
+  /** A card's hint, in amber. */
+  hint: "rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
 } as const;

@@ -169,6 +169,7 @@ const en_translations = {
   "studyCard.redoLater": "Redo Later",
   // Run start dialog
   "runStart.title": "Start Study Session",
+  "runStart.titleFor": "Start Run",
   "runStart.studyMode": "Study mode",
   "runStart.allCards": "All Cards",
   "runStart.shuffleCards": "Shuffle cards",
@@ -487,6 +488,7 @@ const translations: Record<Lang, Translation> = {
     "studyCard.howDidYouDo": "¿Cómo te fue?",
     "studyCard.redoLater": "Rehacer después",
     "runStart.title": "Iniciar sesión de estudio",
+    "runStart.titleFor": "Iniciar sesión",
     "runStart.studyMode": "Modo de estudio",
     "runStart.allCards": "Todas las cartas",
     "runStart.shuffleCards": "Mezclar cartas",

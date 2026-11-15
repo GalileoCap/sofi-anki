@@ -6,7 +6,7 @@ import { DeckForm } from "@/components/deck-form";
 import { ExportDialog } from "@/components/export-dialog";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { OverflowMenu } from "@/components/overflow-menu";
-import { RunStartDialog } from "@/components/run-start-dialog";
+import { RunStartDialog } from "@/pages/run-start-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardContent, Card as UiCard } from "@/components/ui/card";
@@ -45,7 +45,7 @@ type DeckPageProps = {
   /** When the screen opened, which due cards count from. */
   now: Millis;
   onBack: () => void;
-  onStudy: (choice: RunChoice, goal?: SessionGoal, shuffle?: boolean) => void;
+  onStudy: (choice: RunChoice, goal: SessionGoal | undefined, shuffle: boolean) => void;
   onStats: () => void;
 };
 
@@ -101,7 +101,7 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
     setExporting(false);
   }
 
-  const start = (mode: RunMode, goal?: SessionGoal, shuffle?: boolean) => onStudy({ mode, complexities: chosenComplexities }, goal, shuffle);
+  const start = (mode: RunMode, goal: SessionGoal | undefined, shuffle: boolean) => onStudy({ mode, complexities: chosenComplexities }, goal, shuffle);
 
   const editDeck = (trigger: ReactNode) => (
     <DeckForm
@@ -183,17 +183,15 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
       <RunStartDialog
         open={startDialog === "pick"}
         onOpenChange={(open) => setStartDialog(open ? "pick" : null)}
-        showModePicker
-        dueCount={counts.due}
-        weakCount={counts.weak}
-        newCount={counts.new}
+        mode={null}
+        counts={counts}
         onStart={start}
       />
       <RunStartDialog
         open={startDialog !== null && startDialog !== "pick"}
         onOpenChange={(open) => !open && setStartDialog(null)}
-        label={startDialog !== null && startDialog !== "pick" ? startDialog.label : ""}
-        mode={startDialog !== null && startDialog !== "pick" ? startDialog.mode : "all"}
+        mode={startDialog !== null && startDialog !== "pick" ? startDialog : { mode: "all", label: "" }}
+        counts={counts}
         onStart={start}
       />
 

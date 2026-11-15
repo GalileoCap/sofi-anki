@@ -4,25 +4,24 @@ import { DeckStats } from "@/components/deck-stats";
 import { GlobalStats } from "@/components/global-stats";
 import { Page } from "@/components/page";
 import { SharedDeckView } from "@/components/shared-deck-view";
-import { StudySession } from "@/components/study-session";
 import { useLanguage } from "@/contexts/language-context";
 import { receiveDeck } from "@/core/decks";
-import type { CardRunResult, Deck, SessionGoal, Store } from "@/core/model";
-import { type RunChoice, runCards } from "@/core/run";
-import { indexSchedules, scheduleRun } from "@/core/scheduler";
+import type { Card, Deck, SessionGoal, Store } from "@/core/model";
+import { runCards } from "@/core/run";
+import { indexSchedules } from "@/core/scheduler";
 import { decodeDeck, sharedPart } from "@/core/share";
-import { newId, now } from "@/effects/clock";
+import { now } from "@/effects/clock";
 import { clearHash, pageHash } from "@/effects/page";
 import { useStore } from "@/hooks/use-store";
-import { looks } from "@/lib/looks";
 import { DeckPage } from "@/pages/deck";
 import { Home } from "@/pages/home";
+import { StudyPage } from "@/pages/study";
 
 type View =
   | { kind: "home" }
   | { kind: "globalStats" }
   | { kind: "deck"; deckId: string }
-  | { kind: "study"; deckId: string; choice: RunChoice; goal?: SessionGoal; shuffle?: boolean }
+  | { kind: "study"; deckId: string; cards: readonly Card[]; goal?: SessionGoal; shuffle: boolean }
   | { kind: "stats"; deckId: string }
   | { kind: "shared"; deck: Deck };
 
@@ -48,16 +47,6 @@ export default function App({ initial }: { initial: Store }) {
   const { t } = useLanguage();
   const { decks, runs } = store;
   const schedules = indexSchedules(store.schedules);
-
-  function finishRun(deckId: string, totalTimeMs: number, results: CardRunResult[]) {
-    const at = now();
-    const run = { id: newId(), deckId, completedAt: at, totalTimeMs, results };
-    update((s) => ({
-      ...s,
-      runs: [...s.runs, run],
-      schedules: [...scheduleRun(indexSchedules(s.schedules), deckId, results, at).values()],
-    }));
-  }
 
   function goHome() {
     clearHash();
@@ -85,21 +74,19 @@ export default function App({ initial }: { initial: Store }) {
   }
 
   if (view.kind === "study" && deck) {
-    const studied = { ...deck, cards: runCards(deck, view.choice, schedules, runs, openedAt) };
-    if (studied.cards.length > 0) {
-      return (
-        <div className={looks.page}>
-          {banner}
-          <StudySession
-            deck={studied}
-            goal={view.goal}
-            shuffle={view.shuffle ?? false}
-            onExit={() => setView({ kind: "deck", deckId: deck.id })}
-            onRunComplete={(totalTimeMs, results) => finishRun(deck.id, totalTimeMs, results)}
-          />
-        </div>
-      );
-    }
+    return (
+      <>
+        {banner}
+        <StudyPage
+          deck={deck}
+          cards={view.cards}
+          goal={view.goal}
+          shuffle={view.shuffle}
+          update={update}
+          onExit={() => setView({ kind: "deck", deckId: deck.id })}
+        />
+      </>
+    );
   }
 
   if (view.kind === "globalStats") {
@@ -141,7 +128,10 @@ export default function App({ initial }: { initial: Store }) {
           update={update}
           now={openedAt}
           onBack={() => setView({ kind: "home" })}
-          onStudy={(choice, goal, shuffle) => setView({ kind: "study", deckId: deck.id, choice, goal, shuffle })}
+          onStudy={(choice, goal, shuffle) => {
+            const cards = runCards(deck, choice, schedules, runs, now());
+            if (cards.length > 0) setView({ kind: "study", deckId: deck.id, cards, goal, shuffle });
+          }}
           onStats={() => setView({ kind: "stats", deckId: deck.id })}
         />
       </Page>
