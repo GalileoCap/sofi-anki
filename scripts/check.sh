@@ -6,6 +6,8 @@ cd "$(dirname "$0")/.."
 tsc -b
 eslint . --max-warnings 0
 session-codeintel looks .
+# The prose and comments written here; shadcn's generated components are not.
+git ls-files -z '*.md' 'src/*.ts' 'src/*.tsx' ':!src/components/ui/' | xargs -0 session-tells check
 session-suppressions check
 session-docs check
 session-intent check
