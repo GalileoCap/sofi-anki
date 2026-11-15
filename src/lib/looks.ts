@@ -15,4 +15,12 @@ export const looks = {
     "flex w-full cursor-pointer select-none items-center rounded px-2 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
   /** A card's hint, in amber. */
   hint: "rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
+  /** Text that reads as good, as a warning, and as bad. */
+  positive: "text-green-700 dark:text-green-400",
+  caution: "text-yellow-700 dark:text-yellow-400",
+  negative: "text-red-700 dark:text-red-400",
 } as const;
+
+/** The look of an accuracy in percent. */
+export const accuracyLook = (percent: number): string =>
+  percent >= 80 ? looks.positive : percent >= 50 ? looks.caution : looks.negative;

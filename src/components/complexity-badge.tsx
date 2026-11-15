@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/language-context";
 import type { TranslationKey } from "@/lib/translations";
-import type { Complexity } from "@/types";
+import type { Complexity } from "@/core/model";
 
 const COMPLEXITY_STYLES: Record<Complexity, string> = {
   easy: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",

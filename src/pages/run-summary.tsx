@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { ComplexityBadge } from "@/components/complexity-badge";
 import { Confetti } from "@/components/confetti";
+import { DispositionBadge } from "@/components/disposition-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle, Card as UiCard } from "@/components/ui/card";
@@ -9,24 +10,17 @@ import { useLanguage } from "@/contexts/language-context";
 import type { CardAttempt, CardDisposition, CardRunResult } from "@/core/model";
 import { byFirstTry, isPerfect } from "@/core/run";
 import { clockFace, shortDuration } from "@/core/time";
+import { looks } from "@/lib/looks";
 import type { TranslationKey } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 
 const groups: { disposition: CardDisposition; label: TranslationKey; className: string }[] = [
-  { disposition: "correct", label: "common.correct", className: "text-green-700 dark:text-green-400" },
-  { disposition: "approximate", label: "common.approximate", className: "text-yellow-700 dark:text-yellow-400" },
-  { disposition: "wrong", label: "common.wrong", className: "text-red-700 dark:text-red-400" },
+  { disposition: "correct", label: "common.correct", className: looks.positive },
+  { disposition: "approximate", label: "common.approximate", className: looks.caution },
+  { disposition: "wrong", label: "common.wrong", className: looks.negative },
   { disposition: "skip", label: "common.skipped", className: "text-muted-foreground" },
   { disposition: "save_for_later", label: "runSummary.savedForLater", className: "text-muted-foreground" },
 ];
-
-const attemptLooks: Record<CardDisposition, { label: TranslationKey; className: string }> = {
-  correct: { label: "common.correct", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  approximate: { label: "common.approximate", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
-  wrong: { label: "common.wrong", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
-  skip: { label: "common.skipped", className: "bg-muted text-muted-foreground" },
-  save_for_later: { label: "common.saved", className: "bg-muted text-muted-foreground" },
-};
 
 type RunSummaryProps = {
   results: readonly CardRunResult[];
@@ -131,9 +125,7 @@ function ResultRow({ result }: { result: CardRunResult }) {
                 <div key={i} className="flex flex-col gap-1">
                   <div className="flex items-center gap-2 px-2 py-1 text-xs">
                     <span className="text-muted-foreground">#{i + 1}</span>
-                    <Badge variant="outline" className={cn("text-xs", attemptLooks[attempt.result].className)}>
-                      {t(attemptLooks[attempt.result].label)}
-                    </Badge>
+                    <DispositionBadge disposition={attempt.result} />
                     <span className="font-mono text-muted-foreground">{shortDuration(attempt.durationMs)}</span>
                   </div>
                   {card.type === "choice" && i > 0 && <Picked card={card} attempt={attempt} />}

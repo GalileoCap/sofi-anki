@@ -6,6 +6,12 @@ export function clockFace(ms: number): string {
   return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
+/** `ms` on a clock face under an hour, and in hours and minutes from an hour, `1h 5m`. */
+export function longClockFace(ms: number): string {
+  const minutes = Math.floor(ms / 60_000);
+  return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : clockFace(ms);
+}
+
 /** `ms` in words of units, `<1s`, `45s`, `2m 5s`, `3m`. */
 export function shortDuration(ms: number): string {
   if (ms < 1000) return "<1s";

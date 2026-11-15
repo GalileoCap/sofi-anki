@@ -122,8 +122,8 @@ export type CardStat = {
 };
 
 /**
- * One row per card of the deck, then per card studied in a run and since removed, with what
- * the deck's runs say of it.
+ * One row per card of the deck, and per card studied in a run and since removed, with what
+ * the deck's runs say of it, in the order of `statRank`. `schedules` is the deck's, by card id.
  */
 export function cardStats(deck: Deck, runs: readonly RunRecord[], schedules: ReadonlyMap<string, CardSchedule>): CardStat[] {
   const seen = new Map<string, { card: CardRunResult["card"]; results: CardRunResult[] }>();
@@ -134,7 +134,7 @@ export function cardStats(deck: Deck, runs: readonly RunRecord[], schedules: Rea
       seen.set(result.card.id, { ...entry, results: [...entry.results, result] });
     }
   }
-  return [...seen.values()].map(({ card, results }) => {
+  const rows = [...seen.values()].map(({ card, results }): CardStat => {
     const attempts = results.flatMap((r) => r.attempts);
     const count = (kind: CardDisposition) => attempts.filter((a) => a.result === kind).length;
     const answered = attempts.filter((a) => isAnswer(a.result)).length;
@@ -152,7 +152,18 @@ export function cardStats(deck: Deck, runs: readonly RunRecord[], schedules: Rea
       schedule: schedules.get(card.id),
     };
   });
+  return rows.sort((a, b) => statRank(a) - statRank(b));
 }
+
+/** Cards never studied first, then those studied and never answered, then by accuracy, lowest first. */
+const statRank = (stat: CardStat): number =>
+  stat.timesStudied === 0 ? -2 : stat.accuracy === null ? -1 : stat.accuracy;
+
+/** The time spent over `runs` and the cards they went through. */
+export const totals = (runs: readonly RunRecord[]): { timeMs: number; cards: number } => ({
+  timeMs: runs.reduce((sum, run) => sum + run.totalTimeMs, 0),
+  cards: runs.reduce((sum, run) => sum + run.results.length, 0),
+});
 
 export type TimelineEntry = { readonly at: Millis; readonly result: CardDisposition; readonly intervalAfter: number };
 

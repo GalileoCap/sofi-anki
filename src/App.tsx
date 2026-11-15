@@ -1,7 +1,5 @@
 import { useState } from "react";
 
-import { DeckStats } from "@/components/deck-stats";
-import { GlobalStats } from "@/components/global-stats";
 import { Page } from "@/components/page";
 import { SharedDeckView } from "@/components/shared-deck-view";
 import { useLanguage } from "@/contexts/language-context";
@@ -14,7 +12,9 @@ import { now } from "@/effects/clock";
 import { clearHash, pageHash } from "@/effects/page";
 import { useStore } from "@/hooks/use-store";
 import { DeckPage } from "@/pages/deck";
+import { DeckStatsPage } from "@/pages/deck-stats";
 import { Home } from "@/pages/home";
+import { StatsPage } from "@/pages/stats";
 import { StudyPage } from "@/pages/study";
 
 type View =
@@ -93,13 +93,7 @@ export default function App({ initial }: { initial: Store }) {
     return (
       <Page>
         {banner}
-        <GlobalStats
-          decks={[...decks]}
-          allRuns={[...runs]}
-          schedules={schedules}
-          onBack={goHome}
-          onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
-        />
+        <StatsPage store={store} now={openedAt} onBack={goHome} onOpenDeck={(id) => setView({ kind: "deck", deckId: id })} />
       </Page>
     );
   }
@@ -108,12 +102,7 @@ export default function App({ initial }: { initial: Store }) {
     return (
       <Page>
         {banner}
-        <DeckStats
-          deck={deck}
-          runs={runs.filter((run) => run.deckId === deck.id)}
-          schedules={schedules}
-          onBack={() => setView({ kind: "deck", deckId: deck.id })}
-        />
+        <DeckStatsPage deck={deck} store={store} now={openedAt} onBack={() => setView({ kind: "deck", deckId: deck.id })} />
       </Page>
     );
   }
