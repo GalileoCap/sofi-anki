@@ -9,14 +9,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type { CardSRS, Deck } from "@/types";
-import type { ParsedApkg } from "@/lib/apkg";
+import type { CardSchedule, Deck } from "@/core/model";
+import { now } from "@/effects/clock";
+import { readFileBytes } from "@/effects/files";
+
+type ParsedApkg = { decks: Deck[]; schedules: CardSchedule[] };
 
 interface ImportApkgDialogProps {
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onImport: (decks: Deck[], srs: CardSRS[]) => void;
+  onImport: (parsed: ParsedApkg) => void;
 }
 
 type State =
@@ -48,20 +51,19 @@ export function ImportApkgDialog({
 
   async function handleFile(file: File) {
     setState({ kind: "loading" });
-    try {
-      const { parseApkg } = await import("@/lib/apkg");
-      const result = await parseApkg(file);
-      if (result.decks.length === 0) {
-        setState({ kind: "error", message: t("importApkg.noCards") });
-        return;
-      }
-      setState({ kind: "parsed", result, fileName: file.name });
-    } catch (e) {
-      setState({
-        kind: "error",
-        message: e instanceof Error ? e.message : t("importApkg.parseFailed"),
-      });
-    }
+    const { readApkg } = await import("@/effects/anki-file");
+    await readFileBytes(file)
+      .mapErr(() => t("importApkg.parseFailed"))
+      .andThen((bytes) => readApkg(bytes, now()).mapErr(() => t("importApkg.parseFailed")))
+      .match(
+        (result) =>
+          setState(
+            result.decks.length === 0
+              ? { kind: "error", message: t("importApkg.noCards") }
+              : { kind: "parsed", result, fileName: file.name },
+          ),
+        (message) => setState({ kind: "error", message }),
+      );
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -77,7 +79,7 @@ export function ImportApkgDialog({
 
   function handleImport() {
     if (state.kind !== "parsed") return;
-    onImport(state.result.decks, state.result.srs);
+    onImport(state.result);
     handleOpenChange(false);
   }
 

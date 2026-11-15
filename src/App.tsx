@@ -1,262 +1,230 @@
-import { useState, useMemo, useEffect } from "react";
-import { useDecks } from "@/hooks/use-decks";
-import { useRuns } from "@/hooks/use-runs";
-import { useSRS } from "@/hooks/use-srs";
-import { useSettings } from "@/hooks/use-settings";
-import { DeckList } from "@/components/deck-list";
+import { useState } from "react";
+
 import { DeckDetail } from "@/components/deck-detail";
+import { DeckList } from "@/components/deck-list";
 import { DeckStats } from "@/components/deck-stats";
 import { GlobalStats } from "@/components/global-stats";
-import { StudySession } from "@/components/study-session";
+import { Page } from "@/components/page";
 import { SharedDeckView } from "@/components/shared-deck-view";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { LanguageToggle } from "@/components/language-toggle";
-import { decodeDeck } from "@/lib/share";
-import type { AnswerResult, CardSRS, Complexity, Deck, RunMode, SessionGoal } from "@/types";
+import { StudySession } from "@/components/study-session";
+import { useLanguage } from "@/contexts/language-context";
+import { cardFromJson, deckFromJson } from "@/core/deck-json";
+import {
+  type CardDraft,
+  type DeckLooks,
+  addCards,
+  addDeck,
+  cardFromDraft,
+  newDeck,
+  receiveDeck,
+  removeCard,
+  removeDeck,
+  replaceCard,
+  restyleDeck,
+} from "@/core/decks";
+import type { AnswerResult, CardRunResult, CardSchedule, Deck, SessionGoal, Store } from "@/core/model";
+import { type RunChoice, runCards } from "@/core/run";
+import { deckSchedules, indexSchedules, newCards, scheduleRun, weakCards, dueCards, withoutDeck } from "@/core/scheduler";
+import { decodeDeck, sharedPart } from "@/core/share";
+import { cardPerformance } from "@/core/stats";
+import { newId, now } from "@/effects/clock";
+import { clearHash, pageHash } from "@/effects/page";
+import { useStore } from "@/hooks/use-store";
+import { looks } from "@/lib/looks";
 
+/** A card's record over its deck's runs, as the deck screen shows it. */
 export interface CardPerf {
   attempts: number;
-  accuracy: number; // 0–1
+  /** The mean score of its answers, from 0 to 1. */
+  accuracy: number;
   lastResult: AnswerResult | null;
-  srs: CardSRS | undefined;
+  srs: CardSchedule | undefined;
 }
 
 type View =
   | { kind: "home" }
   | { kind: "globalStats" }
   | { kind: "deck"; deckId: string }
-  | { kind: "study"; deckId: string; runMode: RunMode; complexityFilter: Complexity[] | null; goal?: SessionGoal; shuffle?: boolean }
+  | { kind: "study"; deckId: string; choice: RunChoice; goal?: SessionGoal; shuffle?: boolean }
   | { kind: "stats"; deckId: string }
-  | { kind: "shared"; deckData: Deck };
+  | { kind: "shared"; deck: Deck };
 
-function App() {
-  const [view, setView] = useState<View>({ kind: "home" });
-  const {
-    decks,
-    addDeck,
-    deleteDeck,
-    updateDeck,
-    addCard,
-    deleteCard,
-    editCard,
-    importDeck,
-    importCards,
-    importDeckWithId,
-    overwriteDeck,
-    mergeDeck,
-    reloadFromStorage,
-  } = useDecks();
-  const { runs, addRun, deleteRunsForDeck, getRunsForDeck } = useRuns();
-  const srs = useSRS();
-  const { settings, updateDailyGoal } = useSettings();
+/** The view a page opens on: the shared deck its link carries, else the home screen. */
+function openingView(): View {
+  const encoded = sharedPart(pageHash());
+  if (encoded === null) return { kind: "home" };
+  return decodeDeck(encoded).match(
+    (deck): View => ({ kind: "shared", deck }),
+    (): View => {
+      clearHash();
+      return { kind: "home" };
+    },
+  );
+}
 
-  // Parse share URL on mount
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.startsWith("#/share/")) {
-      const encoded = hash.slice("#/share/".length);
-      decodeDeck(encoded)
-        .then((deck) => setView({ kind: "shared", deckData: deck }))
-        .catch(() => {
-          // Invalid share URL, go home
-          window.location.hash = "";
-        });
-    }
-  }, []);
+const withDecks = (change: (decks: readonly Deck[]) => Deck[]) => (store: Store): Store => ({ ...store, decks: change(store.decks) });
 
-  const currentDeck =
-    view.kind !== "home" && view.kind !== "globalStats" && view.kind !== "shared"
-      ? decks.find((d) => d.id === view.deckId)
-      : undefined;
+export default function App({ initial }: { initial: Store }) {
+  const { store, update, saveError } = useStore(initial);
+  const [view, setView] = useState<View>(openingView);
+  const [openedAt] = useState(now);
+  const { t } = useLanguage();
+  const { decks, runs, settings } = store;
+  const schedules = indexSchedules(store.schedules);
 
-  // Per-card performance for the current deck view
-  const deckCardPerf = useMemo((): Map<string, CardPerf> => {
-    if (!currentDeck) return new Map();
-    const deckSrs = srs.getSRSForDeck(currentDeck.id);
-    const deckRuns = getRunsForDeck(currentDeck.id);
+  const draftCard = (draft: CardDraft, id: string) => cardFromDraft(draft, id, newId);
 
-    // Aggregate attempts across all runs for this deck
-    const attemptsMap = new Map<string, { total: number; weighted: number }>();
-    for (const run of deckRuns) {
-      for (const cr of run.results) {
-        const cardId = cr.card.id;
-        const graded = cr.attempts.filter(
-          (a) => a.result === "correct" || a.result === "approximate" || a.result === "wrong"
-        );
-        if (graded.length === 0) continue;
-        // Use last graded attempt per session
-        const last = graded[graded.length - 1];
-        const score = last.result === "correct" ? 1 : last.result === "approximate" ? 0.5 : 0;
-        const prev = attemptsMap.get(cardId) ?? { total: 0, weighted: 0 };
-        attemptsMap.set(cardId, { total: prev.total + 1, weighted: prev.weighted + score });
-      }
-    }
+  function finishRun(deckId: string, totalTimeMs: number, results: CardRunResult[]) {
+    const at = now();
+    const run = { id: newId(), deckId, completedAt: at, totalTimeMs, results };
+    update((s) => ({
+      ...s,
+      runs: [...s.runs, run],
+      schedules: [...scheduleRun(indexSchedules(s.schedules), deckId, results, at).values()],
+    }));
+  }
 
-    const result = new Map<string, CardPerf>();
-    for (const card of currentDeck.cards) {
-      const agg = attemptsMap.get(card.id);
-      const srsEntry = deckSrs.get(card.id);
-      result.set(card.id, {
-        attempts: agg?.total ?? 0,
-        accuracy: agg ? agg.weighted / agg.total : 0,
-        lastResult: srsEntry?.lastResult ?? null,
-        srs: srsEntry,
-      });
-    }
-    return result;
-  }, [currentDeck, srs, getRunsForDeck]);
-
-  const newCount = currentDeck
-    ? currentDeck.cards.filter((c) => (deckCardPerf.get(c.id)?.attempts ?? 0) === 0).length
-    : 0;
-
-  // Build a filtered deck for study sessions
-  const studyDeck = useMemo((): Deck | undefined => {
-    if (view.kind !== "study" || !currentDeck) return undefined;
-
-    let cards = currentDeck.cards;
-
-    if (view.runMode === "due") {
-      cards = srs.getDueCards(currentDeck);
-    } else if (view.runMode === "weak") {
-      cards = srs.getWeakCards(currentDeck);
-    } else if (view.runMode === "new") {
-      cards = cards.filter((c) => (deckCardPerf.get(c.id)?.attempts ?? 0) === 0);
-    }
-
-    if (view.complexityFilter) {
-      const filterSet = new Set(view.complexityFilter);
-      cards = cards.filter((c) => filterSet.has(c.complexity));
-    }
-
-    return { ...currentDeck, cards };
-  }, [view, currentDeck, srs, deckCardPerf]);
-
-  function goHome() {
-    window.location.hash = "";
+  function deleteDeck(deckId: string) {
+    update((s) => ({
+      ...s,
+      decks: removeDeck(s.decks, deckId),
+      runs: s.runs.filter((run) => run.deckId !== deckId),
+      schedules: [...withoutDeck(indexSchedules(s.schedules), deckId).values()],
+    }));
     setView({ kind: "home" });
   }
 
+  function goHome() {
+    clearHash();
+    setView({ kind: "home" });
+  }
+
+  const banner = saveError && <p className="bg-destructive/10 p-2 text-center text-sm text-destructive">{t("store.saveRefused")}</p>;
+  const deck = "deckId" in view ? decks.find((d) => d.id === view.deckId) : undefined;
+
   if (view.kind === "shared") {
-    const existingDeck = decks.find((d) => d.id === view.deckData.id);
+    const shared = view.deck;
     return (
-      <SharedDeckView
-        deck={view.deckData}
-        existingDeck={existingDeck}
-        onImportNew={() => importDeckWithId(view.deckData)}
-        onOverwrite={() => overwriteDeck(view.deckData)}
-        onMerge={() => mergeDeck(view.deckData)}
-        onGoHome={goHome}
-      />
+      <>
+        {banner}
+        <SharedDeckView
+          deck={shared}
+          existingDeck={decks.find((d) => d.id === shared.id)}
+          onImportNew={() => update(withDecks((d) => receiveDeck(d, shared, "merge")))}
+          onOverwrite={() => update(withDecks((d) => receiveDeck(d, shared, "overwrite")))}
+          onMerge={() => update(withDecks((d) => receiveDeck(d, shared, "merge")))}
+          onGoHome={goHome}
+        />
+      </>
     );
   }
 
-  if (view.kind === "study" && studyDeck && studyDeck.cards.length > 0) {
-    return (
-      <div className="mx-auto w-[80%] p-4 sm:p-8">
-        <StudySession
-          deck={studyDeck}
-          goal={view.goal}
-          shuffle={view.shuffle ?? false}
-          onExit={() => setView({ kind: "deck", deckId: studyDeck.id })}
-          onRunComplete={(totalTimeMs, results) => {
-            addRun(studyDeck.id, totalTimeMs, results);
-            srs.updateAfterRun(studyDeck.id, results);
-          }}
-        />
-      </div>
-    );
+  if (view.kind === "study" && deck) {
+    const studied = { ...deck, cards: runCards(deck, view.choice, schedules, runs, openedAt) };
+    if (studied.cards.length > 0) {
+      return (
+        <div className={looks.page}>
+          {banner}
+          <StudySession
+            deck={studied}
+            goal={view.goal}
+            shuffle={view.shuffle ?? false}
+            onExit={() => setView({ kind: "deck", deckId: deck.id })}
+            onRunComplete={(totalTimeMs, results) => finishRun(deck.id, totalTimeMs, results)}
+          />
+        </div>
+      );
+    }
   }
 
   if (view.kind === "globalStats") {
     return (
-      <div className="mx-auto w-[80%] p-4 sm:p-8">
-        <div className="flex justify-end mb-4">
-          <ThemeToggle />
-          <LanguageToggle />
-        </div>
+      <Page>
+        {banner}
         <GlobalStats
-          decks={decks}
-          allRuns={runs}
-          srs={srs}
+          decks={[...decks]}
+          allRuns={[...runs]}
+          schedules={schedules}
           onBack={goHome}
           onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
         />
-      </div>
+      </Page>
     );
   }
 
-  if (view.kind === "stats" && currentDeck) {
-    const deckRuns = getRunsForDeck(currentDeck.id);
+  if (view.kind === "stats" && deck) {
     return (
-      <div className="mx-auto w-[80%] p-4 sm:p-8">
-        <div className="flex justify-end mb-4">
-          <ThemeToggle />
-          <LanguageToggle />
-        </div>
+      <Page>
+        {banner}
         <DeckStats
-          deck={currentDeck}
-          runs={deckRuns}
-          srs={srs}
-          onBack={() => setView({ kind: "deck", deckId: currentDeck.id })}
+          deck={deck}
+          runs={runs.filter((run) => run.deckId === deck.id)}
+          schedules={schedules}
+          onBack={() => setView({ kind: "deck", deckId: deck.id })}
         />
-      </div>
+      </Page>
     );
   }
+
+  if (view.kind === "deck" && deck) {
+    const performance = cardPerformance(deck, runs, deckSchedules(schedules, deck.id));
+    const cardPerf = new Map(
+      [...performance].map(([id, p]): [string, CardPerf] => [
+        id,
+        { attempts: p.runs, accuracy: p.score, lastResult: p.schedule?.lastResult ?? null, srs: p.schedule },
+      ]),
+    );
+    return (
+      <Page>
+        {banner}
+        <DeckDetail
+          deck={deck}
+          hasRuns={runs.some((run) => run.deckId === deck.id)}
+          dueCount={dueCards(deck, schedules, openedAt).length}
+          weakCount={weakCards(deck, schedules).length}
+          newCount={newCards(deck, runs).length}
+          cardPerf={cardPerf}
+          schedules={schedules}
+          onBack={() => setView({ kind: "home" })}
+          onStartStudy={(mode, complexities, goal, shuffle) =>
+            setView({ kind: "study", deckId: deck.id, choice: { mode, complexities }, goal, shuffle })
+          }
+          onViewStats={() => setView({ kind: "stats", deckId: deck.id })}
+          onEditDeck={(title, tags, color, emoji) => update(withDecks((d) => restyleDeck(d, deck.id, { title, tags, color, emoji })))}
+          onAddCard={(draft) => update(withDecks((d) => addCards(d, deck.id, [draftCard(draft, newId())])))}
+          onEditCard={(cardId, draft) => update(withDecks((d) => replaceCard(d, deck.id, draftCard(draft, cardId))))}
+          onDeleteCard={(cardId) => update(withDecks((d) => removeCard(d, deck.id, cardId)))}
+          onDeleteDeck={() => deleteDeck(deck.id)}
+          onImportCards={(cards) => update(withDecks((d) => addCards(d, deck.id, cards.map((c) => cardFromJson(c, newId)))))}
+        />
+      </Page>
+    );
+  }
+
+  const looksOf = (title: string, tags: string[], color?: string, emoji?: string): DeckLooks => ({ title, tags, color, emoji });
 
   return (
-    <div className="mx-auto w-[80%] p-4 sm:p-8">
-      <div className="flex justify-end mb-4">
-        <ThemeToggle />
-        <LanguageToggle />
-      </div>
-
-      {view.kind === "deck" && currentDeck ? (
-        <DeckDetail
-          deck={currentDeck}
-          hasRuns={getRunsForDeck(currentDeck.id).length > 0}
-          dueCount={srs.getDueCards(currentDeck).length}
-          weakCount={srs.getWeakCards(currentDeck).length}
-          newCount={newCount}
-          cardPerf={deckCardPerf}
-          onBack={() => setView({ kind: "home" })}
-          onStartStudy={(runMode, complexityFilter, goal, shuffle) =>
-            setView({ kind: "study", deckId: currentDeck.id, runMode, complexityFilter, goal, shuffle })
-          }
-          onViewStats={() =>
-            setView({ kind: "stats", deckId: currentDeck.id })
-          }
-          onEditDeck={(title, tags, color, emoji) => updateDeck(currentDeck.id, title, tags, color, emoji)}
-          onAddCard={(card) => addCard(currentDeck.id, card)}
-          onEditCard={(cardId, card) => editCard(currentDeck.id, cardId, card)}
-          onDeleteCard={(cardId) => deleteCard(currentDeck.id, cardId)}
-          onDeleteDeck={() => {
-            deleteRunsForDeck(currentDeck.id);
-            srs.deleteSRSForDeck(currentDeck.id);
-            deleteDeck(currentDeck.id);
-            setView({ kind: "home" });
-          }}
-          onImportCards={(cards) => importCards(currentDeck.id, cards)}
-        />
-      ) : (
-        <DeckList
-          decks={decks}
-          allRuns={runs}
-          dailyGoal={settings.dailyCardGoal}
-          onUpdateDailyGoal={updateDailyGoal}
-          onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
-          onAddDeck={(title, tags, color, emoji) => addDeck(title, tags, color, emoji)}
-          onImportDeck={(data) => importDeck(data)}
-          onImportApkg={(newDecks, srsEntries) => {
-            for (const deck of newDecks) importDeckWithId(deck);
-            srs.importSRS(srsEntries);
-          }}
-          onRestored={reloadFromStorage}
-          onViewGlobalStats={() => setView({ kind: "globalStats" })}
-        />
-      )}
-    </div>
+    <Page>
+      {banner}
+      <DeckList
+        decks={[...decks]}
+        allRuns={[...runs]}
+        dailyGoal={settings.dailyCardGoal}
+        onUpdateDailyGoal={(goal) => update((s) => ({ ...s, settings: { ...s.settings, dailyCardGoal: Math.max(0, goal) } }))}
+        onSelectDeck={(id) => setView({ kind: "deck", deckId: id })}
+        onAddDeck={(...args) => update(withDecks((d) => addDeck(d, newDeck(newId(), looksOf(...args), now()))))}
+        onImportDeck={(data) => update(withDecks((d) => addDeck(d, deckFromJson(data, now(), newId))))}
+        onImportApkg={(parsed) =>
+          update((s) => ({
+            ...s,
+            decks: parsed.decks.reduce((all, incoming) => receiveDeck(all, incoming, "merge"), s.decks as Deck[]),
+            schedules: [...new Map([...indexSchedules(s.schedules), ...indexSchedules(parsed.schedules)]).values()],
+          }))
+        }
+        store={store}
+        onRestore={(restored) => update(() => restored)}
+        onViewGlobalStats={() => setView({ kind: "globalStats" })}
+      />
+    </Page>
   );
 }
-
-export default App;

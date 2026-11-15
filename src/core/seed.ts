@@ -1,15 +1,24 @@
+import {
+  type AnswerResult,
+  type Card,
+  DEFAULT_SETTINGS,
+  type Deck,
+  type Millis,
+  type RunRecord,
+  type Store,
+  millis,
+} from "@/core/model";
+import { indexSchedules, scheduleRun } from "@/core/scheduler";
+
 /**
- * Demo seed — loaded once on first launch when localStorage is empty.
- * Provides two sample decks with realistic run history to showcase all features.
+ * The demo a first visit opens on: two decks with weeks of runs behind them, so every screen
+ * has something to show. Ids are fixed, and moments count back from `now`.
  */
-import type { AnswerResult, Card, CardSRS, Deck, RunRecord } from "@/types";
-import { loadDecks, saveDecks, saveRuns, saveSRS } from "@/lib/storage";
 
 const JS_DECK_ID   = "demo-js-v1";
 const APP_DECK_ID  = "demo-app-guide-v1";
 const DAY = 86_400_000;
 
-// ─── Card IDs ────────────────────────────────────────────────────────────────
 
 // JavaScript Fundamentals deck
 const ID = {
@@ -43,18 +52,16 @@ const GID = {
   sharing:      "demo-g12",
 };
 
-// ─── Deck definitions ─────────────────────────────────────────────────────────
 
-function buildJsDeck(now: number): Deck {
+function buildJsDeck(now: Millis): Deck {
   return {
     id: JS_DECK_ID,
     title: "JavaScript Fundamentals",
     emoji: "⚡",
     color: "#f59e0b",
     tags: ["javascript", "web"],
-    createdAt: now - 25 * DAY,
+    createdAt: millis(now - 25 * DAY),
     cards: [
-      // ── Easy ──────────────────────────────────────────────────────────────
       {
         id: ID.letConst,
         type: "standard",
@@ -132,7 +139,6 @@ function buildJsDeck(now: number): Deck {
         ],
       },
 
-      // ── Medium ────────────────────────────────────────────────────────────
       {
         id: ID.closure,
         type: "standard",
@@ -190,7 +196,6 @@ function buildJsDeck(now: number): Deck {
         tags: ["DOM"],
       },
 
-      // ── Hard ──────────────────────────────────────────────────────────────
       {
         id: ID.arrayFrom,
         type: "choice",
@@ -225,14 +230,14 @@ function buildJsDeck(now: number): Deck {
   };
 }
 
-function buildAppDeck(now: number): Deck {
+function buildAppDeck(now: Millis): Deck {
   return {
     id: APP_DECK_ID,
     title: "sofi-anki Guide",
     emoji: "📖",
     color: "#863bff",
     tags: ["guide"],
-    createdAt: now - 12 * DAY,
+    createdAt: millis(now - 12 * DAY),
     cards: [
       {
         id: GID.cardTypes,
@@ -384,15 +389,13 @@ function buildAppDeck(now: number): Deck {
   };
 }
 
-// ─── Run schedule & results ───────────────────────────────────────────────────
 
 type R = AnswerResult;
 const CR: R = "correct";
 const AP: R = "approximate";
 const WR: R = "wrong";
 
-// ── JavaScript Fundamentals runs ─────────────────────────────────────────────
-// 11 runs; last 7 consecutive → streak of 7.
+// 11 runs, the last 7 on consecutive days: a streak of 7.
 const JS_RUN_OFFSETS = [21, 16, 12, 9, 7, 6, 5, 4, 3, 2, 1];
 
 const JS_RESULTS: Record<string, R[]> = {
@@ -418,8 +421,7 @@ const JS_DURATION: Record<string, number> = {
   [ID.bubbling]:   16_000,[ID.arrayFrom]:  22_000, [ID.symbol]:   25_000,
 };
 
-// ── sofi-anki Guide runs ──────────────────────────────────────────────────────
-// 6 runs over 10 days — newer deck the user has just started.
+// 6 runs over 10 days, as for a deck begun recently.
 const APP_RUN_OFFSETS = [10, 8, 6, 4, 2, 1];
 
 const APP_RESULTS: Record<string, R[]> = {
@@ -445,7 +447,6 @@ const APP_DURATION: Record<string, number> = {
   [GID.dailyGoal]:  10_000, [GID.overflow]:     9_000, [GID.sharing]:     14_000,
 };
 
-// ── Generic run builder ───────────────────────────────────────────────────────
 
 function buildRuns(
   deckId: string,
@@ -454,10 +455,10 @@ function buildRuns(
   results: Record<string, R[]>,
   durations: Record<string, number>,
   cards: Card[],
-  now: number,
+  now: Millis,
 ): RunRecord[] {
   return offsets.map((daysAgo, runIdx) => {
-    const completedAt = now - daysAgo * DAY;
+    const completedAt = millis(now - daysAgo * DAY);
     const runResults = cards.map((card) => {
       const result = results[card.id]?.[runIdx] ?? "correct";
       const durationMs = (durations[card.id] ?? 10_000) + (runIdx % 3) * 1_500;
@@ -474,67 +475,21 @@ function buildRuns(
   });
 }
 
-// ─── SRS computation (mirrors the algorithm in use-srs.ts) ───────────────────
 
-const DEFAULT_EASE = 2.5;
-const MIN_EASE = 1.3;
-
-function buildSRS(runs: RunRecord[]): CardSRS[] {
-  const state = new Map<string, CardSRS>();
-
-  for (const run of runs) {
-    for (const cr of run.results) {
-      const cardId = cr.card.id;
-      const lastGraded = [...cr.attempts]
-        .reverse()
-        .find((a) => a.result === "correct" || a.result === "approximate" || a.result === "wrong");
-      if (!lastGraded) continue;
-
-      const existing = state.get(`${run.deckId}:${cardId}`);
-      let intervalDays = existing?.intervalDays ?? 0;
-      let easeFactor = existing?.easeFactor ?? DEFAULT_EASE;
-
-      if (lastGraded.result === "correct") {
-        intervalDays = Math.max(1, Math.round(intervalDays === 0 ? 1 : intervalDays * easeFactor));
-        easeFactor += 0.1;
-      } else if (lastGraded.result === "approximate") {
-        intervalDays = Math.max(1, intervalDays);
-      } else {
-        intervalDays = 0;
-        easeFactor = Math.max(MIN_EASE, easeFactor - 0.2);
-      }
-
-      state.set(`${run.deckId}:${cardId}`, {
-        cardId,
-        deckId: run.deckId,
-        intervalDays,
-        easeFactor,
-        dueAt: intervalDays === 0 ? run.completedAt : run.completedAt + intervalDays * DAY,
-        lastResult: lastGraded.result as AnswerResult,
-      });
-    }
-  }
-
-  return Array.from(state.values());
-}
-
-// ─── Public entry point ───────────────────────────────────────────────────────
-
-export function seedIfEmpty(): void {
-  if (loadDecks().length > 0) return;
-
-  const now = Date.now();
-
-  const jsDeck  = buildJsDeck(now);
+/**
+ * The store of a first visit, at `now`: the two demo decks, their runs, and the schedules those
+ * runs leave.
+ */
+export function demoStore(now: Millis): Store {
+  const jsDeck = buildJsDeck(now);
   const appDeck = buildAppDeck(now);
-
-  const jsRuns  = buildRuns(JS_DECK_ID,  "js",  JS_RUN_OFFSETS,  JS_RESULTS,  JS_DURATION,  jsDeck.cards,  now);
-  const appRuns = buildRuns(APP_DECK_ID, "app", APP_RUN_OFFSETS, APP_RESULTS, APP_DURATION, appDeck.cards, now);
-
-  const allRuns = [...jsRuns, ...appRuns];
-  const srs = buildSRS(allRuns);
-
-  saveDecks([jsDeck, appDeck]);
-  saveRuns(allRuns);
-  saveSRS(srs);
+  const runs = [
+    ...buildRuns(JS_DECK_ID, "js", JS_RUN_OFFSETS, JS_RESULTS, JS_DURATION, jsDeck.cards, now),
+    ...buildRuns(APP_DECK_ID, "app", APP_RUN_OFFSETS, APP_RESULTS, APP_DURATION, appDeck.cards, now),
+  ];
+  const schedules = runs.reduce(
+    (index, run) => scheduleRun(index, run.deckId, run.results, run.completedAt),
+    indexSchedules([]),
+  );
+  return { decks: [jsDeck, appDeck], runs, schedules: [...schedules.values()], settings: DEFAULT_SETTINGS };
 }

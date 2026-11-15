@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "direnv",
+      "runtimeArgs": ["exec", ".", "pnpm", "dev", "--port", "5173", "--strictPort"],
+      "port": 5173,
+      "url": "http://localhost:5173"
+    }
+  ]
+}

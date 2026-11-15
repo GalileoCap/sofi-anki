@@ -12,7 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { ComplexityBadge } from "@/components/complexity-badge";
 import { StudyHeatmap } from "@/components/study-heatmap";
 import type { CardDisposition, CardSRS, Deck, RunRecord } from "@/types";
-import type { useSRS } from "@/hooks/use-srs";
+import { type Schedules, dueCards, scheduleKey, weakCards } from "@/core/scheduler";
+import { now as clockNow } from "@/effects/clock";
 import { cn } from "@/lib/utils";
 
 function formatTime(ms: number): string {
@@ -51,7 +52,7 @@ const RESULT_COLORS: Record<CardDisposition, string> = {
 interface DeckStatsProps {
   deck: Deck;
   runs: RunRecord[];
-  srs: ReturnType<typeof useSRS>;
+  schedules: Schedules;
   onBack: () => void;
 }
 
@@ -69,8 +70,8 @@ interface CardStat {
   srsInfo: CardSRS | undefined;
 }
 
-export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
-  const [now] = useState(() => Date.now());
+export function DeckStats({ deck, runs, schedules, onBack }: DeckStatsProps) {
+  const [now] = useState(clockNow);
   const { t } = useLanguage();
 
   const sortedRuns = useMemo(
@@ -78,8 +79,8 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
     [runs]
   );
 
-  const dueCount = srs.getDueCards(deck).length;
-  const weakCount = srs.getWeakCards(deck).length;
+  const dueCount = dueCards(deck, schedules, now).length;
+  const weakCount = weakCards(deck, schedules).length;
 
   const overview = useMemo(() => {
     const totalRuns = runs.length;
@@ -125,7 +126,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
         totalGraded: 0,
         accuracyPct: 0,
         avgTimeMs: 0,
-        srsInfo: srs.getSRS(deck.id, card.id),
+        srsInfo: schedules.get(scheduleKey(deck.id, card.id)),
       });
     }
 
@@ -146,7 +147,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
             totalGraded: 0,
             accuracyPct: 0,
             avgTimeMs: 0,
-            srsInfo: srs.getSRS(deck.id, result.card.id),
+            srsInfo: schedules.get(scheduleKey(deck.id, result.card.id)),
           };
           statsMap.set(result.card.id, stat);
         }
@@ -186,7 +187,7 @@ export function DeckStats({ deck, runs, srs, onBack }: DeckStatsProps) {
       if (b.accuracyPct === -1 && a.accuracyPct !== -1) return 1;
       return a.accuracyPct - b.accuracyPct;
     });
-  }, [deck.cards, deck.id, runs, srs]);
+  }, [deck.cards, deck.id, runs, schedules]);
 
   return (
     <div className="flex flex-col gap-6">

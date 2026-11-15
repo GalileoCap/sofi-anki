@@ -9,22 +9,27 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { exportAllData, importAllData } from "@/lib/storage";
+import { type Backup, type RestoreMode, readBackup, restore, writeBackup } from "@/core/backup";
+import { dayKey } from "@/core/stats";
+import type { Store } from "@/core/model";
+import { now } from "@/effects/clock";
+import { download, readFileText } from "@/effects/files";
 
 interface BackupDialogProps {
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onRestored: () => void;
+  store: Store;
+  onRestore: (store: Store) => void;
 }
 
-export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange, onRestored }: BackupDialogProps) {
+export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange, store, onRestore }: BackupDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [confirmReplace, setConfirmReplace] = useState(false);
-  const [pendingJson, setPendingJson] = useState<string | null>(null);
+  const [pending, setPending] = useState<Backup | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { t } = useLanguage();
@@ -35,15 +40,8 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
   }
 
   function handleExport() {
-    const data = exportAllData();
-    const date = new Date().toISOString().slice(0, 10);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `anki-backup-${date}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const at = now();
+    download(`anki-backup-${dayKey(at)}.json`, writeBackup(store, at), "application/json");
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -52,32 +50,19 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
     setError("");
     setSuccess("");
     setConfirmReplace(false);
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const json = reader.result as string;
-        JSON.parse(json); // validate
-        setPendingJson(json);
-      } catch {
-        setError(t("backup.invalidJson"));
-      }
-    };
-    reader.readAsText(file);
+    readFileText(file).match(
+      (text) => readBackup(text).match(setPending, () => setError(t("backup.restoreFailed"))),
+      () => setError(t("backup.invalidJson")),
+    );
   }
 
-  function doRestore(mode: "replace" | "merge") {
-    if (!pendingJson) return;
-    try {
-      importAllData(pendingJson, mode);
-      setSuccess(mode === "replace" ? t("backup.replacedSuccess") : t("backup.mergedSuccess"));
-      setPendingJson(null);
-      setConfirmReplace(false);
-      if (fileRef.current) fileRef.current.value = "";
-      onRestored();
-    } catch {
-      setError(t("backup.restoreFailed"));
-    }
+  function doRestore(mode: RestoreMode) {
+    if (!pending) return;
+    onRestore(restore(store, pending, mode));
+    setSuccess(mode === "replace" ? t("backup.replacedSuccess") : t("backup.mergedSuccess"));
+    setPending(null);
+    setConfirmReplace(false);
+    if (fileRef.current) fileRef.current.value = "";
   }
 
   return (
@@ -111,7 +96,7 @@ export function BackupDialog({ trigger, open: controlledOpen, onOpenChange: cont
             className="text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground hover:file:bg-secondary/80"
           />
 
-          {pendingJson && !confirmReplace && (
+          {pending && !confirmReplace && (
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => doRestore("merge")}>
                 {t("backup.mergeKeep")}

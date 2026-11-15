@@ -4,8 +4,8 @@ from: [O1]
 source: session
 status: decided 2026-11-15
 kind: behaviour
-implemented_by: [src/core/backup.ts, src/lib/storage.ts]
-proven_by: [tests/backup-restore.test.ts, tests/stored.test.ts]
+implemented_by: [src/core/backup.ts, src/components/backup-dialog.tsx]
+proven_by: [tests/stored.test.ts]
 supersedes: []
 ---
 

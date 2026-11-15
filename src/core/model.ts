@@ -145,5 +145,8 @@ export type Store = {
   readonly settings: Settings;
 };
 
-/** The theme the toggle moves to: light, dark, the system's, and round again. */
-export const nextTheme = (theme: Theme): Theme => themes[(themes.indexOf(theme) + 1) % themes.length];
+/** The item after `item` in `list`, the first after the last: what a toggle moves to. */
+export const following = <T>(list: readonly T[], item: T): T => list[(list.indexOf(item) + 1) % list.length];
+
+/** Whether `theme` shows dark, given whether the system asks for dark. */
+export const isDark = (theme: Theme, systemDark: boolean): boolean => theme === "dark" || (theme === "system" && systemDark);

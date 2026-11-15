@@ -22,9 +22,14 @@ import { ComplexityBadge } from "@/components/complexity-badge";
 import { ImportCardsDialog } from "@/components/import-dialog";
 import { ExportDialog } from "@/components/export-dialog";
 import { RunStartDialog } from "@/components/run-start-dialog";
-import { encodeDeck, MAX_SHARE_URL_LENGTH } from "@/lib/share";
+import type { CardDraft } from "@/core/decks";
+import type { Schedules } from "@/core/scheduler";
+import { shareUrl } from "@/core/share";
+import { now as clockNow } from "@/effects/clock";
+import { copyText, download } from "@/effects/files";
+import { pageBase } from "@/effects/page";
 import { Markdown } from "@/components/markdown";
-import type { Card, ChoiceOption, Complexity, Deck, DeckImportCard, RunMode, SessionGoal } from "@/types";
+import type { ChoiceOption, Complexity, Deck, DeckImportCard, RunMode, SessionGoal } from "@/types";
 import type { CardPerf } from "@/App";
 import { cn } from "@/lib/utils";
 
@@ -57,12 +62,13 @@ interface DeckDetailProps {
   weakCount: number;
   newCount: number;
   cardPerf: Map<string, CardPerf>;
+  schedules: Schedules;
   onBack: () => void;
   onStartStudy: (runMode: RunMode, complexityFilter: Complexity[] | null, goal?: SessionGoal, shuffle?: boolean) => void;
   onViewStats: () => void;
   onEditDeck: (title: string, tags: string[], color?: string, emoji?: string) => void;
-  onAddCard: (card: Omit<Card, "id">) => void;
-  onEditCard: (cardId: string, card: Omit<Card, "id">) => void;
+  onAddCard: (card: CardDraft) => void;
+  onEditCard: (cardId: string, card: CardDraft) => void;
   onDeleteCard: (cardId: string) => void;
   onDeleteDeck: () => void;
   onImportCards: (cards: DeckImportCard[]) => void;
@@ -75,6 +81,7 @@ export function DeckDetail({
   weakCount,
   newCount,
   cardPerf,
+  schedules,
   onBack,
   onStartStudy,
   onViewStats,
@@ -86,7 +93,7 @@ export function DeckDetail({
   onImportCards,
 }: DeckDetailProps) {
   const { t, tp } = useLanguage();
-  const [now] = useState(() => Date.now());
+  const [now] = useState(clockNow);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [listTop, setListTop] = useState(0);
@@ -115,24 +122,9 @@ export function DeckDetail({
 
   async function handleExportApkg() {
     setApkgExporting(true);
-    try {
-      const srsMap = new Map(
-        [...cardPerf.entries()]
-          .filter(([, p]) => p.srs != null)
-          .map(([id, p]) => [id, p.srs!])
-      );
-      const { exportAsApkg } = await import("@/lib/apkg");
-      const bytes = await exportAsApkg(deck, srsMap);
-      const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/zip' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${deck.title}.apkg`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } finally {
-      setApkgExporting(false);
-    }
+    const { writeApkg } = await import("@/effects/anki-file");
+    await writeApkg(deck, schedules, clockNow()).map((bytes) => download(`${deck.title}.apkg`, bytes, "application/zip"));
+    setApkgExporting(false);
   }
 
   // Card editing state (for mobile "..." per card)
@@ -314,7 +306,7 @@ export function DeckDetail({
         </CardContent>
       </UiCard>
 
-      {/* Mobile start dialog — with mode picker */}
+      {/* On a phone, the start dialog picks the mode itself */}
       <RunStartDialog
         open={mobileStartOpen}
         onOpenChange={setMobileStartOpen}
@@ -336,7 +328,7 @@ export function DeckDetail({
 
       {/* Manage section */}
       <div className="flex flex-wrap items-center gap-2">
-        {/* Add Card — always visible */}
+        {/* Add Card shows on every screen size */}
         <CardForm
           trigger={<Button variant="outline" size="sm">{t("deckDetail.addCard")}</Button>}
           onSubmit={onAddCard}
@@ -756,21 +748,16 @@ function ShareLinkButton({ deck }: { deck: Deck }) {
       size="sm"
       disabled={shareStatus === "copying"}
       onClick={async () => {
-        setShareStatus("copying");
-        try {
-          const encoded = await encodeDeck(deck);
-          const url = `${window.location.origin}${window.location.pathname}#/share/${encoded}`;
-          if (url.length > MAX_SHARE_URL_LENGTH) {
-            setShareStatus("too-large");
-            setTimeout(() => setShareStatus("idle"), 3000);
-            return;
-          }
-          await navigator.clipboard.writeText(url);
-          setShareStatus("copied");
-          setTimeout(() => setShareStatus("idle"), 2000);
-        } catch {
-          setShareStatus("idle");
+        const url = shareUrl(pageBase(), deck);
+        if (url === null) {
+          setShareStatus("too-large");
+          setTimeout(() => setShareStatus("idle"), 3000);
+          return;
         }
+        setShareStatus("copying");
+        const copied = await copyText(url);
+        setShareStatus(copied.isOk() ? "copied" : "idle");
+        if (copied.isOk()) setTimeout(() => setShareStatus("idle"), 2000);
       }}
     >
       {shareStatus === "copied" ? t("deckDetail.shareLinkCopied") : shareStatus === "too-large" ? t("deckDetail.shareLinkTooLarge") : t("deckDetail.shareLink")}

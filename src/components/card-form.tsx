@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import { TagInput } from "@/components/tag-input";
 import { Markdown } from "@/components/markdown";
-import type { Card, CardType, Complexity } from "@/types";
+import type { CardDraft } from "@/core/decks";
+import type { Card, CardType, Complexity } from "@/core/model";
+import { newId } from "@/effects/clock";
 import { cn } from "@/lib/utils";
 
 const COMPLEXITIES: { value: Complexity; key: TranslationKey }[] = [
@@ -32,7 +34,7 @@ interface CardFormProps {
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSubmit: (card: Omit<Card, "id">) => void;
+  onSubmit: (card: CardDraft) => void;
   initial?: Card;
   dialogTitle?: string;
   submitLabel?: string;
@@ -45,7 +47,7 @@ interface OptionRow {
 }
 
 function newOption(): OptionRow {
-  return { id: crypto.randomUUID(), text: "", correct: false };
+  return { id: newId(), text: "", correct: false };
 }
 
 export function CardForm({
@@ -139,8 +141,8 @@ export function CardForm({
         response: response.trim(),
         complexity,
         tags,
-        hint: hintValue,
-      } as Omit<Card, "id">);
+        ...(hintValue ? { hint: hintValue } : {}),
+      });
     } else {
       const correctCount = options.filter((o) => o.correct).length;
       onSubmit({
@@ -148,14 +150,14 @@ export function CardForm({
         title: title.trim(),
         complexity,
         tags,
-        hint: hintValue,
+        ...(hintValue ? { hint: hintValue } : {}),
         multiSelect: correctCount > 1,
         options: options.map((o) => ({
           id: o.id,
           text: o.text.trim(),
           correct: o.correct,
         })),
-      } as Omit<Card, "id">);
+      });
     }
     handleOpenChange(false);
   }
@@ -278,7 +280,7 @@ export function CardForm({
             </div>
           )}
 
-          {/* Hint — collapsible */}
+          {/* The hint, which folds away */}
           {showHintInput ? (
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">

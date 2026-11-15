@@ -17,7 +17,8 @@ import { ImportDeckDialog } from "@/components/import-dialog";
 import { ImportApkgDialog } from "@/components/import-apkg-dialog";
 import { BackupDialog } from "@/components/backup-dialog";
 import { StudyHeatmap } from "@/components/study-heatmap";
-import type { CardSRS, Deck, DeckImport, RunRecord } from "@/types";
+import type { DeckImport } from "@/core/deck-json";
+import type { CardSchedule, Deck, RunRecord, Store } from "@/core/model";
 import { cn } from "@/lib/utils";
 
 const ITEM_CLASS =
@@ -64,8 +65,9 @@ interface DeckListProps {
   onSelectDeck: (id: string) => void;
   onAddDeck: (title: string, tags: string[], color?: string, emoji?: string) => void;
   onImportDeck: (data: DeckImport) => void;
-  onImportApkg: (decks: Deck[], srs: CardSRS[]) => void;
-  onRestored: () => void;
+  onImportApkg: (parsed: { decks: Deck[]; schedules: CardSchedule[] }) => void;
+  store: Store;
+  onRestore: (store: Store) => void;
   onViewGlobalStats: () => void;
 }
 
@@ -78,7 +80,8 @@ export function DeckList({
   onAddDeck,
   onImportDeck,
   onImportApkg,
-  onRestored,
+  store,
+  onRestore,
   onViewGlobalStats,
 }: DeckListProps) {
   const [search, setSearch] = useState("");
@@ -200,7 +203,8 @@ export function DeckList({
       <BackupDialog
         open={backupOpen}
         onOpenChange={setBackupOpen}
-        onRestored={onRestored}
+        store={store}
+        onRestore={onRestore}
       />
 
       {/* Streak + daily goal + heatmap */}

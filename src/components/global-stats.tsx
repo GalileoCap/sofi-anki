@@ -10,7 +10,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { StudyHeatmap } from "@/components/study-heatmap";
 import type { Deck, RunRecord } from "@/types";
-import type { useSRS } from "@/hooks/use-srs";
+import { type Schedules, dueCards } from "@/core/scheduler";
+import { now as clockNow } from "@/effects/clock";
 import { cn } from "@/lib/utils";
 
 function formatTime(ms: number): string {
@@ -47,13 +48,13 @@ function computeStreak(runs: RunRecord[]): number {
 interface GlobalStatsProps {
   decks: Deck[];
   allRuns: RunRecord[];
-  srs: ReturnType<typeof useSRS>;
+  schedules: Schedules;
   onBack: () => void;
   onSelectDeck: (id: string) => void;
 }
 
-export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: GlobalStatsProps) {
-  const [now] = useState(() => Date.now());
+export function GlobalStats({ decks, allRuns, schedules, onBack, onSelectDeck }: GlobalStatsProps) {
+  const [now] = useState(clockNow);
   const { t } = useLanguage();
 
   const totals = useMemo(() => {
@@ -116,7 +117,7 @@ export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: Globa
         }
       }
       const accuracy = total > 0 ? Math.round((correct / total) * 100) : null;
-      const dueCount = srs.getDueCards(deck).length;
+      const dueCount = dueCards(deck, schedules, now).length;
 
       return { deck, runs: deckRuns.length, lastRun, accuracy, dueCount };
     }).sort((a, b) => {
@@ -128,7 +129,7 @@ export function GlobalStats({ decks, allRuns, srs, onBack, onSelectDeck }: Globa
       if (a.lastRun !== null && b.lastRun !== null) return b.lastRun - a.lastRun;
       return 0;
     });
-  }, [decks, allRuns, srs]);
+  }, [decks, allRuns, schedules, now]);
 
   // Accuracy trend (last 20 runs across all decks, newest first)
   const sortedRuns = useMemo(

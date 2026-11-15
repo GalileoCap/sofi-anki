@@ -1,5 +1,17 @@
-import type { AnswerResult, Card, CardAttempt, CardRunResult, ChoiceCard, SessionGoal } from "@/core/model";
-import { wasAnswered } from "@/core/scheduler";
+import type {
+  AnswerResult,
+  Card,
+  CardAttempt,
+  CardRunResult,
+  ChoiceCard,
+  Complexity,
+  Deck,
+  Millis,
+  RunMode,
+  RunRecord,
+  SessionGoal,
+} from "@/core/model";
+import { type Schedules, dueCards, newCards, wasAnswered, weakCards } from "@/core/scheduler";
 
 /** `items` reordered by a Fisher-Yates shuffle driven by `randoms`, one number in [0, 1) per item. */
 export function shuffled<T>(items: readonly T[], randoms: readonly number[]): T[] {
@@ -143,3 +155,24 @@ export const answeredResults = (state: RunState): CardRunResult[] =>
 /** Whether the run has met its goal, given the time studied so far. */
 export const goalReached = (goal: SessionGoal, state: RunState, elapsedMs: number): boolean =>
   goal.type === "cards" ? state.completed >= goal.value : elapsedMs >= goal.value * 60_000;
+
+/** What a run studies: the mode's cards of `deck`, kept to `complexities` when given. */
+export type RunChoice = { readonly mode: RunMode; readonly complexities: readonly Complexity[] | null };
+
+/** The cards a run of `deck` studies, in the deck's order. */
+export function runCards(
+  deck: Deck,
+  choice: RunChoice,
+  schedules: Schedules,
+  runs: readonly RunRecord[],
+  now: Millis,
+): Card[] {
+  const byMode = {
+    all: () => deck.cards,
+    due: () => dueCards(deck, schedules, now),
+    weak: () => weakCards(deck, schedules),
+    new: () => newCards(deck, runs),
+  }[choice.mode]();
+  const kept = choice.complexities === null ? null : new Set(choice.complexities);
+  return kept === null ? [...byMode] : byMode.filter((card) => kept.has(card.complexity));
+}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLanguage } from "@/contexts/language-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,9 +9,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { encodeDeck, MAX_SHARE_URL_LENGTH } from "@/lib/share";
-import type { Deck } from "@/types";
-
+import { deckToJson } from "@/core/deck-json";
+import type { Deck } from "@/core/model";
+import { shareUrl as linkFor } from "@/core/share";
+import { copyText } from "@/effects/files";
+import { pageBase } from "@/effects/page";
 
 interface ExportDialogProps {
   trigger?: React.ReactNode;
@@ -27,64 +29,23 @@ export function ExportDialog({ trigger, open: controlledOpen, onOpenChange: cont
   const open = controlledOpen ?? internalOpen;
 
   const [copiedData, setCopiedData] = useState(false);
-  const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const { t } = useLanguage();
 
   function handleOpenChange(next: boolean) {
     setInternalOpen(next);
     controlledOnOpenChange?.(next);
-    if (!next) {
-      setShareUrl(null);
-      setCopiedUrl(false);
-    }
+    if (!next) setCopiedUrl(false);
   }
 
-  // Compute share URL when dialog opens (only if needed)
-  useEffect(() => {
-    if (!open || !includeShareUrl) return;
-    encodeDeck(deck).then((encoded) => {
-      const url = `${window.location.origin}${window.location.pathname}#/share/${encoded}`;
-      setShareUrl(url.length <= MAX_SHARE_URL_LENGTH ? url : null);
+  const shareUrl = open && includeShareUrl ? linkFor(pageBase(), deck) : null;
+  const deckJson = JSON.stringify(deckToJson(deck), null, 2);
+
+  function copyToClipboard(text: string, setCopied: (v: boolean) => void) {
+    copyText(text).map(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     });
-  }, [open, includeShareUrl, deck]);
-
-  const deckJson = JSON.stringify(
-    {
-      title: deck.title,
-      ...(deck.tags?.length ? { tags: deck.tags } : {}),
-      ...(deck.color ? { color: deck.color } : {}),
-      ...(deck.emoji ? { emoji: deck.emoji } : {}),
-      cards: deck.cards.map((c) => {
-        const tags = c.tags?.length ? { tags: c.tags } : {};
-        const hint = c.hint ? { hint: c.hint } : {};
-        if (c.type === "choice") {
-          return {
-            type: "choice",
-            title: c.title,
-            complexity: c.complexity,
-            ...tags,
-            ...hint,
-            options: c.options.map((o) => ({ text: o.text, correct: o.correct })),
-          };
-        }
-        return {
-          title: c.title,
-          response: c.response,
-          complexity: c.complexity,
-          ...tags,
-          ...hint,
-        };
-      }),
-    },
-    null,
-    2
-  );
-
-  async function copyToClipboard(text: string, setCopied: (v: boolean) => void) {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   }
 
   return (

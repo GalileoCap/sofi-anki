@@ -46,11 +46,21 @@ export const writeStored = (name: StorageName, text: string): Result<void, Stora
 
 /**
  * The store as this browser holds it, or why it cannot be read. The app opens only on a store
- * that read, so a key it could not read is never written over.
+ * that read, so a key it could not read is never written over. A browser that has stored no
+ * decks and no runs gets `firstVisit`, written at once. A write it refuses is tried again on the next
+ * visit.
  *
  * @effects localStorage
  */
-export const loadStore = (): Result<Store, StorageError | StoredError> => readStoredText().andThen(readStore);
+export const openStore = (firstVisit: () => Store): Result<Store, StorageError | StoredError> =>
+  readStoredText().andThen((text) =>
+    readStore(text).map((store) => {
+      if (text.decks !== null || text.runs !== null) return store;
+      const fresh = firstVisit();
+      saveChanges(store, fresh);
+      return fresh;
+    }),
+  );
 
 /**
  * The keys that changed from `before` to `after` written. Every change is tried, and the error is the first one refused.

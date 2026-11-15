@@ -3,6 +3,13 @@ export type Lang = "en" | "es";
 const en_translations = {
   // Common / shared buttons and labels
   "common.back": "Back",
+  "store.unreadableTitle": "Your saved data could not be read",
+  "store.unreadableBody":
+    "The app has left it as it is and will not open until it reads, so nothing gets written over it. Download a copy to keep it safe.",
+  "store.unreadablePart": "Part that did not read:",
+  "store.storageRefused": "This browser does not let the app use its storage.",
+  "store.download": "Download the stored data",
+  "store.saveRefused": "This browser refused to save the last change. It shows here until the page is closed.",
   "common.cancel": "Cancel",
   "common.save": "Save",
   "common.create": "Create",
@@ -318,6 +325,13 @@ const translations: Record<Lang, Translation> = {
   en: en_translations,
   es: {
     "common.back": "Volver",
+    "store.unreadableTitle": "No se pudieron leer tus datos guardados",
+    "store.unreadableBody":
+      "La app los dejó como estaban y no abre hasta poder leerlos, así nada los sobrescribe. Descargá una copia para guardarlos.",
+    "store.unreadablePart": "Parte que no se pudo leer:",
+    "store.storageRefused": "Este navegador no deja que la app use su almacenamiento.",
+    "store.download": "Descargar los datos guardados",
+    "store.saveRefused": "El navegador no dejó guardar el último cambio. Se ve acá hasta que cierres la página.",
     "common.cancel": "Cancelar",
     "common.save": "Guardar",
     "common.create": "Crear",

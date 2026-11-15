@@ -78,3 +78,15 @@ describe("a run", () => {
     expect(streak([run(at(2026, 0, 1))], at(2026, 0, 4))).toBe(0);
   });
 });
+
+describe("the demo seed moved into the core", () => {
+  test("it leaves the schedules the old seed wrote", async () => {
+    const { demoStore } = await import("@/core/seed");
+    const old = (await import("./fixtures/old-seed-storage.json")).default;
+    const spacing = (list: readonly { deckId: string; cardId: string; intervalDays: number; easeFactor: number; lastResult: unknown }[]) =>
+      list.map((s) => [s.deckId, s.cardId, s.intervalDays, s.easeFactor.toFixed(2), s.lastResult].join(" ")).sort();
+    const store = demoStore(millis(Date.UTC(2026, 0, 1)));
+    expect(spacing(store.schedules)).toEqual(spacing(JSON.parse(old["anki-srs"])));
+    expect(store.runs.length).toBe(17);
+  });
+});
