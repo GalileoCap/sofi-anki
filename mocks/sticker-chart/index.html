@@ -42,7 +42,7 @@
           <div class="topbar"><span></span><div class="actions"><button class="btn ghost">Stats</button><button class="btn ghost" aria-label="More: new deck, import, back up">More</button></div></div>
           <div><h1>Today</h1><p class="quiet small"><span class="figure">6</span> cards are waiting, from <span class="figure">2</span> decks. Then <span class="figure">3</span> tomorrow and <span class="figure">15</span> later this week.</p></div>
           <div class="sheet">
-            <div class="label"><span>Today's sheet</span><span class="quiet figure" style="font-weight: 500">0 of 20</span></div>
+            <div class="label"><span>Today's sheet</span><span class="figure">0 of 20</span></div>
             <div class="spots" data-fill="20"></div>
             <div class="week" data-week="en"></div>
             <p class="fine quiet" style="text-align: center; margin-top: 6px;"><span class="figure">10</span> days in a row</p>
@@ -60,7 +60,7 @@
           <div class="topbar"><span></span><div class="actions"><button class="btn ghost">Estadísticas</button><button class="btn ghost" aria-label="Más">Más</button></div></div>
           <div><h1>Hoy</h1><p class="quiet small"><span class="figure">6</span> cartas esperan, de <span class="figure">2</span> mazos. Después <span class="figure">3</span> mañana y <span class="figure">15</span> más esta semana.</p></div>
           <div class="sheet">
-            <div class="label"><span>La hoja de hoy</span><span class="quiet figure" style="font-weight: 500">0 de 20</span></div>
+            <div class="label"><span>La hoja de hoy</span><span class="figure">0 de 20</span></div>
             <div class="spots" data-fill="20"></div>
             <div class="week" data-week="es"></div>
             <p class="fine quiet" style="text-align: center; margin-top: 6px;"><span class="figure">10</span> días seguidos</p>
@@ -80,7 +80,7 @@
           <div class="studycard" style="flex: 1;">
             <div class="from"><span class="emoji-sticker small" style="background: #f59e0b">⚡</span>JavaScript Fundamentals</div>
             <h2>What is a closure?</h2>
-            <div style="margin-top: auto; background: var(--caution-soft); border-radius: var(--r-md); padding: 10px 12px; font-size: var(--sm);"><b>Hint.</b> Think of a function "closing over" variables from its surrounding scope: it takes them with it.</div>
+            <div class="rule" style="margin-top: auto;"></div><p><b>Hint.</b> Think of a function "closing over" variables from its surrounding scope: it takes them with it.</p>
           </div>
           <button class="btn primary big">Show the answer</button>
         </div>
@@ -129,24 +129,21 @@ inc(); // 1</code></pre>
       <div class="shot"><p>The end of a run, drawn with yesterday's JavaScript run (12 cards)</p><div class="device phone theme"><div class="dir">
         <div class="screen">
           <div class="topbar"><span></span><button class="btn ghost">Close</button></div>
-          <div><h1>12 stickers</h1><p class="quiet small">JavaScript Fundamentals, in <span class="figure">3:02</span></p></div>
+          <div><h1>12 cards studied</h1><p class="quiet small">JavaScript Fundamentals, in <span class="figure">3:02</span></p></div>
           <div class="sheet">
             <div class="label"><span>First tries</span></div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 8px;">
-              <div><div class="figure" style="font-size: var(--2xl); font-weight: 800; color: var(--positive)">6</div><div class="fine quiet">Right</div></div>
-              <div><div class="figure" style="font-size: var(--2xl); font-weight: 800; color: var(--caution)">3</div><div class="fine quiet">Almost</div></div>
-              <div><div class="figure" style="font-size: var(--2xl); font-weight: 800; color: var(--negative)">3</div><div class="fine quiet">Wrong</div></div>
-            </div>
+            <div style="display: flex; height: 14px; border-radius: 999px; overflow: hidden; gap: 2px;"><span style="flex: 6; background: var(--positive)"></span><span style="flex: 3; background: var(--caution)"></span><span style="flex: 3; background: var(--negative)"></span></div>
+            <p class="small" style="margin-top: 8px;"><span style="color: var(--positive); font-weight: 700"><span class="figure">6</span> right</span>, <span style="color: var(--caution); font-weight: 700"><span class="figure">3</span> almost</span>, <span style="color: var(--negative); font-weight: 700"><span class="figure">3</span> wrong</span></p>
           </div>
           <div>
             <h2 class="section" style="margin-bottom: 4px;">To look at again</h2>
             <div class="rows small">
-              <div class="row"><span>What is event bubbling?</span><span class="chip wrong">Wrong</span></div>
-              <div class="row"><span>What does <code>Array.from({length: 3}, (_, i) =&gt; i)</code> return?</span><span class="chip wrong">Wrong</span></div>
-              <div class="row"><span>What is a <code>Symbol</code> and when would you use one?</span><span class="chip wrong">Wrong</span></div>
-              <div class="row"><span>Which Array methods <strong>mutate</strong> the original array?</span><span class="chip almost">Almost</span></div>
-              <div class="row"><span>What is a closure?</span><span class="chip almost">Almost</span></div>
-              <div class="row"><span>Which of these return a <strong>new</strong> array?</span><span class="chip almost">Almost</span></div>
+              <div class="row"><span>What is event bubbling?</span><span class="chip wrong"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M7 5 L23 21 M23 5 L7 21"/></svg>Wrong</span></div>
+              <div class="row"><span>What does <code>Array.from({length: 3}, (_, i) =&gt; i)</code> return?</span><span class="chip wrong"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M7 5 L23 21 M23 5 L7 21"/></svg>Wrong</span></div>
+              <div class="row"><span>What is a <code>Symbol</code> and when would you use one?</span><span class="chip wrong"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M7 5 L23 21 M23 5 L7 21"/></svg>Wrong</span></div>
+              <div class="row"><span>Which Array methods <strong>mutate</strong> the original array? (select all)</span><span class="chip almost"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M4 14 L11 21 L21 6"/><path d="M12 8 L19 17"/></svg>Almost</span></div>
+              <div class="row"><span>What is a closure?</span><span class="chip almost"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M4 14 L11 21 L21 6"/><path d="M12 8 L19 17"/></svg>Almost</span></div>
+              <div class="row"><span>Which of these return a <strong>new</strong> array? (select all that apply)</span><span class="chip almost"><svg viewBox="0 0 30 26" aria-hidden="true"><path d="M4 14 L11 21 L21 6"/><path d="M12 8 L19 17"/></svg>Almost</span></div>
             </div>
           </div>
           <button class="btn primary big">Study these 6 again</button>
@@ -182,10 +179,10 @@ inc(); // 1</code></pre>
         <div style="display: grid; grid-template-columns: 280px 1fr; gap: 40px; padding: 28px 40px;">
           <div style="display: flex; flex-direction: column; gap: 16px;">
             <button class="btn ghost" style="align-self: flex-start; padding: 0;">Leave <span class="kbd">Esc</span></button>
-            <div class="sheet"><div class="label"><span>Today's sheet</span><span class="quiet figure" style="font-weight: 500">0 of 20</span></div><div class="spots" data-fill="20"></div></div>
+            <div class="sheet"><div class="label"><span>Today's sheet</span><span class="figure">0 of 20</span></div><div class="spots" data-fill="20"></div></div>
             <div><h2 class="section" style="margin-bottom: 4px;">In this run</h2><div class="rows small">
-              <div class="row"><span>JavaScript Fundamentals</span><span class="figure">5</span></div>
-              <div class="row"><span>sofi-anki Guide</span><span class="figure">1</span></div>
+              <div class="row"><span style="display: flex; gap: 10px; align-items: center;"><span class="emoji-sticker small" style="background: #f59e0b">⚡</span>JavaScript Fundamentals</span><span class="figure">5</span></div>
+              <div class="row"><span style="display: flex; gap: 10px; align-items: center;"><span class="emoji-sticker small" style="background: #863bff">📖</span>sofi-anki Guide</span><span class="figure">1</span></div>
             </div></div>
             <p class="fine quiet"><span class="kbd">Space</span> turns the card, <span class="kbd">H</span> shows the hint, <span class="kbd">⌘Z</span> takes a grade back.</p>
           </div>
@@ -217,11 +214,12 @@ inc(); // 1</code></pre>
     <p class="lead">The deck is one page: its cover and actions on the left, its cards on the right. The rare and destructive actions sit in one menu, drawn open.</p>
     <div class="shots">
       <div class="shot"><p>Home on a laptop: today on the left, the decks ranked by due on the right</p><div class="device laptop theme"><div class="dir">
-        <div style="display: grid; grid-template-columns: 400px 1fr; gap: 48px; padding: 28px 40px;">
+        <div class="topbar" style="padding: 12px 40px 0;"><span></span><div class="actions"><button class="btn ghost">Stats</button><button class="btn ghost" aria-label="More: import, back up">More</button></div></div>
+        <div style="display: grid; grid-template-columns: 400px 1fr; gap: 48px; padding: 8px 40px 28px;">
           <div style="display: flex; flex-direction: column; gap: 16px;">
             <div><h1>Today</h1><p class="quiet small"><span class="figure">6</span> cards are waiting, from <span class="figure">2</span> decks. Then <span class="figure">3</span> tomorrow and <span class="figure">15</span> later this week.</p></div>
             <div class="sheet">
-              <div class="label"><span>Today's sheet</span><span class="quiet figure" style="font-weight: 500">0 of 20</span></div>
+              <div class="label"><span>Today's sheet</span><span class="figure">0 of 20</span></div>
               <div class="spots" data-fill="20"></div>
               <div class="week" data-week="en"></div>
               <p class="fine quiet" style="text-align: center; margin-top: 6px;"><span class="figure">10</span> days in a row</p>
@@ -229,7 +227,7 @@ inc(); // 1</code></pre>
             <button class="btn primary big">Study 6 cards <span class="kbd">S</span></button>
           </div>
           <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div style="display: flex; align-items: center; gap: 8px;"><h2 class="section" style="flex: 1;">Decks</h2><button class="btn">New deck <span class="kbd">N</span></button><button class="btn ghost">Stats</button><button class="btn ghost" aria-label="More: import, back up">More</button></div>
+            <div style="display: flex; align-items: center; gap: 8px;"><h2 class="section" style="flex: 1;">Decks</h2><button class="btn">New deck <span class="kbd">N</span></button></div>
             <div class="decklist">
             <button class="deckrow" style="--deck: #f59e0b"><span class="emoji-sticker small">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">12 cards, studied yesterday</span></span><span class="chip due">5 due</span></button>
             <button class="deckrow" style="--deck: #863bff"><span class="emoji-sticker small">📖</span><span class="name"><b>sofi-anki Guide</b><span class="fine quiet">12 cards, studied yesterday</span></span><span class="chip due">1 due</span></button>
@@ -242,7 +240,7 @@ inc(); // 1</code></pre>
         <div style="display: grid; grid-template-columns: 300px 1fr; gap: 40px; padding: 28px 40px;">
           <div style="display: flex; flex-direction: column; gap: 14px;">
             <button class="btn ghost" style="align-self: flex-start; padding: 0;">Back to today</button>
-            <div class="cover" style="background: #f59e0b; min-height: 220px;"><span class="emoji-sticker">⚡</span><span class="labelblock"><b style="font-size: var(--lg)">JavaScript Fundamentals</b><span>12 cards, javascript and web</span></span></div>
+            <div class="deckrow deckhead" style="--deck: #f59e0b"><span class="emoji-sticker">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">12 cards, javascript and web</span></span></div>
             <button class="btn primary big">Study 5 due <span class="kbd">S</span></button>
             <div style="display: flex; gap: 8px;"><button class="btn" style="flex: 1;">Add a card <span class="kbd">N</span></button><button class="btn" aria-label="More">More</button></div>
             <div class="menu">
@@ -272,7 +270,11 @@ function makeCounter() {
   let count = 0;
   return () =&gt; ++count;
 }
-```</textarea></label>
+const inc = makeCounter();
+inc(); // 1
+```
+
+Closures power data privacy, partial application, and memoization.</textarea></label>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
                 <label class="field">Hint<input class="input" value="Think of a function &quot;closing over&quot; variables"></label>
                 <div class="field">Difficulty<div class="segmented"><span>Easy</span><span class="on">Medium</span><span>Hard</span></div></div>
@@ -288,7 +290,10 @@ function makeCounter() {
                 <pre><code>function makeCounter() {
   let count = 0;
   return () =&gt; ++count;
-}</code></pre>
+}
+const inc = makeCounter();
+inc(); // 1</code></pre>
+                <p>Closures power data privacy, partial application, and memoization.</p>
               </div>
             </div>
           </div>
@@ -316,7 +321,7 @@ function makeCounter() {
       <div class="shot"><p>The friend's phone, from the link</p><div class="device phone theme"><div class="dir">
         <div class="screen">
           <div class="topbar"><span>A deck shared with you</span><span></span></div>
-          <div class="cover" style="background: #f59e0b; min-height: 200px; cursor: default;"><span class="emoji-sticker">⚡</span><span class="labelblock"><b style="font-size: var(--lg)">JavaScript Fundamentals</b><span>12 cards, javascript and web</span></span></div>
+          <div class="deckrow deckhead" style="--deck: #f59e0b"><span class="emoji-sticker">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">12 cards, javascript and web</span></span></div>
           <div>
             <h2 class="section" style="margin-bottom: 4px;">Some of its cards</h2>
             <div class="rows small">
@@ -332,12 +337,11 @@ function makeCounter() {
       <div class="shot"><p>Kept: the deck is on the friend's home, its cards new, ready to study</p><div class="device phone theme"><div class="dir">
         <div class="screen">
           <div class="topbar"><span></span><div class="actions"><button class="btn ghost" aria-label="More">More</button></div></div>
-          <div><h1>Today</h1><p class="quiet small"><span class="figure">12</span> new cards, from JavaScript Fundamentals</p></div>
-          <div style="background: var(--positive-soft); color: var(--positive); border-radius: var(--r-md); padding: 10px 14px; font-size: var(--sm); font-weight: 700;">JavaScript Fundamentals is yours now.</div>
-          <div class="sheet"><div class="label"><span>Today's sheet</span><span class="quiet figure" style="font-weight: 500">0 of 20</span></div><div class="spots" data-fill="20"></div></div>
+          <div><h1>Today</h1><p class="small" style="color: var(--positive); font-weight: 700;">JavaScript Fundamentals is yours now.</p></div>
+          <div class="sheet"><div class="label"><span>Today's sheet</span><span class="figure">0 of 20</span></div><div class="spots" data-fill="20"></div></div>
           <button class="btn primary big">Study 12 new cards</button>
           <div class="decklist">
-            <button class="deckrow" style="--deck: #f59e0b"><span class="emoji-sticker small">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">12 cards, kept today</span></span><span class="chip due">12 new</span></button>
+            <button class="deckrow" style="--deck: #f59e0b"><span class="emoji-sticker small">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">Kept today</span></span><span class="chip due">12 new</span></button>
           </div>
         </div>
       </div></div></div>
@@ -354,18 +358,18 @@ function makeCounter() {
           <div class="topbar"><button class="btn ghost">Back to today</button><span></span></div>
           <div><h1>How it's going</h1><p class="quiet small"><span class="figure">10</span> days in a row, <span class="figure">52%</span> right the first time</p></div>
           <div class="sheet">
-            <div class="label"><span>November</span><span class="quiet" style="font-weight: 500">11 days studied</span></div>
+            <div class="label"><span>November</span><span>11 days studied</span></div>
             <div id="calendar"></div>
           </div>
-          <div class="sheet" style="border-style: solid;">
-            <div class="label"><span>First tries, run by run</span><span class="quiet" style="font-weight: 500">17 runs</span></div>
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;"><h2 class="section">First tries, run by run</h2><span class="small figure">17 runs</span></div>
             <div id="runs"></div>
           </div>
           <div>
-            <h2 class="section" style="margin-bottom: 4px;">Decks, the neediest first</h2>
-            <div class="rows small">
-              <div class="row"><span style="display: flex; gap: 10px; align-items: center;"><span class="emoji-sticker small" style="background: #f59e0b">⚡</span><span>JavaScript Fundamentals<br><span class="fine quiet">Studied yesterday, <span class="figure">5</span> due</span></span></span><span class="figure" style="font-weight: 800;">48%</span></div>
-              <div class="row"><span style="display: flex; gap: 10px; align-items: center;"><span class="emoji-sticker small" style="background: #863bff">📖</span><span>sofi-anki Guide<br><span class="fine quiet">Studied yesterday, <span class="figure">1</span> due</span></span></span><span class="figure" style="font-weight: 800;">60%</span></div>
+            <h2 class="section" style="margin-bottom: 8px;">Decks, the neediest first</h2>
+            <div class="decklist">
+              <button class="deckrow" style="--deck: #f59e0b"><span class="emoji-sticker small">⚡</span><span class="name"><b>JavaScript Fundamentals</b><span class="fine quiet">Studied yesterday, <span class="figure">5</span> due</span></span><span class="figure" style="font-weight: 800;">48%</span></button>
+              <button class="deckrow" style="--deck: #863bff"><span class="emoji-sticker small">📖</span><span class="name"><b>sofi-anki Guide</b><span class="fine quiet">Studied yesterday, <span class="figure">1</span> due</span></span><span class="figure" style="font-weight: 800;">60%</span></button>
             </div>
           </div>
         </div>
@@ -378,12 +382,12 @@ function makeCounter() {
     <h2>6. Back everything up, and restore it</h2>
     <div class="shots">
       <div class="shot"><p>Back up and restore, from home's More menu</p><div class="device laptop theme"><div class="dir">
-        <div class="scrim" style="min-height: 560px;">
+        <div class="scrim" style="min-height: 640px;">
           <div class="dialog">
             <h2>Back up and restore</h2>
             <div style="display: flex; gap: 14px; align-items: center;"><div style="flex: 1;"><p style="font-weight: 700;">Download a backup</p><p class="small quiet">One file with your 2 decks, 17 runs and every card's schedule.</p></div><button class="btn primary">Download</button></div>
             <div class="rule" style="border-top: 2px dashed var(--border);"></div>
-            <div style="display: flex; gap: 14px; align-items: center;"><div style="flex: 1;"><p style="font-weight: 700;">Restore from a backup</p><p class="small quiet">Replaces everything in this browser with the file's decks and history. A file that is not a backup changes nothing.</p></div><button class="btn">Choose a file</button></div>
+            <div style="display: flex; gap: 14px; align-items: center;"><div style="flex: 1;"><p style="font-weight: 700;">Restore from a backup</p><p class="small quiet">Replaces everything in this browser with the file's decks and history. A file that is not a backup changes nothing.</p></div><button class="btn">Restore from a file</button></div>
             <div style="display: flex; justify-content: flex-end;"><button class="btn ghost">Close</button></div>
           </div>
         </div>
@@ -413,20 +417,20 @@ function makeCounter() {
     host.innerHTML = week.map((decks, i) => `<span class="day">${pair(decks)}${names[host.dataset.week][i]}</span>`).join("");
   }
 
-  // November 2026, Monday first: the days studied, by deck, from the demo's runs. A past day with no study is in body text and a day to come is quiet, both at AA.
+  // November 2026, Monday first: the days studied, by deck, from the demo's runs. Every day keeps its number under its stickers. A day to come is quiet, at AA.
   const studied = { 3: ["js"], 5: ["guide"], 6: ["js"], 7: ["guide"], 8: ["js"], 9: ["js", "guide"], 10: ["js"], 11: ["js", "guide"], 12: ["js"], 13: ["js", "guide"], 14: ["js", "guide"] };
   const cells = ["M", "T", "W", "T", "F", "S", "S"].map((d) => `<span class="fine quiet">${d}</span>`);
   for (let i = 0; i < 6; i++) cells.push("<span></span>");
   for (let day = 1; day <= 30; day++) {
-    const mark = studied[day] ? pair(studied[day]) : day === 15 ? '<span class="pair empty"></span>' : `<span class="fine${day > 15 ? " quiet" : ""}" style="height: 30px; display: grid; place-items: center;">${day}</span>`;
-    cells.push(`<span style="display: grid; justify-items: center;" title="November ${day}">${mark}</span>`);
+    const mark = studied[day] ? pair(studied[day]) : day === 15 ? '<span class="pair empty"></span>' : '<span style="height: 30px"></span>';
+    cells.push(`<span style="display: grid; justify-items: center;" title="November ${day}">${mark}<span class="fine${day > 15 ? " quiet" : ""}">${day}</span></span>`);
   }
   document.getElementById("calendar").innerHTML = `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px 2px; text-align: center;">${cells.join("")}</div>`;
 
   // Each run's first tries, oldest first: [deck, right, almost, wrong], twelve cards each.
   const runs = [["js",2,0,10],["js",3,2,7],["js",5,2,5],["guide",2,0,10],["js",6,3,3],["guide",4,5,3],["js",7,3,2],["js",6,3,3],["guide",8,3,1],["js",7,3,2],["js",7,4,1],["guide",10,2,0],["js",7,1,4],["js",7,2,3],["guide",9,3,0],["js",6,3,3],["guide",10,2,0]];
   const bar = ([deck, r, a, w]) => `<div style="display: flex; flex-direction: column; gap: 3px; align-items: center;"><div style="display: flex; flex-direction: column-reverse; height: 96px; width: 100%; border-radius: 4px; overflow: hidden;"><span style="flex: ${r}; background: var(--positive)"></span><span style="flex: ${a}; background: var(--caution)"></span><span style="flex: ${w}; background: var(--negative)"></span></div><i class="sticker-dot" style="width: 10px; border-width: 1.5px; background: ${colours[deck]}"></i></div>`;
-  document.getElementById("runs").innerHTML = `<div style="display: grid; grid-template-columns: auto 1fr; gap: 6px;"><div class="fine quiet" style="display: flex; flex-direction: column; justify-content: space-between; height: 96px; text-align: right;"><span>12</span><span>6</span><span>0</span></div><div style="display: grid; grid-template-columns: repeat(${runs.length}, 1fr); gap: 3px;">${runs.map(bar).join("")}</div></div><div class="fine" style="display: flex; gap: 14px; margin-top: 8px;"><span style="color: var(--positive)">Right</span><span style="color: var(--caution)">Almost</span><span style="color: var(--negative)">Wrong</span><span class="quiet">Dot: the deck</span></div>`;
+  document.getElementById("runs").innerHTML = `<div style="display: grid; grid-template-columns: auto 1fr; gap: 6px;"><div class="fine quiet" style="display: flex; flex-direction: column; justify-content: space-between; height: 96px; text-align: right;"><span>12</span><span>6</span><span>0</span></div><div style="display: grid; grid-template-columns: repeat(${runs.length}, 1fr); gap: 3px;">${runs.map(bar).join("")}</div></div><div class="fine" style="display: flex; gap: 14px; margin-top: 8px;"><span style="color: var(--positive)">Right</span><span style="color: var(--caution)">Almost</span><span style="color: var(--negative)">Wrong</span><span class="quiet" style="display: inline-flex; gap: 6px; align-items: center;"><i class="sticker-dot" style="width: 10px; border-width: 1.5px; background: #f59e0b"></i>JavaScript</span><span class="quiet" style="display: inline-flex; gap: 6px; align-items: center;"><i class="sticker-dot" style="width: 10px; border-width: 1.5px; background: #863bff"></i>Guide</span></div>`;
 
   // The deck's cards: question, difficulty, last grade, right the first time, when it comes back.
   const cards = [
@@ -444,11 +448,14 @@ function makeCounter() {
     ["What does optional chaining (<code>?.</code>) do?", "Easy", "right", "100%", "In 7 days"],
   ];
   const word = { wrong: "Wrong", almost: "Almost", right: "Right" };
+  // Each grade's mark, taken from the stamps so it is drawn once.
+  const mark = {};
+  for (const stamp of document.querySelector(".stamps").querySelectorAll(".stamp")) mark[[...stamp.classList].find((c) => c in word)] = stamp.querySelector("svg").outerHTML;
   const more = '<button class="btn ghost" aria-label="More: edit, move, delete" style="min-height: 36px; padding: 0 8px;"><svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><circle cx="3.5" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="14.5" cy="9" r="1.6"/></svg></button>';
-  const head = '<div class="row fine quiet" style="grid-template-columns: 1fr 70px 56px 104px 36px; padding-top: 4px; padding-bottom: 6px;"><span>Card</span><span>Last</span><span style="text-align: right;">Right</span><span style="text-align: right;">Back</span><span></span></div>';
+  const head = '<div class="row fine quiet" style="grid-template-columns: minmax(0, 1fr) 92px 56px 110px 36px; padding-top: 4px; padding-bottom: 6px;"><span>Card</span><span>Last</span><span style="text-align: right;">Right</span><span style="text-align: right;">Comes back</span><span></span></div>';
   document.getElementById("deck-rows").innerHTML = head + cards.map(([q, level, last, share, due]) => {
     const dueChip = due === "Today" || due.endsWith("late") ? `<span class="chip due">${due}</span>` : `<span class="chip plain">${due}</span>`;
-    return `<div class="row" style="grid-template-columns: 1fr 70px 56px 104px 36px;"><span>${q}<br><span class="fine quiet">${level}</span></span><span class="chip ${last}" style="justify-self: start;">${word[last]}</span><span class="figure small" style="text-align: right;">${share}</span><span style="justify-self: end;">${dueChip}</span>${more}</div>`;
+    return `<div class="row" style="grid-template-columns: minmax(0, 1fr) 92px 56px 110px 36px;"><span style="min-width: 0;"><span class="trunc" title="${q.replace(/<[^>]+>/g, "")}">${q}</span><span class="fine quiet">${level}</span></span><span class="chip ${last}" style="justify-self: start;">${mark[last]}${word[last]}</span><span class="figure small" style="text-align: right;">${share}</span><span style="justify-self: end;">${dueChip}</span>${more}</div>`;
   }).join("");
 
   document.getElementById("dark").onclick = () => {

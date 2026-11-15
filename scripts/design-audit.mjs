@@ -64,8 +64,9 @@ function inspect(screen, isPhone) {
   const scrolls = [];
   for (const e of all) {
     const style = getComputedStyle(e);
-    // A field scrolls its own text, so a long value is not overflow.
-    if (e.scrollWidth > e.clientWidth + 1 && e.clientWidth > 0 && !e.matches("input, textarea")) {
+    // A field scrolls its own text, and an ellipsis announces the cut, so neither is overflow.
+    const announced = e.matches("input, textarea") || (style.textOverflow === "ellipsis" && e.title);
+    if (e.scrollWidth > e.clientWidth + 1 && e.clientWidth > 0 && !announced) {
       (["auto", "scroll"].includes(style.overflowX) ? scrolls : overflow).push(`${label(e)} (${e.scrollWidth} in ${e.clientWidth})`);
     }
     const r = e.getBoundingClientRect();
