@@ -31,3 +31,12 @@ export function onHashChange(listener: () => void): () => void {
   window.addEventListener("hashchange", listener);
   return () => window.removeEventListener("hashchange", listener);
 }
+
+/**
+ * The page's language, so a screen reader speaks its text in that language.
+ *
+ * @effects DOM
+ */
+export function showLang(lang: string): void {
+  document.documentElement.lang = lang;
+}
