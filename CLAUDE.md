@@ -55,4 +55,5 @@ The deployed site holds people's real decks. Whatever the app stores (the `local
 - [docs/design/rules.md](docs/design/rules.md): the design rules by topic (T8), each with its registers, its source and what holds it. The gate's messages and the critique's questions name them.
 - [docs/design/system.md](docs/design/system.md): the design tokens by role (`A10`), the scales, and the census budgets the static design gate (`A11`) holds.
 - [docs/design/checklist.md](docs/design/checklist.md): the critique's yes-or-no questions (T5), drawn from the rules held by `check`, answered by a fresh reader from the rendered audit's screenshots.
+- [docs/design/restyle.md](docs/design/restyle.md): the plan for restyling the app to the sticker chart (`A12`), screen by screen, and what changes beyond the look.
 - [docs/suppressions.md](docs/suppressions.md): every suppression and type escape with its reason, written by `session-suppressions index`.
