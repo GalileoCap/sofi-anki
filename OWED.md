@@ -23,6 +23,8 @@ Done 2026-11-16, by the owner's word. The repo answers. The secret is checked by
 
 ### Pages on `GalileoCap/anki`, after the first deploy writes its `gh-pages` branch
 
+Done 2026-11-16 up to the last item: `https://anki.smplworks.net/` serves the app. Open: "Enforce HTTPS" (`http://` still answers without redirecting), and the run that gives the old address its hand-over page, since the run of 10:17 UTC came before the site was up and skipped it.
+
 Until `https://anki.smplworks.net/` serves the app, the workflow skips the hand-over's deploy, so the old address keeps serving the old app.
 
 1. Settings → Pages: source "Deploy from a branch", branch `gh-pages`, folder `/`.
