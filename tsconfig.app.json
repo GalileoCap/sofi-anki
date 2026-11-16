@@ -9,7 +9,8 @@
     ],
     "module": "esnext",
     "types": [
-      "vite/client"
+      "vite/client",
+      "google.accounts"
     ],
     "skipLibCheck": true,
     /* Bundler mode */

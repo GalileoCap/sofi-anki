@@ -4,23 +4,64 @@
     {
       "name": "dev",
       "runtimeExecutable": "direnv",
-      "runtimeArgs": ["exec", ".", "pnpm", "dev", "--port", "5173", "--strictPort"],
+      "runtimeArgs": [
+        "exec",
+        ".",
+        "pnpm",
+        "dev",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
       "port": 5173,
       "url": "http://localhost:5173"
     },
     {
       "name": "handover-new",
       "runtimeExecutable": "direnv",
-      "runtimeArgs": ["exec", ".", "env", "VITE_OLD_ORIGIN=http://localhost:4174", "pnpm", "dev", "--port", "5174", "--strictPort"],
+      "runtimeArgs": [
+        "exec",
+        ".",
+        "env",
+        "VITE_OLD_ORIGIN=http://localhost:4174",
+        "pnpm",
+        "dev",
+        "--port",
+        "5174",
+        "--strictPort"
+      ],
       "port": 5174,
       "url": "http://localhost:5174"
     },
     {
       "name": "handover-old",
       "runtimeExecutable": "direnv",
-      "runtimeArgs": ["exec", ".", "sh", "-c", "SITE=handover VITE_NEW_ADDRESS=http://localhost:5174/ pnpm exec vite build && SITE=handover pnpm exec vite preview --port 4174 --strictPort"],
+      "runtimeArgs": [
+        "exec",
+        ".",
+        "sh",
+        "-c",
+        "SITE=handover VITE_NEW_ADDRESS=http://localhost:5174/ pnpm exec vite build && SITE=handover pnpm exec vite preview --port 4174 --strictPort"
+      ],
       "port": 4174,
       "url": "http://localhost:4174"
+    },
+    {
+      "name": "sync-fake-client",
+      "runtimeExecutable": "direnv",
+      "runtimeArgs": [
+        "exec",
+        ".",
+        "env",
+        "VITE_GOOGLE_CLIENT_ID=fake-client.apps.googleusercontent.com",
+        "pnpm",
+        "dev",
+        "--port",
+        "5175",
+        "--strictPort"
+      ],
+      "port": 5175,
+      "url": "http://localhost:5175"
     }
   ]
 }

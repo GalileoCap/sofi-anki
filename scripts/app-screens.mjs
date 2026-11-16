@@ -28,6 +28,8 @@ export const screens = [
   },
   { name: "home, daily goal", go: (page) => homeMenu(page, "Daily goal") },
   { name: "home, back up and restore", go: (page) => homeMenu(page, "Back up and restore") },
+  // Sync shows only in a build given a Google client id (A19): `pnpm dev` with VITE_GOOGLE_CLIENT_ID set.
+  { name: "home, sync", go: (page) => homeMenu(page, /^Sync$/) },
   {
     name: "home, bring in from Anki",
     go: async (page) => {

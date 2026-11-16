@@ -7,9 +7,11 @@ import { type Route, parseRoute, routeHash } from "@/core/route";
 import { type RunItem, deckItems, runCards } from "@/core/run";
 import { indexSchedules } from "@/core/scheduler";
 import { decodeDeck } from "@/core/share";
+import type { Stamps } from "@/core/sync";
 import { now } from "@/effects/clock";
 import { backTo, onHashChange, openHash, pageHash, replaceHash, showTitle } from "@/effects/page";
 import { useStore } from "@/hooks/use-store";
+import { useSync } from "@/hooks/use-sync";
 import { DeckPage } from "@/pages/deck";
 import { DeckStatsPage } from "@/pages/deck-stats";
 import { Home } from "@/pages/home";
@@ -23,8 +25,9 @@ type Run = { items: readonly RunItem[]; goal?: SessionGoal; shuffle: boolean };
 const HOME: Route = { kind: "home" };
 const APP_TITLE = "sofi-anki";
 
-export default function App({ initial }: { initial: Store }) {
-  const { store, update, saveError } = useStore(initial);
+export default function App({ initial, stamps }: { initial: Store; stamps: Stamps }) {
+  const { store, update, adopt, synced, saveError } = useStore(initial, stamps);
+  const sync = useSync(store, synced, adopt);
   const [route, setRoute] = useState(() => parseRoute(pageHash()));
   const [run, setRun] = useState<Run | null>(null);
   useEffect(
@@ -160,6 +163,7 @@ export default function App({ initial }: { initial: Store }) {
         onOpenDeck={(id) => open({ kind: "deck", deckId: id })}
         onOpenStats={() => open({ kind: "stats" })}
         onStudy={(items) => study({ items, shuffle: false }, null)}
+        sync={sync}
       />
     </Page>
   );

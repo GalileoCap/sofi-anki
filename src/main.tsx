@@ -9,7 +9,7 @@ import { LanguageProvider } from "@/contexts/language-provider";
 import { isDark } from "@/core/model";
 import { RECEIVE_HASH } from "@/core/handover";
 import { demoStore } from "@/core/seed";
-import { readLook, readTheme } from "@/core/stored";
+import { readLook, readStamps, readTheme } from "@/core/stored";
 import { now } from "@/effects/clock";
 import { receiveHandOver } from "@/effects/handover";
 import { pageHash, replaceHash } from "@/effects/page";
@@ -26,7 +26,7 @@ function start(root: HTMLElement) {
       <LanguageProvider>
         <TooltipProvider delayDuration={300}>
           {openStore(() => demoStore(now())).match(
-            (store) => <App initial={store} />,
+            (store) => <App initial={store} stamps={readStamps(readStoredValue("syncStamps"))} />,
             (error) => <UnreadableStore error={error} />,
           )}
         </TooltipProvider>

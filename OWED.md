@@ -35,3 +35,19 @@ Until `https://anki.smplworks.net/` serves the app, the workflow skips the hand-
 ### `GalileoCap/sofi-anki` keeps no custom domain
 
 Its Settings → Pages must leave the custom domain empty: a domain there makes GitHub redirect the old address, which strands the data saved there.
+
+## Before sync shows on anki.smplworks.net (A19)
+
+Until the deploy has a client id, the app builds and works as before, with no Sync in home's More menu.
+
+### A Google OAuth client for the app folder, named to the deploy
+
+The owner's step, in a Google account of theirs.
+
+1. At console.cloud.google.com, make a project (for instance "sofi-anki") and enable the Google Drive API in it.
+2. Google Auth Platform → Branding: app name "sofi-anki", support and developer email, home page `https://anki.smplworks.net/`.
+3. Audience: External. Data access: add the scope `https://www.googleapis.com/auth/drive.appdata`, which Google lists as non-sensitive. While the app is in Testing, only the Google accounts added under Test users can sign in, and Google asks them again every 7 days. Publish it to let any friend in, and check then whether Google asks for verification.
+4. Clients → Create client → Web application. Authorized JavaScript origins: `https://anki.smplworks.net` and `http://localhost:5173`. No redirect URI.
+5. In `GalileoCap/sofi-anki`, Settings → Secrets and variables → Actions → Variables: `GOOGLE_CLIENT_ID` holding the client id. For `pnpm dev`, the same in an untracked `.env.local` as `VITE_GOOGLE_CLIENT_ID=…`.
+6. Push to `main` and turn sync on from two devices: the More menu shows Sync, and an edit on one shows on the other.
+

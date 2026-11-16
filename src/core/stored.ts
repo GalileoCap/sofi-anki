@@ -17,11 +17,13 @@ import {
   deckViews,
   langs,
   lookDeckView,
+  millisSchema,
   runSchema,
   scheduleSchema,
   settingsSchema,
   themes,
 } from "@/core/model";
+import { NO_STAMPS, type Stamps, stampsSchema } from "@/core/sync";
 
 /** The `localStorage` keys, unchanged since the first version so stored data keeps reading. */
 export const storageKeys = {
@@ -33,6 +35,8 @@ export const storageKeys = {
   theme: "anki-theme",
   look: "anki-look",
   deckView: "anki-deck-view",
+  syncStamps: "anki-sync-stamps",
+  sync: "anki-sync",
 } as const;
 
 export type StoreKey = "decks" | "runs" | "schedules" | "settings";
@@ -58,6 +62,23 @@ export function readStore(text: StoredText): Result<Store, StoredError> {
   ]).map(([decks, runs, schedules, settings]) => ({ decks, runs, schedules, settings }));
 }
 
+/** The stored sync stamps, or none when nothing or something unreadable is stored: stamps only order changes, so losing them loses no data. */
+export const readStamps = (text: string | null): Stamps =>
+  text === null ? NO_STAMPS : decodeJson(stampsSchema, text).unwrapOr(NO_STAMPS);
+
+/** Whether this browser has turned sync on, and the Google access token it holds until the token expires. */
+export const syncStateSchema = z.object({
+  on: z.boolean(),
+  token: z.string().optional(),
+  expiresAt: millisSchema.optional(),
+});
+export type SyncState = z.infer<typeof syncStateSchema>;
+export const SYNC_OFF: SyncState = { on: false };
+
+/** The stored sync state, or off when none or an unreadable one is stored. */
+export const readSyncState = (text: string | null): SyncState =>
+  text === null ? SYNC_OFF : decodeJson(syncStateSchema, text).unwrapOr(SYNC_OFF);
+
 /** The stored language, or `DEFAULT_LANG` when none or an unknown one is stored. */
 export const readLang = (text: string | null): Lang =>
   langs.find((lang) => lang === text) ?? DEFAULT_LANG;
@@ -70,7 +91,7 @@ export const readTheme = (text: string | null): Theme =>
 export const readLook = (text: string | null): AppLook =>
   appLooks.find((look) => look === text) ?? DEFAULT_LOOK;
 
-/** The stored deck view, or the one `look` opens on when none or an unknown one is stored. */
+/** The stored deck view, or the view `look` opens on when none or an unknown one is stored. */
 export const readDeckView = (text: string | null, look: AppLook): DeckView =>
   deckViews.find((view) => view === text) ?? lookDeckView[look];
 

@@ -13,7 +13,7 @@ This file adds the project's own. `.claude/settings.json` declares the plugin, a
 The owner's goals, the objectives and the constraints in force. Each entry is a file in [docs/intent/](docs/intent/INDEX.md), whose `INDEX.md` is written by `session-intent index`, and `session-intent check` holds this list to the record.
 
 - `G1` An Anki-like study app for the owner and their friends.
-- `C1` Keep it simple: no accounts, no server.
+- `C1` Keep it simple: no accounts, no server, and sync only through a person's own Google Drive, when they choose it.
 - `O1` Nobody loses their decks or their study history to the app (approved).
 - `O2` A friend can study a deck someone else made (approved).
 - `O3` Cards come back for study around when they would be forgotten (approved).
@@ -24,6 +24,7 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 - `O8` A person studying can see where a card's answer comes from (approved).
 - `O9` A card can hold formulas and diagrams (approved).
 - `O10` The app is served at anki.smplworks.net, and the old address keeps working (approved).
+- `O11` A person's decks, schedule and study history are the same on each of their devices (approved).
 
 ## Environment
 
@@ -47,7 +48,7 @@ Work happens on `dev`. A push to `main` deploys both sites (the app to `GalileoC
 
 ## Stored data
 
-The deployed site holds people's real decks. Whatever the app stores (the `localStorage` keys `anki-decks`, `anki-runs`, `anki-srs`, `anki-settings`, `lang`, `anki-theme`, `anki-look`, `anki-deck-view`, and at the old address `anki-moved-at`), a backup file, a share link and an `.apkg` must keep reading as before. A change to what is stored reads the old shape, and its step is written in `OWED.md`.
+The deployed site holds people's real decks. Whatever the app stores (the `localStorage` keys `anki-decks`, `anki-runs`, `anki-srs`, `anki-settings`, `lang`, `anki-theme`, `anki-look`, `anki-deck-view`, `anki-sync-stamps`, `anki-sync`, and at the old address `anki-moved-at`), the sync file in a person's Drive, a backup file, a share link and an `.apkg` must keep reading as before. A change to what is stored reads the old shape, and its step is written in `OWED.md`.
 
 ## UI
 

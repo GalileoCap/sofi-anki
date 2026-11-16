@@ -35,7 +35,7 @@ export function readStoredText(): Result<StoredText, StorageError> {
  *
  * @effects localStorage
  */
-export const readStoredValue = (name: "lang" | "theme" | "look" | "deckView"): string | null => getItem(name).unwrapOr(null);
+export const readStoredValue = (name: "lang" | "theme" | "look" | "deckView" | "syncStamps" | "sync"): string | null => getItem(name).unwrapOr(null);
 
 /**
  * `text` stored under `name`.

@@ -10,6 +10,7 @@ import { ImportApkgDialog } from "@/components/import-apkg-dialog";
 import { ImportDeckDialog } from "@/components/import-dialog";
 import { LastStudied } from "@/components/last-studied";
 import { LanguageSwitch, ThemeSwitch } from "@/components/preferences";
+import { SyncDialog } from "@/components/sync-dialog";
 import { Chip, DayStickers, DeckRow, Key, Sheet, Spots, Toggle } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,6 +26,7 @@ import { newId, now as clockNow } from "@/effects/clock";
 import { useDeckView } from "@/hooks/use-deck-view";
 import { useKeys } from "@/hooks/use-keys";
 import { useLook } from "@/hooks/use-look";
+import type { Sync } from "@/hooks/use-sync";
 import { deckColour } from "@/lib/sticker-looks";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
@@ -46,13 +48,14 @@ type HomeProps = {
   onOpenDeck: (id: string) => void;
   onOpenStats: () => void;
   onStudy: (items: RunItem[]) => void;
+  sync: Sync;
 };
 
 /** Today: what is due, the day's sheet of stickers, one button to study it all, and the decks ranked by due. */
-export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStudy }: HomeProps) {
+export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStudy, sync }: HomeProps) {
   const { t, tp } = useLanguage();
   const { decks, runs } = store;
-  const [dialog, setDialog] = useState<"newDeck" | "json" | "apkg" | "backup" | "goal" | null>(null);
+  const [dialog, setDialog] = useState<"newDeck" | "json" | "apkg" | "backup" | "goal" | "sync" | null>(null);
   const [search, setSearch] = useState("");
   const [tagFilter, setTagFilter] = useState<ReadonlySet<string>>(new Set());
   const allTags = [...new Set(decks.flatMap((deck) => deck.tags))].sort((a, b) => a.localeCompare(b));
@@ -101,8 +104,16 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
         )}
         <LanguageSwitch />
         <ThemeSwitch />
-        <HomeMenu onDialog={setDialog} look={look} onToggleLook={toggleLook} />
+        <HomeMenu onDialog={setDialog} canSync={sync.available} look={look} onToggleLook={toggleLook} />
       </div>
+      {sync.status.kind === "paused" && (
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <p className={looks.lead}>{t("sync.paused")}</p>
+          <Button variant="outline" size="sm" onClick={() => void sync.turnOn()}>
+            {t("sync.resume")}
+          </Button>
+        </div>
+      )}
 
       {dialog === "newDeck" && (
         <DeckForm
@@ -124,6 +135,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
       <ImportDeckDialog {...dialogProps("json")} onImport={(data) => update(withDecks((d) => addDeck(d, deckFromJson(data, clockNow(), newId))))} />
       <ImportApkgDialog {...dialogProps("apkg")} onImport={(parsed) => update((s) => receiveAnkiDecks(s, parsed.decks, parsed.schedules))} />
       <BackupDialog {...dialogProps("backup")} store={store} onRestore={(restored) => update(() => restored)} />
+      <SyncDialog {...dialogProps("sync")} sync={sync} />
       <GoalDialog {...dialogProps("goal")} goal={goal} onGoal={(next) => update((s) => ({ ...s, settings: { ...s.settings, dailyCardGoal: next } }))} />
 
       <div className={looks.split}>
@@ -290,13 +302,15 @@ function DeckViewSwitch({ view, onPick }: { view: DeckView; onPick: (view: DeckV
 }
 
 type HomeMenuProps = {
-  onDialog: (dialog: "backup" | "goal") => void;
+  onDialog: (dialog: "backup" | "goal" | "sync") => void;
+  /** Whether this build offers sync: it was given a Google client id. */
+  canSync: boolean;
   look: AppLook;
   onToggleLook: () => void;
 };
 
-/** Home's menu: what is done now and then, the backup, the daily goal and the look. */
-function HomeMenu({ onDialog, look, onToggleLook }: HomeMenuProps) {
+/** Home's menu: what is done now and then, the backup, sync, the daily goal and the look. */
+function HomeMenu({ onDialog, canSync, look, onToggleLook }: HomeMenuProps) {
   const { t } = useLanguage();
   const item = (label: string, onSelect: () => void) => (
     <DropdownMenu.Item className={looks.menuItem} onSelect={onSelect}>
@@ -311,6 +325,7 @@ function HomeMenu({ onDialog, look, onToggleLook }: HomeMenuProps) {
       <DropdownMenu.Portal>
         <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
           {item(t("home.backup"), () => onDialog("backup"))}
+          {canSync && item(t("sync.menu"), () => onDialog("sync"))}
           <DropdownMenu.Separator className={looks.menuRule} />
           {item(t("home.dailyGoal"), () => onDialog("goal"))}
           <DropdownMenu.CheckboxItem className={looks.menuItem} checked={look === "classic"} onCheckedChange={onToggleLook}>

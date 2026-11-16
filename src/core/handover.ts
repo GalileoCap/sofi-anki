@@ -4,8 +4,8 @@ import { z } from "zod";
 import { restore } from "@/core/backup";
 import { type StoredError, changedText, readStore, storageKeys } from "@/core/stored";
 
-/** A name of the stored keys the hand-over carries: those the old address held. The deck view came after the move. */
-export type StoredName = Exclude<keyof typeof storageKeys, "deckView">;
+/** A name of the stored keys the hand-over carries: those the old address held. The deck view and sync came after the move. */
+export type StoredName = Exclude<keyof typeof storageKeys, "deckView" | "syncStamps" | "sync">;
 
 /** The text under each of the app's stored keys, null where nothing is. */
 export type StoredAll = Readonly<Record<StoredName, string | null>>;

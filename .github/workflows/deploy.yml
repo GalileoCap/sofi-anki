@@ -35,8 +35,12 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       # The session-kit gates run on the owner's machine only: the kit is not installed here.
+      # The Google OAuth client for sync (A19), a repository variable: a client id is public. Without
+      # it the build offers no sync.
       - name: Lint and build
         run: pnpm lint && pnpm build
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
 
       - name: Push the app to anki.smplworks.net
         uses: peaceiris/actions-gh-pages@v4
