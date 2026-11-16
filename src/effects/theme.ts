@@ -37,11 +37,11 @@ export function onSystemThemeChange(listener: () => void): () => void {
 }
 
 /**
- * Whether the page shows dark now.
+ * The page's classes now, which name its theme and look.
  *
  * @effects DOM
  */
-export const pageShowsDark = (): boolean => document.documentElement.classList.contains("dark");
+export const pageClasses = (): string => document.documentElement.className;
 
 /**
  * `listener` called each time the page's classes change (dark, classic), until the returned function is called.

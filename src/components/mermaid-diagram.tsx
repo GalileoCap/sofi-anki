@@ -3,26 +3,26 @@ import type { Result } from "neverthrow";
 
 import { useLanguage } from "@/contexts/language-context";
 import { drawDiagram } from "@/effects/diagram";
-import { onPageClassChange, pageShowsDark } from "@/effects/theme";
+import { onPageClassChange, pageClasses } from "@/effects/theme";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 type Drawn = { readonly key: string; readonly svg: Result<string, string> };
 
-/** A Mermaid diagram from a card's ```mermaid block, drawn in the page's light or dark. Its source shows while it loads or when it does not parse. */
+/** A Mermaid diagram from a card's ```mermaid block, drawn in the page's colours and redrawn when its theme or look changes. Its source shows while it loads or when it does not parse. */
 export function MermaidDiagram({ source }: { source: string }) {
   const { t } = useLanguage();
-  const dark = useSyncExternalStore(onPageClassChange, pageShowsDark);
-  const key = `${dark}:${source}`;
+  const classes = useSyncExternalStore(onPageClassChange, pageClasses);
+  const key = `${classes}:${source}`;
   const [drawn, setDrawn] = useState<Drawn | null>(null);
 
   useEffect(() => {
     let current = true;
-    void drawDiagram(source, dark).then((svg) => current && setDrawn({ key, svg }));
+    void drawDiagram(source).then((svg) => current && setDrawn({ key, svg }));
     return () => {
       current = false;
     };
-  }, [key, source, dark]);
+  }, [key, source]);
 
   const svg = drawn?.key === key ? drawn.svg : null;
   if (svg?.isOk()) {
