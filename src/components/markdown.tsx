@@ -16,6 +16,9 @@ interface MarkdownProps {
   inline?: boolean;
 }
 
+/** A formula wider than its room scrolls within itself, so the page keeps its width. A formula on its own line takes the line. */
+const formulaScrolls = "[&_.katex]:inline-block [&_.katex]:max-w-full [&_.katex]:overflow-x-auto [&_.katex]:overflow-y-hidden [&_.katex]:py-1 [&_.katex]:align-middle [&>.katex]:my-2 [&>.katex]:block!";
+
 /** The source of a ```mermaid block, from the `pre` that holds it, or null for any other block. */
 function mermaidSource(pre: Element | undefined): string | null {
   const code = pre?.children[0];
@@ -33,7 +36,7 @@ function mermaidSource(pre: Element | undefined): string | null {
 export function Markdown({ children, className, inline }: MarkdownProps) {
   const Wrapper = inline ? "span" : "div";
   return (
-    <Wrapper className={cn(className)}>
+    <Wrapper className={cn(formulaScrolls, className)}>
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[[rehypeKatex, { output: "mathml" }]]}
@@ -53,7 +56,11 @@ export function Markdown({ children, className, inline }: MarkdownProps) {
           return diagram !== null ? (
             <MermaidDiagram source={diagram} />
           ) : (
-            <pre tabIndex={0} className="my-2 overflow-x-auto rounded-lg bg-muted/80 border p-3 text-xs font-mono leading-relaxed">
+            // A block without a language reaches `code` looking inline, so its chip is undone here.
+            <pre
+              tabIndex={0}
+              className="my-2 overflow-x-auto rounded-lg bg-muted/80 border p-3 text-xs font-mono leading-relaxed [&_code]:border-0 [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-xs"
+            >
               {children}
             </pre>
           );

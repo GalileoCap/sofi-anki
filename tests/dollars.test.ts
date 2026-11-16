@@ -10,4 +10,8 @@ describe("a card written before math keeps reading as it did", () => {
     expect(guardDollars("`$5 and $10` and\n```\n$x and $y\n```")).toBe("`$5 and $10` and\n```\n$x and $y\n```");
     expect(guardDollars("already \\$5")).toBe("already \\$5");
   });
+
+  test("a formula on a line of its own is shown on its own", () => {
+    expect(guardDollars("so:\n\n$$\\sum k$$\n\nand $$x$$ here")).toBe("so:\n\n$$\n\\sum k\n$$\n\nand $$x$$ here");
+  });
 });

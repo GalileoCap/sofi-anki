@@ -50,6 +50,8 @@ const GID = {
   dailyGoal:    "demo-g10",
   overflow:     "demo-g11",
   sharing:      "demo-g12",
+  formulas:     "demo-g13",
+  sources:      "demo-g14",
 };
 
 
@@ -323,6 +325,8 @@ function buildAppDeck(now: Millis): Deck {
           { id: "md-a", text: "`**bold**` and `*italic*`",   correct: true  },
           { id: "md-b", text: "Fenced code blocks",          correct: true  },
           { id: "md-c", text: "Tables",                      correct: true  },
+          { id: "md-e", text: "LaTeX formulas, like $a^2 + b^2 = c^2$", correct: true },
+          { id: "md-f", text: "Mermaid diagrams",            correct: true  },
           { id: "md-d", text: "Embedded video",              correct: false },
         ],
       },
@@ -385,6 +389,35 @@ function buildAppDeck(now: Millis): Deck {
         complexity: "medium",
         tags: ["decks"],
       },
+      {
+        id: GID.formulas,
+        type: "standard",
+        title: "How do you write a formula or a diagram on a card?",
+        response:
+          "Write LaTeX between single dollars inside a line, like $e^{i\\pi} + 1 = 0$, or between double dollars for a formula of its own:\n\n" +
+          "$$\\sum_{k=1}^{n} k = \\frac{n(n+1)}{2}$$\n\n" +
+          "Write a diagram in a `mermaid` code block:\n\n" +
+          "```mermaid\nflowchart LR\n  Q[Question] --> A[Answer] --> G{Grade}\n  G -->|Wrong| Q\n```\n\n" +
+          "As written on the card:\n\n" +
+          "~~~\n$$\\sum_{k=1}^{n} k = \\frac{n(n+1)}{2}$$\n\n```mermaid\nflowchart LR\n  Q[Question] --> A[Answer] --> G{Grade}\n  G -->|Wrong| Q\n```\n~~~\n\n" +
+          "A price stays a price: $5 and $10 are not a formula.",
+        sources: [
+          "[KaTeX's supported functions](https://katex.org/docs/supported.html)",
+          "[Mermaid's syntax](https://mermaid.js.org/intro/syntax-reference.html)",
+        ],
+        complexity: "medium",
+        tags: ["cards"],
+      },
+      {
+        id: GID.sources,
+        type: "standard",
+        title: "Where can a card say its answer comes from?",
+        response:
+          "In **Sources, one a line** in the card form: a book and page, a URL, or a Markdown link.\n\n" +
+          "They show under the answer once the card is turned, like the two links under the card on formulas and diagrams.",
+        complexity: "easy",
+        tags: ["cards"],
+      },
     ],
   };
 }
@@ -424,6 +457,7 @@ const JS_DURATION: Record<string, number> = {
 // 6 runs over 10 days, as for a deck begun recently.
 const APP_RUN_OFFSETS = [10, 8, 6, 4, 2, 1];
 
+// The guide's cards without results here (formulas, sources) were never studied, so they come up as new.
 const APP_RESULTS: Record<string, R[]> = {
   //                [10,  8,  6,  4,  2,  1]  days ago
   [GID.cardTypes]:  [WR, CR, CR, CR, CR, CR],
@@ -485,7 +519,7 @@ export function demoStore(now: Millis): Store {
   const appDeck = buildAppDeck(now);
   const runs = [
     ...buildRuns(JS_DECK_ID, "js", JS_RUN_OFFSETS, JS_RESULTS, JS_DURATION, jsDeck.cards, now),
-    ...buildRuns(APP_DECK_ID, "app", APP_RUN_OFFSETS, APP_RESULTS, APP_DURATION, appDeck.cards, now),
+    ...buildRuns(APP_DECK_ID, "app", APP_RUN_OFFSETS, APP_RESULTS, APP_DURATION, appDeck.cards.filter((card) => card.id in APP_RESULTS), now),
   ];
   const schedules = runs.reduce(
     (index, run) => scheduleRun(index, run.deckId, run.results, run.completedAt),

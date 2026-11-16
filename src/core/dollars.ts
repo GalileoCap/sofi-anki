@@ -7,9 +7,15 @@
 export function guardDollars(markdown: string): string {
   return markdown
     .split(/(```[\s\S]*?(?:```|$)|~~~[\s\S]*?(?:~~~|$)|`[^`\n]*`)/)
-    .map((part, i) => (i % 2 === 1 ? part : guardText(part)))
+    .map((part, i) => (i % 2 === 1 ? part : guardText(displayLines(part))))
     .join("");
 }
+
+/**
+ * A line holding only `$$…$$` as display math. remark-math reads `$$` as display only on lines
+ * of their own, and a formula written on one line would otherwise sit in the text.
+ */
+const displayLines = (text: string): string => text.replace(/^[ \t]*\$\$([^\n]+?)\$\$[ \t]*$/gm, "$$$$\n$1\n$$$$");
 
 const isSpace = (ch: string | undefined): boolean => ch === undefined || /\s/.test(ch);
 

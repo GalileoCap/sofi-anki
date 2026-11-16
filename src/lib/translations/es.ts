@@ -127,36 +127,10 @@ export const es: Translation = {
       "tags": ["subtema"]
     },
     {
-      "type": "choice",
-      "title": "Pregunta de opción múltiple",
-      "hint": "Pista opcional que se muestra antes de la respuesta",
-      "sources": ["Opcional: de dónde sale la respuesta"],
-      "complexity": "easy" | "medium" | "hard",
-      "tags": ["subtema"],
-      "options": [
-        { "text": "Opción A", "correct": true },
-        { "text": "Opción B", "correct": false }
-      ]
-    }
-  ]
-}
-
-Todas las cartas tienen "title", "response", "complexity", opcional "tags", opcional "hint" y opcional "sources".
-Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", opcional "sources" y "options" (array de { "text", "correct" }).
-Los textos son Markdown: escribí las fórmulas en LaTeX entre $ y $ (en línea) o $$ y $$ (en su propia línea), y los diagramas en bloques de código \`\`\`mermaid.
-Devolvé solo el JSON, sin texto extra.`,
-  "import.cards.schemaPrompt": `Generá 50 tarjetas tipo anki sobre "" en el siguiente formato JSON:
-
-
-{
-  "cards": [
-    {
-      "title": "Pregunta o anverso de la tarjeta",
-      "response": "Respuesta o reverso de la tarjeta",
-      "hint": "Pista opcional que se muestra antes de revelar la respuesta",
-      "sources": ["Opcional: de dónde sale la respuesta, una referencia o una URL"],
-      "complexity": "easy" | "medium" | "hard",
-      "tags": ["subtema"]
+      "title": "Área de un círculo de radio $r$?",
+      "response": "$$A = \\\\pi r^2$$\\n\\n\`\`\`mermaid\\nflowchart LR\\n  r[radius] --> A[area]\\n\`\`\`",
+      "sources": ["Euclides, Elementos, libro XII, prop. 2"],
+      "complexity": "medium"
     },
     {
       "type": "choice",
@@ -175,7 +149,45 @@ Devolvé solo el JSON, sin texto extra.`,
 
 Todas las cartas tienen "title", "response", "complexity", opcional "tags", opcional "hint" y opcional "sources".
 Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", opcional "sources" y "options" (array de { "text", "correct" }).
-Los textos son Markdown: escribí las fórmulas en LaTeX entre $ y $ (en línea) o $$ y $$ (en su propia línea), y los diagramas en bloques de código \`\`\`mermaid.
+Los textos son Markdown: escribí las fórmulas en LaTeX entre $ y $ (en línea) o $$ y $$ (en su propia línea), y los diagramas en bloques de código \`\`\`mermaid, como la segunda tarjeta. Dentro de un string JSON, duplicá cada barra invertida (\\\\frac) y escribí cada salto de línea como \\n.
+Devolvé solo el JSON, sin texto extra.`,
+  "import.cards.schemaPrompt": `Generá 50 tarjetas tipo anki sobre "" en el siguiente formato JSON:
+
+
+{
+  "cards": [
+    {
+      "title": "Pregunta o anverso de la tarjeta",
+      "response": "Respuesta o reverso de la tarjeta",
+      "hint": "Pista opcional que se muestra antes de revelar la respuesta",
+      "sources": ["Opcional: de dónde sale la respuesta, una referencia o una URL"],
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtema"]
+    },
+    {
+      "title": "Área de un círculo de radio $r$?",
+      "response": "$$A = \\\\pi r^2$$\\n\\n\`\`\`mermaid\\nflowchart LR\\n  r[radius] --> A[area]\\n\`\`\`",
+      "sources": ["Euclides, Elementos, libro XII, prop. 2"],
+      "complexity": "medium"
+    },
+    {
+      "type": "choice",
+      "title": "Pregunta de opción múltiple",
+      "hint": "Pista opcional que se muestra antes de la respuesta",
+      "sources": ["Opcional: de dónde sale la respuesta"],
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtema"],
+      "options": [
+        { "text": "Opción A", "correct": true },
+        { "text": "Opción B", "correct": false }
+      ]
+    }
+  ]
+}
+
+Todas las cartas tienen "title", "response", "complexity", opcional "tags", opcional "hint" y opcional "sources".
+Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", opcional "sources" y "options" (array de { "text", "correct" }).
+Los textos son Markdown: escribí las fórmulas en LaTeX entre $ y $ (en línea) o $$ y $$ (en su propia línea), y los diagramas en bloques de código \`\`\`mermaid, como la segunda tarjeta. Dentro de un string JSON, duplicá cada barra invertida (\\\\frac) y escribí cada salto de línea como \\n.
 Devolvé solo el JSON, sin texto extra.`,
   // The sticker chart (A12): home, study, the run's end, and dates in words.
   "when.never": "sin estudiar todav\u00eda",

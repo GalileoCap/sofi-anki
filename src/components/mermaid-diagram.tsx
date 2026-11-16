@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { drawDiagram } from "@/effects/diagram";
 import { onPageClassChange, pageShowsDark } from "@/effects/theme";
 import { looks } from "@/lib/ui-looks";
+import { cn } from "@/lib/utils";
 
 type Drawn = { readonly key: string; readonly svg: Result<string, string> };
 
@@ -33,7 +34,7 @@ export function MermaidDiagram({ source }: { source: string }) {
       <pre tabIndex={0} className="overflow-x-auto font-mono text-xs whitespace-pre-wrap">
         {source}
       </pre>
-      {svg?.isErr() && <p className={looks.fine}>{t("diagram.failed").replace("{reason}", svg.error)}</p>}
+      {svg?.isErr() && <p className={cn(looks.fine, "wrap-anywhere")}>{t("diagram.failed").replace("{reason}", svg.error)}</p>}
     </div>
   );
 }

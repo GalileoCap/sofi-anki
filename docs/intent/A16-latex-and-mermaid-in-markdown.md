@@ -15,8 +15,10 @@ Every text the app renders as Markdown (questions, answers, hints, options, sour
 
 - KaTeX writes MathML, which the browser lays out, so no KaTeX stylesheet or font enters the build or the design census. It sits in its own eager chunk, about 80 kB gzipped.
 - A lone `$` is math only by Pandoc's rule (`guardDollars`): the opening one has a non-space after it, the closing one a non-space before and no digit after. Any other `$` is escaped, so a card that already reads "it costs $5 and $10" reads the same.
+- A line holding only `$$…$$` is shown as a formula of its own, centred, as people and models write it, though remark-math reads `$$` as display only on lines of their own.
+- A formula wider than its room scrolls within itself and a diagram shrinks to fit, so a phone's page keeps its width.
 - Mermaid loads only when a card holds a diagram. Its chunks are named `diagram-*`, left out of the install-time precache and cached on first use. Its `strict` security level escapes HTML in labels and turns off click handlers, since a shared deck's diagrams are another person's text. A diagram is drawn in the page's light or dark and redrawn when the theme changes. One that does not parse shows its source and Mermaid's error.
-- The deck-writing prompt tells a model to write formulas and diagrams this way.
+- The deck-writing prompt tells a model to write formulas and diagrams this way, with a worked card and how to escape them in JSON. The guide deck a first visit seeds has a card on formulas and diagrams and one on sources, both new to study.
 
 ## Options
 

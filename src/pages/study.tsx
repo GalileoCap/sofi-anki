@@ -185,7 +185,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
         </div>
       </aside>
 
-      <div className={cn(looks.form, "min-h-0")}>
+      <div className={cn(looks.form, "min-h-0 min-w-0")}>
         <div className={looks.topbar}>
           <Button variant="ghost" onClick={() => setLeaving(true)}>
             <Icon icon={Cancel01Icon} />

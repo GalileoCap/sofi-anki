@@ -149,37 +149,10 @@ export const en = {
       "tags": ["subtopic"]
     },
     {
-      "type": "choice",
-      "title": "Multiple choice question",
-      "hint": "Optional hint shown before answer",
-      "sources": ["Optional: where the answer comes from"],
-      "complexity": "easy" | "medium" | "hard",
-      "tags": ["subtopic"],
-      "options": [
-        { "text": "Option A", "correct": true },
-        { "text": "Option B", "correct": false }
-      ]
-    }
-  ]
-}
-
-Standard cards have "title", "response", "complexity", optional "tags", optional "hint", and optional "sources".
-Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", optional "sources", and "options" (array of { "text", "correct" }).
-If multiple options are correct, it becomes a multi-select question.
-The deck and each card can have "tags" (array of strings) for categorization.
-Text fields are Markdown: write math in LaTeX between $ and $ (inline) or $$ and $$ (on its own line), and diagrams in \`\`\`mermaid code blocks.
-Return only the JSON, no extra text.`,
-  "import.cards.schemaPrompt": `Generate flashcards in the following JSON format:
-
-{
-  "cards": [
-    {
-      "title": "Question or front of card",
-      "response": "Answer or back of card",
-      "hint": "Optional hint shown before revealing the answer",
-      "sources": ["Optional: where the answer comes from, a reference or a URL"],
-      "complexity": "easy" | "medium" | "hard",
-      "tags": ["subtopic"]
+      "title": "Area of a circle of radius $r$?",
+      "response": "$$A = \\\\pi r^2$$\\n\\n\`\`\`mermaid\\nflowchart LR\\n  r[radius] --> A[area]\\n\`\`\`",
+      "sources": ["Euclid, Elements, Book XII, Prop. 2"],
+      "complexity": "medium"
     },
     {
       "type": "choice",
@@ -198,7 +171,46 @@ Return only the JSON, no extra text.`,
 
 Standard cards have "title", "response", "complexity", optional "tags", optional "hint", and optional "sources".
 Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", optional "sources", and "options" (array of { "text", "correct" }).
-Text fields are Markdown: write math in LaTeX between $ and $ (inline) or $$ and $$ (on its own line), and diagrams in \`\`\`mermaid code blocks.
+If multiple options are correct, it becomes a multi-select question.
+The deck and each card can have "tags" (array of strings) for categorization.
+Text fields are Markdown: write math in LaTeX between $ and $ (inline) or $$ and $$ (on its own line), and diagrams in \`\`\`mermaid code blocks, as the second card does. Inside a JSON string, double every backslash (\\\\frac) and write each line break as \\n.
+Return only the JSON, no extra text.`,
+  "import.cards.schemaPrompt": `Generate flashcards in the following JSON format:
+
+{
+  "cards": [
+    {
+      "title": "Question or front of card",
+      "response": "Answer or back of card",
+      "hint": "Optional hint shown before revealing the answer",
+      "sources": ["Optional: where the answer comes from, a reference or a URL"],
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"]
+    },
+    {
+      "title": "Area of a circle of radius $r$?",
+      "response": "$$A = \\\\pi r^2$$\\n\\n\`\`\`mermaid\\nflowchart LR\\n  r[radius] --> A[area]\\n\`\`\`",
+      "sources": ["Euclid, Elements, Book XII, Prop. 2"],
+      "complexity": "medium"
+    },
+    {
+      "type": "choice",
+      "title": "Multiple choice question",
+      "hint": "Optional hint shown before answer",
+      "sources": ["Optional: where the answer comes from"],
+      "complexity": "easy" | "medium" | "hard",
+      "tags": ["subtopic"],
+      "options": [
+        { "text": "Option A", "correct": true },
+        { "text": "Option B", "correct": false }
+      ]
+    }
+  ]
+}
+
+Standard cards have "title", "response", "complexity", optional "tags", optional "hint", and optional "sources".
+Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", optional "sources", and "options" (array of { "text", "correct" }).
+Text fields are Markdown: write math in LaTeX between $ and $ (inline) or $$ and $$ (on its own line), and diagrams in \`\`\`mermaid code blocks, as the second card does. Inside a JSON string, double every backslash (\\\\frac) and write each line break as \\n.
 Return only the JSON, no extra text.`,
   // The sticker chart (A12): home, study, the run's end, and dates in words.
   "when.never": "not studied yet",
