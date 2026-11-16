@@ -116,7 +116,7 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
               save();
             }
           }}
-          className="grid gap-x-8 gap-y-4 lg:grid-cols-2"
+          className="grid gap-x-8 gap-y-4 lg:grid-cols-2 [&>*]:min-w-0"
         >
           <div className={looks.form}>
             <Segmented
