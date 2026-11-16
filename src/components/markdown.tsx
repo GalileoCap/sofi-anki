@@ -17,7 +17,7 @@ interface MarkdownProps {
 }
 
 /** A formula wider than its room scrolls within itself, so the page keeps its width. A formula on its own line takes the line. */
-const formulaScrolls = "[&_.katex]:inline-block [&_.katex]:max-w-full [&_.katex]:overflow-x-auto [&_.katex]:overflow-y-hidden [&_.katex]:py-1 [&_.katex]:align-middle [&>.katex]:my-2 [&>.katex]:block!";
+const formulaScrolls = "[&_.katex]:inline-block [&_.katex]:max-w-full [&_.katex]:overflow-x-auto [&_.katex]:overflow-y-hidden [&_.katex]:py-1 [&_.katex]:align-middle [&_.katex:has(>math[display=block])]:my-2 [&_.katex:has(>math[display=block])]:block!";
 
 /** The source of a ```mermaid block, from the `pre` that holds it, or null for any other block. */
 function mermaidSource(pre: Element | undefined): string | null {
