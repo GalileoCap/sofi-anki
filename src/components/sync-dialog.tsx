@@ -19,7 +19,12 @@ export function SyncDialog({ open, onOpenChange, sync }: SyncDialogProps) {
           <DialogTitle>{t("sync.title")}</DialogTitle>
         </DialogHeader>
         <p className="text-base">{t("sync.about")}</p>
-        <p className={looks.lead}>{t("sync.where")}</p>
+        <p className={looks.lead}>
+          {t("sync.where")}{" "}
+          <a href="/privacy.html" target="_blank" rel="noreferrer" className="underline underline-offset-2">
+            {t("sync.privacy")}
+          </a>
+        </p>
         <SyncLine status={status} />
         <div className={looks.buttons}>
           {!on ? (

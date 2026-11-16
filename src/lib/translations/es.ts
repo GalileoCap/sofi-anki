@@ -429,4 +429,5 @@ Devolvé solo el JSON, sin texto extra.`,
   "sync.refused": "Google rechazó la sincronización ({detail}). Aquí no cambió nada.",
   "sync.badFile": "El archivo de tu Drive no se pudo leer, así que la sincronización lo dejó a él y a este dispositivo como estaban.",
   "sync.signInAgain": "Google pide que inicies sesión una vez más para que la sincronización siga. Vuelve a activarla.",
+  "sync.privacy": "Política de privacidad",
 };

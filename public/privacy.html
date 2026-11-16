@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Privacy policy · sofi-anki</title>
+    <style>
+      :root { color-scheme: light dark; --ink: #2a1720; --muted: #6b5560; --bg: #fdf8fa; --rule: #e8dce2; --link: #8a2f5a; }
+      @media (prefers-color-scheme: dark) { :root { --ink: #f3e9ee; --muted: #b9a7b0; --bg: #1c1418; --rule: #3a2c33; --link: #e9a3c4; } }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+      main { max-width: 42rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+      h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 0.25rem; }
+      h2 { font-size: 1.2rem; margin: 2rem 0 0.5rem; }
+      p, li { margin: 0.5rem 0; }
+      .muted { color: var(--muted); }
+      a { color: var(--link); }
+      hr { border: 0; border-top: 2px dashed var(--rule); margin: 3rem 0; }
+      nav { margin-bottom: 1.5rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav class="muted"><a href="#en">English</a> · <a href="#es" lang="es">Español</a> · <a href="/">sofi-anki</a></nav>
+
+      <section id="en">
+        <h1>Privacy policy</h1>
+        <p class="muted">sofi-anki, at anki.smplworks.net. In effect since 16 November 2026.</p>
+
+        <p>sofi-anki is a flashcard app made by one person for themselves and their friends. It has no accounts, no ads, no analytics and no cookies. This page says what data it handles and where that data goes.</p>
+
+        <h2>Your decks stay in your browser</h2>
+        <p>Your decks, your study history, each card's schedule and your settings are kept in your browser's own storage on your device. The app sends them nowhere unless you turn on sync. The site is served by GitHub Pages, which, like any web host, receives your IP address and browser details when it sends you the page (see <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>).</p>
+        <p>A share link holds the shared deck inside the link itself, after the <code>#</code>, a part browsers never send to a server. A backup file is saved to your device and goes only where you take it.</p>
+
+        <h2>Sync with Google Drive, if you turn it on</h2>
+        <p>Sync is optional and off until you turn it on. It signs you in with Google and asks for one permission, <code>drive.appdata</code>: a hidden folder in your Google Drive that only this app can open. It cannot see, open or change any of your other files.</p>
+        <p>In that folder the app keeps one file, <code>sofi-anki.json</code>, with your decks, study history, schedule, settings and the times each was changed. Your browser reads and writes it directly with Google, so your decks travel only between your devices and your Drive.</p>
+
+        <h2>The sign-in server</h2>
+        <p>Google sign-ins last an hour. So that sync can keep going without asking you to sign in every hour, a small server at <code>auth.anki.smplworks.net</code>, hosted by Opalstack, renews them. When you sign in it receives the one-time code from Google's sign-in, trades it with Google for an access token and a renewal token, and gives both back to your browser. The renewal token is encrypted with a key only the server holds, so the copy kept in your browser is useless to anyone else.</p>
+        <p>The server stores nothing: no database, no files about you, no tokens. It never sees your decks. Its log records each request's kind, path, outcome and duration, with no tokens and no content. The host's web server may keep your IP address in its access logs, as web servers do.</p>
+
+        <h2>Google user data</h2>
+        <p>The app uses the access Google grants only to keep your sync file in your Drive's app folder. It does not share, sell or transfer Google user data to anyone, does not use it for ads, and does not use it to train any AI or machine learning model.</p>
+        <p>sofi-anki's use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+
+        <h2>Removing your data</h2>
+        <ul>
+          <li>Turning sync off in the app asks Google to revoke the app's access. You can also remove it at <a href="https://myaccount.google.com/connections">myaccount.google.com/connections</a>.</li>
+          <li>To delete the sync file, open Google Drive on the web, then Settings, Manage apps, find sofi-anki, and choose Delete hidden app data.</li>
+          <li>To delete what is in your browser, clear this site's data in your browser's settings. Download a backup first if you want to keep your decks.</li>
+        </ul>
+
+        <h2>Changes and contact</h2>
+        <p>If this policy changes, this page will say so, with the new date. Questions or requests: <a href="https://github.com/GalileoCap/sofi-anki/issues">open an issue on GitHub</a>.</p>
+      </section>
+
+      <hr />
+
+      <section id="es" lang="es">
+        <h1>Política de privacidad</h1>
+        <p class="muted">sofi-anki, en anki.smplworks.net. Vigente desde el 16 de noviembre de 2026.</p>
+
+        <p>sofi-anki es una app de tarjetas de estudio hecha por una persona para sí y sus amigos. No tiene cuentas, publicidad, analíticas ni cookies. Esta página dice qué datos maneja y adónde van.</p>
+
+        <h2>Tus mazos quedan en tu navegador</h2>
+        <p>Tus mazos, tu historial de estudio, el calendario de cada tarjeta y tus ajustes se guardan en el almacenamiento de tu navegador, en tu dispositivo. La app no los envía a ningún lado salvo que actives la sincronización. El sitio lo sirve GitHub Pages, que, como cualquier servidor web, recibe tu dirección IP y los datos de tu navegador al enviarte la página (ver la <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">declaración de privacidad de GitHub</a>).</p>
+        <p>Un enlace para compartir lleva el mazo dentro del propio enlace, después del <code>#</code>, una parte que los navegadores nunca envían a un servidor. Una copia de seguridad se guarda en tu dispositivo y va solo adonde tú la lleves.</p>
+
+        <h2>Sincronizar con Google Drive, si la activas</h2>
+        <p>La sincronización es opcional y está apagada hasta que la actives. Inicia sesión con Google y pide un solo permiso, <code>drive.appdata</code>: una carpeta oculta de tu Google Drive que solo esta app puede abrir. No puede ver, abrir ni cambiar ninguno de tus otros archivos.</p>
+        <p>En esa carpeta la app guarda un archivo, <code>sofi-anki.json</code>, con tus mazos, tu historial, tu calendario, tus ajustes y la hora en que cambió cada cosa. Tu navegador lo lee y lo escribe directamente con Google, así que tus mazos viajan solo entre tus dispositivos y tu Drive.</p>
+
+        <h2>El servidor de inicio de sesión</h2>
+        <p>Un inicio de sesión de Google dura una hora. Para que la sincronización siga sin pedirte iniciar sesión cada hora, un pequeño servidor en <code>auth.anki.smplworks.net</code>, alojado en Opalstack, lo renueva. Al iniciar sesión recibe el código de un solo uso del inicio de sesión de Google, lo cambia con Google por un token de acceso y un token de renovación, y devuelve ambos a tu navegador. El token de renovación va cifrado con una clave que solo tiene el servidor, así que la copia que guarda tu navegador no le sirve a nadie más.</p>
+        <p>El servidor no guarda nada: ni base de datos, ni archivos sobre ti, ni tokens. Nunca ve tus mazos. Su registro anota de cada pedido el tipo, la ruta, el resultado y la duración, sin tokens ni contenido. El servidor web del alojamiento puede guardar tu dirección IP en sus registros de acceso, como hacen los servidores web.</p>
+
+        <h2>Datos de usuario de Google</h2>
+        <p>La app usa el acceso que Google otorga solo para guardar tu archivo de sincronización en la carpeta de la app en tu Drive. No comparte, vende ni transfiere datos de usuario de Google a nadie, no los usa para publicidad y no los usa para entrenar ningún modelo de inteligencia artificial o aprendizaje automático.</p>
+        <p>El uso y la transferencia que hace sofi-anki de la información recibida de las API de Google cumple la <a href="https://developers.google.com/terms/api-services-user-data-policy">Política de datos de usuario de los servicios de API de Google</a>, incluidos los requisitos de uso limitado.</p>
+
+        <h2>Borrar tus datos</h2>
+        <ul>
+          <li>Desactivar la sincronización en la app pide a Google que revoque el acceso de la app. También puedes quitarlo en <a href="https://myaccount.google.com/connections">myaccount.google.com/connections</a>.</li>
+          <li>Para borrar el archivo de sincronización, abre Google Drive en la web, luego Configuración, Administrar apps, busca sofi-anki y elige Borrar datos ocultos de la app.</li>
+          <li>Para borrar lo que hay en tu navegador, borra los datos de este sitio en los ajustes del navegador. Descarga antes una copia de seguridad si quieres conservar tus mazos.</li>
+        </ul>
+
+        <h2>Cambios y contacto</h2>
+        <p>Si esta política cambia, esta página lo dirá, con la fecha nueva. Preguntas o pedidos: <a href="https://github.com/GalileoCap/sofi-anki/issues">abre un issue en GitHub</a>.</p>
+      </section>
+    </main>
+  </body>
+</html>

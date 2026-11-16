@@ -56,6 +56,8 @@ const pwa = handover
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,wasm}'],
         // A megabyte and more of diagram code nobody needs until a card holds a diagram.
         globIgnores: ['**/diagram-*.js'],
+        // The privacy policy is its own page, which an installed app loads as itself.
+        navigateFallbackDenylist: [/^\/privacy/],
         runtimeCaching: [
           {
             urlPattern: /\/assets\/diagram-[\w-]+\.js$/,
