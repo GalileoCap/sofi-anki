@@ -42,7 +42,7 @@ Until the deploy has a client id, the app builds and works as before, with no Sy
 
 ### A Google OAuth client for the app folder, named to the deploy
 
-Done 2026-11-16 by the owner: client `887545827797-…` in project `anki-514916`, its id in the repository variable `GOOGLE_CLIENT_ID` and in `.env.local`. Not yet driven: a sign-in on the live app.
+Done 2026-11-16 by the owner: client `887545827797-…` in project `anki-514916`, its id in the repository variable `GOOGLE_CLIENT_ID` and in `.env.local`. A test user signed in and synced on 2026-11-16, and `main` deployed it the same day at 9058ab4.
 
 The owner's step, in a Google account of theirs.
 
