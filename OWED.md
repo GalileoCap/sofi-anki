@@ -8,9 +8,13 @@ The deploy turns the old address into the hand-over page, which forwards to the 
 
 ### DNS: anki.smplworks.net points at GitHub Pages
 
+Done 2026-11-16: `dig` names `galileocap.github.io`.
+
 At Opalstack, a `CNAME` record for `anki.smplworks.net` to `galileocap.github.io.`. `dig +short anki.smplworks.net` names `galileocap.github.io` once it holds.
 
 ### The repo `GalileoCap/anki`, with a deploy key this repo's workflow pushes with
+
+Done 2026-11-16, by the owner's word. The repo answers. The secret is checked by the first deploy.
 
 1. Create `GalileoCap/anki`, public (a free account serves Pages from a public repo only), with any first commit so it has a branch.
 2. Make a key pair: `ssh-keygen -t ed25519 -N "" -C "sofi-anki deploy" -f anki-deploy`.
@@ -19,7 +23,7 @@ At Opalstack, a `CNAME` record for `anki.smplworks.net` to `galileocap.github.io
 
 ### Pages on `GalileoCap/anki`, after the first deploy writes its `gh-pages` branch
 
-The first run of the workflow may stop after pushing the app and before the hand-over, which is harmless: the old address keeps serving the old app until the hand-over deploys.
+Until `https://anki.smplworks.net/` serves the app, the workflow skips the hand-over's deploy, so the old address keeps serving the old app.
 
 1. Settings → Pages: source "Deploy from a branch", branch `gh-pages`, folder `/`.
 2. Custom domain `anki.smplworks.net` (the workflow writes the `CNAME` file too), then "Enforce HTTPS" once GitHub has issued the certificate.

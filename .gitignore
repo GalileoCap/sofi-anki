@@ -29,3 +29,7 @@ dist-ssr
 # session-kit handoff
 CLAUDE.local.md
 dist-handover
+
+# The deploy key pair OWED.md has the owner make: never committed
+anki-deploy
+anki-deploy.pub

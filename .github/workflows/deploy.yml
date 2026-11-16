@@ -19,6 +19,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      up: ${{ steps.new-address.outputs.up }}
     steps:
       - uses: actions/checkout@v4
 
@@ -45,12 +47,25 @@ jobs:
           publish_dir: dist
           cname: anki.smplworks.net
 
+      # The old address forwards to the new one, so it takes the hand-over page only once the new
+      # one serves the app. Until then its last deployment, the app itself, stays.
+      - name: Does anki.smplworks.net serve the app?
+        id: new-address
+        run: |
+          if curl -sf https://anki.smplworks.net/manifest.webmanifest | grep -q '"start_url":"/"'; then
+            echo "up=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::anki.smplworks.net does not serve the app yet; the old address keeps its last deployment"
+            echo "up=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist-handover
 
   deploy:
     needs: build
+    if: needs.build.outputs.up == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
