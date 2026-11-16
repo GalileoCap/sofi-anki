@@ -40,10 +40,10 @@
     "entry": "src/index.css",
     "css": "dist/assets",
     "budgets": {
-      "colors": 41,
+      "colors": 67,
       "fontSizes": 12,
-      "fontFamilies": 3,
-      "radii": 6,
+      "fontFamilies": 5,
+      "radii": 9,
       "shadows": 3
     }
   }

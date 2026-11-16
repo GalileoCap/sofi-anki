@@ -57,12 +57,12 @@ Colour changes on hover and press. Two things move: a fold's chevron turns as it
 
 ## Budgets
 
-The census on 2026-11-15, after the restyle to the sticker chart. Each budget is the count now, so any growth is a decision. A count that drops fails too, and the budget is lowered to keep the gain.
+The census on 2026-11-15, after the restyle to the sticker chart and the classic look (`A14`) beside it. Each budget is the count now, so any growth is a decision. A count that drops fails too, and the budget is lowered to keep the gain.
 
 | Dimension | Count | What it holds |
 |---|---|---|
-| Colours | 41 | The light and dark tokens, each mode's two shadow colours, and Tailwind's own transparent, current colour and ring defaults. The tinted neutrals of each mode share fewer values than shadcn's greys did |
+| Colours | 67 | The light and dark tokens of each look, each mode's two shadow colours, and Tailwind's own transparent, current colour and ring defaults. The classic look's greys are 26 of them |
 | Type sizes | 12 | The eight tokens, the 18 px root, and the browser defaults Tailwind's reset keeps (`1em`, `75 %`, `80 %`) |
-| Families | 3 | M PLUS Rounded 1c, the monospace, and Tailwind's fallback stack |
-| Radii | 6 | None, the three radii, the round one, and the pill |
+| Families | 5 | M PLUS Rounded 1c, Figtree, the monospace, and Tailwind's fallback stacks |
+| Radii | 9 | None, the three radii of each look, the round one, and the pill |
 | Shadows | 3 | None, and the two depths |

@@ -30,11 +30,11 @@ export function readStoredText(): Result<StoredText, StorageError> {
 
 /**
  * The text stored under `name`, or null when nothing is or the browser refuses the read: the
- * language and the theme then take their defaults.
+ * language, the theme and the look then take their defaults.
  *
  * @effects localStorage
  */
-export const readStoredValue = (name: "lang" | "theme"): string | null => getItem(name).unwrapOr(null);
+export const readStoredValue = (name: "lang" | "theme" | "look"): string | null => getItem(name).unwrapOr(null);
 
 /**
  * `text` stored under `name`.

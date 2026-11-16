@@ -17,6 +17,15 @@ export function showDark(dark: boolean): void {
 }
 
 /**
+ * The page in the classic look or the sticker chart.
+ *
+ * @effects DOM
+ */
+export function showClassic(classic: boolean): void {
+  document.documentElement.classList.toggle("classic", classic);
+}
+
+/**
  * `listener` called each time the system's preference changes, until the returned function is called.
  *
  * @effects media query

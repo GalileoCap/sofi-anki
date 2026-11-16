@@ -4,11 +4,14 @@ import { z } from "zod";
 import { type DecodeError, decodeJson } from "@/core/decode";
 import {
   DEFAULT_LANG,
+  DEFAULT_LOOK,
   DEFAULT_SETTINGS,
   DEFAULT_THEME,
+  type AppLook,
   type Lang,
   type Store,
   type Theme,
+  appLooks,
   deckSchema,
   langs,
   runSchema,
@@ -25,6 +28,7 @@ export const storageKeys = {
   settings: "anki-settings",
   lang: "lang",
   theme: "anki-theme",
+  look: "anki-look",
 } as const;
 
 export type StoreKey = "decks" | "runs" | "schedules" | "settings";
@@ -57,6 +61,10 @@ export const readLang = (text: string | null): Lang =>
 /** The stored theme, or `DEFAULT_THEME` when none or an unknown one is stored. */
 export const readTheme = (text: string | null): Theme =>
   themes.find((theme) => theme === text) ?? DEFAULT_THEME;
+
+/** The stored look, or `DEFAULT_LOOK` when none or an unknown one is stored. */
+export const readLook = (text: string | null): AppLook =>
+  appLooks.find((look) => look === text) ?? DEFAULT_LOOK;
 
 const storeKeys: readonly StoreKey[] = ["decks", "runs", "schedules", "settings"];
 

@@ -1,4 +1,4 @@
-import { ChartColumnIcon, MoreHorizontalIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
+import { ChartColumnIcon, MoreHorizontalIcon, PlusSignIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { DropdownMenu } from "radix-ui";
 import { useState } from "react";
 
@@ -23,6 +23,7 @@ import { indexSchedules } from "@/core/scheduler";
 import { comingUp, deckRows, lastWeek, stickersOn, streak } from "@/core/stats";
 import { newId, now as clockNow } from "@/effects/clock";
 import { useKeys } from "@/hooks/use-keys";
+import { useLook } from "@/hooks/use-look";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
@@ -241,6 +242,7 @@ type HomeMenuProps = {
 /** Home's menu: what is done now and then, bringing decks in, the backup and the daily goal. */
 function HomeMenu({ onDialog }: HomeMenuProps) {
   const { t } = useLanguage();
+  const { look, toggleLook } = useLook();
   const item = (label: string, onSelect: () => void) => (
     <DropdownMenu.Item className={looks.menuItem} onSelect={onSelect}>
       {label}
@@ -258,6 +260,12 @@ function HomeMenu({ onDialog }: HomeMenuProps) {
           {item(t("home.backup"), () => onDialog("backup"))}
           <DropdownMenu.Separator className={looks.menuRule} />
           {item(t("home.dailyGoal"), () => onDialog("goal"))}
+          <DropdownMenu.CheckboxItem className={looks.menuItem} checked={look === "classic"} onCheckedChange={toggleLook}>
+            {t("home.classicLook")}
+            <DropdownMenu.ItemIndicator className="ml-auto">
+              <Icon icon={Tick02Icon} />
+            </DropdownMenu.ItemIndicator>
+          </DropdownMenu.CheckboxItem>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

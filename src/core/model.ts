@@ -132,6 +132,11 @@ export type Theme = (typeof themes)[number];
 /** The theme before anyone picks one: the system's. */
 export const DEFAULT_THEME: Theme = "system";
 
+/** How the app looks: the sticker chart, or the classic look of plain greys, picked from home's More menu. */
+export const appLooks = ["sticker", "classic"] as const;
+export type AppLook = (typeof appLooks)[number];
+export const DEFAULT_LOOK: AppLook = "sticker";
+
 export const runModes = ["all", "due", "weak", "new"] as const;
 export type RunMode = (typeof runModes)[number];
 
