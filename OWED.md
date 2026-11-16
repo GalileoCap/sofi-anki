@@ -42,6 +42,8 @@ Until the deploy has a client id, the app builds and works as before, with no Sy
 
 ### A Google OAuth client for the app folder, named to the deploy
 
+Done 2026-11-16 by the owner: client `887545827797-…` in project `anki-514916`, its id in the repository variable `GOOGLE_CLIENT_ID` and in `.env.local`. Not yet driven: a sign-in on the live app.
+
 The owner's step, in a Google account of theirs.
 
 1. At console.cloud.google.com, make a project (for instance "sofi-anki") and enable the Google Drive API in it.
@@ -57,18 +59,26 @@ The app built with `VITE_AUTH_SERVER` signs in through the token server, so the 
 
 ### The Google client's secret, and the code flow's origins
 
+Done 2026-11-16: the secret is in `~/apps/anki_auth/env` on opal, and Google answers a bad code with `invalid_grant`, so it accepts the client.
+
 In the Google client of the section above: copy its client secret. The sign-in popup's code needs no redirect URI. The authorized JavaScript origins stay `https://anki.smplworks.net` and `http://localhost:5173`.
 
 ### auth.anki.smplworks.net points at opal
+
+Done 2026-11-16: `dig` names opal's address.
 
 At Opalstack's DNS, `auth.anki.smplworks.net` to opal's address, the same as `stance.smplworks.net`. `dig +short auth.anki.smplworks.net` names opal's address once it holds.
 
 ### An Opalstack app and site for the server
 
+Half done 2026-11-16: the app `anki_auth` has port 5074. The site does not route yet: the address answers nginx's 404 under the `*.opalstack.com` certificate.
+
 1. Applications: a new "Nginx Proxy Port" app named `anki_auth`. Note its port.
 2. Sites: a new site for `auth.anki.smplworks.net`, routing `/` to `anki_auth`, with the panel's free HTTPS certificate turned on.
 
 ### The first deploy, then its settings
+
+Done 2026-11-16: deployed on port 5074, settings filled, `/health` answers on opal. Its memory after six calls to Google: 1.6 MB, peak 2.5 MB, under the 16 MB cap.
 
 1. `PORT=<the app's port> auth-server/deploy/deploy.sh`. It makes `~/apps/anki_auth/env` on opal with a fresh `SEAL_KEY`, and the server stops at once for want of the Google client.
 2. On opal, fill `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in that file, then `systemctl --user restart anki-auth`.
