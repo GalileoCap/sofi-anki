@@ -86,4 +86,6 @@ Done 2026-11-16: deployed on port 5074, settings filled, `/health` answers on op
 
 ### The Google app published
 
+Done 2026-11-16 by the owner, with the privacy policy at `https://anki.smplworks.net/privacy.html`. The owner signed in after publishing, and the token server logged the exchange.
+
 While the Google app is in Testing, its renewal tokens last 7 days, and each tester signs in again after them. Publishing it (Google Auth Platform → Audience → Publish app) makes them last.
