@@ -28,8 +28,20 @@ export const screens = [
   },
   { name: "home, daily goal", go: (page) => homeMenu(page, "Daily goal") },
   { name: "home, back up and restore", go: (page) => homeMenu(page, "Back up and restore") },
-  { name: "home, bring in from Anki", go: (page) => homeMenu(page, "Bring in from Anki") },
-  { name: "home, bring in a JSON file", go: (page) => homeMenu(page, "Bring in a JSON file") },
+  {
+    name: "home, bring in from Anki",
+    go: async (page) => {
+      await click(page, "button", /^New deck$/);
+      await click(page, "button", /^From Anki$/);
+    },
+  },
+  {
+    name: "home, bring in a JSON file",
+    go: async (page) => {
+      await click(page, "button", /^New deck$/);
+      await click(page, "button", /^From JSON$/);
+    },
+  },
   { name: "stats", go: (page) => click(page, "button", /^Stats$/) },
   { name: "deck", go: openDeck },
   {
@@ -84,7 +96,7 @@ export const screens = [
     name: "study, answer",
     go: async (page) => {
       await startStudy(page);
-      await click(page, "button", /^(Show the answer|Check)/);
+      await click(page, "button", /^(Answer|Check)/);
     },
   },
   {
