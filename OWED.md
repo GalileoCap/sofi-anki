@@ -17,13 +17,13 @@ At Opalstack, a `CNAME` record for `anki.smplworks.net` to `galileocap.github.io
 Done 2026-11-16, by the owner's word. The repo answers. The secret is checked by the first deploy.
 
 1. Create `GalileoCap/anki`, public (a free account serves Pages from a public repo only), with any first commit so it has a branch.
-2. Make a key pair: `ssh-keygen -t ed25519 -N "" -C "sofi-anki deploy" -f anki-deploy`.
+2. Make a key pair outside the project folder: `ssh-keygen -t ed25519 -N "" -C "sofi-anki deploy" -f ~/anki-deploy`.
 3. In `GalileoCap/anki`, Settings → Deploy keys: add `anki-deploy.pub`, with write access.
 4. In `GalileoCap/sofi-anki`, Settings → Secrets and variables → Actions: a secret `ANKI_DEPLOY_KEY` holding `anki-deploy`, the private half. Then delete both files.
 
 ### Pages on `GalileoCap/anki`, after the first deploy writes its `gh-pages` branch
 
-Done 2026-11-16 up to the last item: `https://anki.smplworks.net/` serves the app. Open: "Enforce HTTPS" (`http://` still answers without redirecting), and the run that gives the old address its hand-over page, since the run of 10:17 UTC came before the site was up and skipped it.
+Done 2026-11-16 but for "Enforce HTTPS" (`http://` still answers without redirecting): `https://anki.smplworks.net/` serves the app, and the deploy of 9fa1b97 gave the old address its hand-over page, driven live (a move, a forward after it, a share link forwarded).
 
 Until `https://anki.smplworks.net/` serves the app, the workflow skips the hand-over's deploy, so the old address keeps serving the old app.
 
