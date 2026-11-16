@@ -55,6 +55,10 @@ One family, M PLUS Rounded 1c in its Latin set (weights 400, 500, 700 and 800), 
 
 Colour changes on hover and press. Two things move: a fold's chevron turns as it opens, and stickers fall over the run's end when every card was right the first time. Both stay still where motion is reduced. The sheet filling with a sticker after each grade is the feedback for the daily goal. Each transition names its property (`mo-2`).
 
+## Icon
+
+A ruled index card in front of a fan of deck-coloured cards (sky and amber), on a berry square (`primary`), chosen by the owner on 2026-11-15. The source is `public/favicon.svg`. `node scripts/icons.mjs` renders the PNGs from it: the 192 and 512 px PWA icons, the maskable icon, and the iOS touch icon, which is square because iOS rounds its own corners. The manifest's theme colour is the same berry, and its background is the page's paper pink.
+
 ## Budgets
 
 The census on 2026-11-15, after the restyle to the sticker chart and the classic look (`A14`) beside it. Each budget is the count now, so any growth is a decision. A count that drops fails too, and the budget is lowered to keep the gain.

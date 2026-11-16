@@ -18,8 +18,8 @@ export default defineConfig({
         name: 'sofi-anki',
         short_name: 'sofi-anki',
         description: 'Personal flashcard study app',
-        theme_color: '#863bff',
-        background_color: '#09090b',
+        theme_color: '#622f47',
+        background_color: '#fdf2f3',
         display: 'standalone',
         start_url: '/sofi-anki/',
         icons: [
@@ -34,7 +34,7 @@ export default defineConfig({
             type: 'image/png',
           },
           {
-            src: 'pwa-512.png',
+            src: 'pwa-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
