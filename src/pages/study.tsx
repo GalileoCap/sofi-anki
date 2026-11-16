@@ -1,6 +1,6 @@
 import { Cancel01Icon, MoreHorizontalIcon, PauseIcon, PlayIcon } from "@hugeicons/core-free-icons";
 import { DropdownMenu } from "radix-ui";
-import { useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Icon, IconButton } from "@/components/icon-button";
@@ -101,12 +101,12 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
     refreshTick();
   }
 
-  /** Leaving, once confirmed, keeps the cards answered so far, and nothing when none was. */
-  function leave() {
+  /** Closing the run before it ends keeps the cards answered so far, and nothing when none was. The browser's back closes it as Leave does. */
+  const keepAnswered = useEffectEvent(() => {
     const answered = answeredResults(run);
-    if (answered.length > 0) keep(answered, elapsed(watch, now()));
-    onExit();
-  }
+    if (totalMs === null && answered.length > 0) keep(answered, elapsed(watch, now()));
+  });
+  useEffect(() => () => keepAnswered(), []);
 
   const undo = () => run.undo.length > 0 && step(() => ({ kind: "undo" }));
   const skip = () => step((durationMs) => ({ kind: "skip", durationMs }));
@@ -261,7 +261,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
         confirm={t("study.leave")}
         cancel={t("study.keepStudying")}
         destructive={false}
-        onConfirm={leave}
+        onConfirm={onExit}
       />
     </main>
   );

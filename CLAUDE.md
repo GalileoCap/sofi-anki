@@ -20,6 +20,7 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 - `O4` A deck made in Anki can be studied here (approved).
 - `O5` A session can change the app unobserved without breaking what people rely on (approved).
 - `O6` The app looks made for its people, the same on every screen, and is easy to use (approved).
+- `O7` A person can go back and forth between screens and keep a deck's address (approved).
 
 ## Environment
 
