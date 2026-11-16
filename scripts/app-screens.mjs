@@ -22,8 +22,7 @@ export const screens = [
   {
     name: "home, a tag picked",
     go: async (page) => {
-      await page.locator("main summary").first().click();
-      await page.locator("main details button[aria-pressed]").first().click();
+      await page.getByRole("group", { name: "Tags" }).getByRole("button").first().click();
     },
   },
   { name: "home, daily goal", go: (page) => homeMenu(page, "Daily goal") },
@@ -55,7 +54,7 @@ export const screens = [
     name: "deck, choose cards",
     go: async (page) => {
       await openDeck(page);
-      await click(page, "button", /^Choose cards to study$/);
+      await page.getByRole("group", { name: "Choose cards to study" }).getByRole("button", { name: /^All/ }).click();
     },
   },
   {

@@ -10,7 +10,7 @@ import { FilterFold } from "@/components/filter-fold";
 import { ExportDialog } from "@/components/export-dialog";
 import { Icon, IconButton } from "@/components/icon-button";
 import { ImportCardsDialog } from "@/components/import-dialog";
-import { DeckRow, Key, Segmented, Toggle } from "@/components/sticker";
+import { Chip, DeckRow, Key, Segmented, Toggle } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/language-context";
@@ -73,6 +73,8 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
   const [opened, setOpened] = useState<ReadonlySet<string>>(new Set());
   const [dialog, setDialog] = useState<"import" | "export" | "choose" | "delete" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  /** The cards the start dialog opens on, and how many times it opened, so each opening starts fresh. */
+  const [start, setStart] = useState<{ mode: RunMode; n: number }>({ mode: "all", n: 0 });
 
   const kept = new Set(byMode[filter].map((card) => card.id));
   const shown = studyOrder(
@@ -171,10 +173,26 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
             : t("deck.studyAll").replace("{n}", String(deck.cards.length))}
           <Key>S</Key>
         </Button>
+        {deck.cards.length > 0 && (
+          <div role="group" aria-label={t("deck.chooseCards")} className="grid grid-cols-2 gap-2">
+            {runModes.map((mode) => (
+              <Button
+                key={mode}
+                variant="outline"
+                className="justify-between"
+                disabled={byMode[mode].length === 0}
+                onClick={() => {
+                  setStart({ mode, n: start.n + 1 });
+                  setDialog("choose");
+                }}
+              >
+                {t(filterWords[mode])}
+                <Chip>{byMode[mode].length}</Chip>
+              </Button>
+            ))}
+          </div>
+        )}
         <div className={looks.buttons}>
-          <Button variant="outline" className="grow" onClick={() => setDialog("choose")}>
-            {t("deck.chooseCards")}
-          </Button>
           {addCard(<IconButton variant="outline" icon={PlusSignIcon} label={t("deck.addCard")} />)}
           <IconButton variant="outline" icon={Link01Icon} label={t("deck.shareLink")} onClick={share} />
         </div>
@@ -246,6 +264,8 @@ export function DeckPage({ deck, store, update, now, onBack, onStudy, onStats }:
       </div>
 
       <RunStartDialog
+        key={start.n}
+        mode={start.mode}
         open={dialog === "choose"}
         onOpenChange={(open) => setDialog(open ? "choose" : null)}
         cards={byMode}

@@ -4,7 +4,7 @@ from: [O6]
 source: owner
 status: decided 2026-11-16
 kind: behaviour
-implemented_by: [src/pages/home.tsx, src/hooks/use-deck-view.ts, src/pages/study.tsx, src/pages/stats.tsx, src/lib/translations/en.ts, src/lib/translations/es.ts]
+implemented_by: [src/pages/home.tsx, src/hooks/use-deck-view.ts, src/pages/study.tsx, src/pages/stats.tsx, src/pages/deck.tsx, src/pages/run-start-dialog.tsx, src/lib/translations/en.ts, src/lib/translations/es.ts]
 proven_by: [tests/stored.test.ts]
 supersedes: []
 ---
@@ -17,6 +17,8 @@ The owner's girlfriend disliked the restyle (`A12`, the sticker-chart direction)
 - A button that shows something is named by what it shows: Hint, Answer, Difficulty, Time. The owner reads "Show the X" as machine-made wording.
 - On a phone, Undo, Skip and Save for later sit in view under the run's progress.
 - Stats opens on tiles: decks, cards, runs, time, right first try, the streak.
+- Home's tags sit in view under the search as chips, unfolded (P3, picked the same day).
+- A deck's page offers All, Due, Weak and New under its Study button, each with its count, in place of "Choose cards to study". Each opens the start dialog on its cards, for shuffle, difficulty and a goal, and one with no cards is disabled (P5).
 
 ## Options
 

@@ -20,6 +20,8 @@ const checkLook = "flex min-h-11 cursor-pointer items-center gap-2.5 text-sm";
 type RunStartDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** The cards picked when the dialog opens. */
+  mode: RunMode;
   /** The deck's cards of each kind there is to study. */
   cards: Record<RunMode, readonly Card[]>;
   /** The difficulties chosen, or null for every one. */
@@ -27,9 +29,9 @@ type RunStartDialogProps = {
 };
 
 /** Choosing the cards to study: which of the deck's, of which difficulties, whether shuffled, and an optional goal. */
-export function RunStartDialog({ open, onOpenChange, cards, onStart }: RunStartDialogProps) {
+export function RunStartDialog({ open, onOpenChange, mode, cards, onStart }: RunStartDialogProps) {
   const { t } = useLanguage();
-  const [picked, setPicked] = useState<RunMode>("all");
+  const [picked, setPicked] = useState<RunMode>(mode);
   const [shuffle, setShuffle] = useState(false);
   const [goal, setGoal] = useState<SessionGoal | null>(null);
   const [difficulties, setDifficulties] = useState<ReadonlySet<Complexity>>(new Set());
@@ -39,7 +41,7 @@ export function RunStartDialog({ open, onOpenChange, cards, onStart }: RunStartD
   function start() {
     onStart(picked, difficulties.size === 0 ? null : complexities.filter((c) => difficulties.has(c)), goal ?? undefined, shuffle);
     onOpenChange(false);
-    setPicked("all");
+    setPicked(mode);
     setShuffle(false);
     setGoal(null);
     setDifficulties(new Set());
