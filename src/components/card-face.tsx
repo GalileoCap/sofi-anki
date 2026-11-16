@@ -10,14 +10,19 @@ type CardFaceProps = {
   title: string;
   /** Quiet words at the end of the deck's line, such as the card's difficulty. */
   corner?: ReactNode;
+  /** The card scrolls within itself when its content is taller than its room, and takes focus so the keyboard can scroll it. */
+  scrolls?: boolean;
   className?: string;
   children?: ReactNode;
 };
 
 /** A card as it studies, lifted off the page: the deck it comes from, its question, and what follows. */
-export function CardFace({ deck, title, corner, className, children }: CardFaceProps) {
+export function CardFace({ deck, title, corner, scrolls = false, className, children }: CardFaceProps) {
   return (
-    <div className={cn("flex flex-col gap-2.5 rounded-xl bg-card p-4.5 shadow-md", className)}>
+    <div
+      className={cn("flex flex-col gap-2.5 rounded-xl bg-card p-4.5 shadow-md", scrolls && "min-h-0 overflow-y-auto", className)}
+      tabIndex={scrolls ? 0 : undefined}
+    >
       {(deck || corner) && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {deck && <EmojiSticker deck={deck} />}

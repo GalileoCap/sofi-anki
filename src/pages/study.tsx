@@ -155,8 +155,8 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
   const sheetValue = t("home.ofGoal").replace("{n}", String(stickers.length)).replace("{goal}", String(dailyGoal));
 
   return (
-    <main className={cn(looks.page, "grid min-h-dvh gap-x-10 gap-y-4 lg:grid-cols-[17.5rem_minmax(0,45rem)]")}>
-      <aside className="hidden flex-col gap-4 pt-15 lg:flex">
+    <main className={cn(looks.page, "grid h-dvh grid-rows-[minmax(0,1fr)] gap-x-10 gap-y-4 lg:grid-cols-[17.5rem_minmax(0,45rem)]")}>
+      <aside className="hidden min-h-0 flex-col gap-4 overflow-y-auto pt-15 lg:flex">
         <Sheet label={t("home.sheet")} value={sheetValue}>
           <Spots stickers={stickers} goal={dailyGoal} decks={before.decks} />
         </Sheet>
@@ -174,7 +174,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
             {toggleTime.label}
           </Button>
           <FirstTriesSoFar results={answeredNow} />
-          <div className="flex flex-col items-start">
+          <div className="-ml-3 flex flex-col items-start">
             {actions.map(({ label, key, onClick, disabled }) => (
               <Button key={key} variant="ghost" disabled={disabled} onClick={onClick}>
                 {label}
@@ -183,10 +183,9 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
             ))}
           </div>
         </div>
-        <p className={looks.fine}>{t("study.keys")}</p>
       </aside>
 
-      <div className={looks.form}>
+      <div className={cn(looks.form, "min-h-0")}>
         <div className={looks.topbar}>
           <Button variant="ghost" onClick={() => setLeaving(true)}>
             <Icon icon={Cancel01Icon} />

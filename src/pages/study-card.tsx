@@ -62,9 +62,9 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
     const confirm = event.key === " " || event.key === "Enter";
     if (confirm) event.preventDefault();
     if (event.key === "c") setDifficultyShown(true);
+    if (event.key === "h" && card.hint) setHintShown(!hintShown);
     if (!revealed) {
       if (confirm) reveal();
-      else if (event.key === "h" && card.hint) setHintShown(!hintShown);
       return;
     }
     const graded = grades[Number(event.key) - 1];
@@ -79,10 +79,21 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-4">
-      <CardFace deck={deck} title={card.title} corner={(revealed || difficultyShown) && t(`complexity.${card.complexity}`)} className="flex-1">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
+      <CardFace
+        deck={deck}
+        title={card.title}
+        corner={(revealed || difficultyShown) && t(`complexity.${card.complexity}`)}
+        scrolls
+        className="flex-1"
+      >
         {card.type === "choice" && <ChoiceOptions card={card} selected={selected} revealed={revealed} onPick={pick} />}
-        {!revealed && (card.hint || !difficultyShown) && (
+        {revealed && card.type === "standard" && (
+          <UnderRule>
+            <Markdown>{card.response}</Markdown>
+          </UnderRule>
+        )}
+        {(card.hint || (!revealed && !difficultyShown)) && (
           <div className="mt-auto flex flex-col">
             {card.hint && hintShown && (
               <UnderRule>
@@ -98,7 +109,7 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
                   <Key>H</Key>
                 </Button>
               )}
-              {!difficultyShown && (
+              {!revealed && !difficultyShown && (
                 <Button variant="ghost" className="text-muted-foreground" onClick={() => setDifficultyShown(true)}>
                   {t("study.showDifficulty")}
                   <Key>C</Key>
@@ -106,11 +117,6 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
               )}
             </div>
           </div>
-        )}
-        {revealed && card.type === "standard" && (
-          <UnderRule>
-            <Markdown>{card.response}</Markdown>
-          </UnderRule>
         )}
       </CardFace>
 
@@ -139,7 +145,7 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
               </div>
             ))}
           </div>
-          <div className="flex flex-col items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5">
             <span className={looks.muted}>
               {t("study.askAgain")}
               <Key>R</Key>
@@ -153,7 +159,6 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
               ]}
               value={askAgain}
               onChange={setAskAgain}
-              className="self-center"
             />
           </div>
         </div>
