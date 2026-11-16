@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && SITE=handover vite build",
     "lint": "eslint . --max-warnings 0",
     "check:static": "scripts/check.sh",
-    "check": "scripts/check.sh && vitest run && vite build && node scripts/chunk-sizes.mjs && node scripts/design-census.mjs",
+    "check": "scripts/check.sh && vitest run && vite build && SITE=handover vite build && node scripts/chunk-sizes.mjs && node scripts/design-census.mjs",
     "design:audit": "node scripts/design-audit.mjs",
     "preview": "vite preview",
     "test": "vitest run"

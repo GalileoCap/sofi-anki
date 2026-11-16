@@ -1,5 +1,6 @@
 import { Result } from "neverthrow";
 
+import type { StoredAll } from "@/core/handover";
 import type { Store } from "@/core/model";
 import { type StoredError, type StoredText, changedText, readStore, storageKeys } from "@/core/stored";
 
@@ -69,3 +70,14 @@ export const openStore = (firstVisit: () => Store): Result<Store, StorageError |
  */
 export const saveChanges = (before: Store, after: Store): Result<void, StorageError> =>
   Result.combine(changedText(before, after).map(([key, text]) => writeStored(key, text))).map(() => undefined);
+
+/**
+ * The text under every key the app stores, the store's and the language's, theme's and look's.
+ *
+ * @effects localStorage
+ */
+export function readStoredAll(): Result<StoredAll, StorageError> {
+  return readStoredText().andThen((text) =>
+    Result.combine([getItem("lang"), getItem("theme"), getItem("look")]).map(([lang, theme, look]) => ({ ...text, lang, theme, look })),
+  );
+}

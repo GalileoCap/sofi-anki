@@ -1,18 +1,29 @@
+import { renameSync } from 'fs'
 import path from 'path'
-import { defineConfig } from 'vite'
+import { type Plugin, defineConfig } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// https://vite.dev/config/
-export default defineConfig({
-  base: '/sofi-anki/',
-  plugins: [
-    react(),
-    babel({ presets: [reactCompilerPreset()] }),
-    tailwindcss(),
-    VitePWA({
+// Two sites from one source (A17): the app at the root of anki.smplworks.net, and with
+// SITE=handover the page that replaces it at galileocap.github.io/sofi-anki/.
+const handover = process.env.SITE === 'handover'
+
+/** The hand-over page written as the old site's index.html. */
+const handoverAsIndex = (): Plugin => ({
+  name: 'handover-as-index',
+  apply: 'build',
+  closeBundle() {
+    renameSync('dist-handover/handover.html', 'dist-handover/index.html')
+  },
+})
+
+// The old app's service worker, at the same address, takes this one as its update: it removes
+// itself and reloads its pages, so they load the hand-over page in place of the cached app.
+const pwa = handover
+  ? VitePWA({ selfDestroying: true, manifest: false })
+  : VitePWA({
       registerType: 'autoUpdate',
       manifest: {
         name: 'sofi-anki',
@@ -21,7 +32,7 @@ export default defineConfig({
         theme_color: '#622f47',
         background_color: '#fdf2f3',
         display: 'standalone',
-        start_url: '/sofi-anki/',
+        start_url: '/',
         icons: [
           {
             src: 'pwa-192.png',
@@ -61,18 +72,24 @@ export default defineConfig({
           },
         ],
       },
-    }),
-  ],
+    })
+
+// https://vite.dev/config/
+export default defineConfig({
+  base: handover ? '/sofi-anki/' : '/',
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss(), pwa, ...(handover ? [handoverAsIndex()] : [])],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
   build: {
+    outDir: handover ? 'dist-handover' : 'dist',
     // Above Mermaid's largest chunk, which loads only for a diagram. scripts/chunk-sizes.mjs
     // holds every other chunk to Vite's 500 kB.
     chunkSizeWarningLimit: 1700,
     rolldownOptions: {
+      input: handover ? 'handover.html' : 'index.html',
       output: {
         // Libraries apart from the app, so each chunk stays under the 500 kB warning and a
         // release that changes only the app leaves them cached.

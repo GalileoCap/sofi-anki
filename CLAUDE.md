@@ -1,6 +1,6 @@
 # sofi-anki
 
-A flashcard study app in the spirit of Anki, for the owner and their friends. It runs wholly in the browser and is served from GitHub Pages: each person's decks, runs and schedule live in their own browser's `localStorage`, and decks travel between people by share link or file. There is no server, no account and no sync.
+A flashcard study app in the spirit of Anki, for the owner and their friends. It runs wholly in the browser and is served from GitHub Pages at `anki.smplworks.net`, while its old address, `galileocap.github.io/sofi-anki/`, hands each browser's data over and forwards (`A17`): each person's decks, runs and schedule live in their own browser's `localStorage`, and decks travel between people by share link or file. There is no server, no account and no sync.
 
 The working rules are session-kit's (`~/.claude/CLAUDE.md`), and the shape of the code is `CODE.md`'s:
 
@@ -23,6 +23,7 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 - `O7` A person can go back and forth between screens and keep a deck's address (approved).
 - `O8` A person studying can see where a card's answer comes from (approved).
 - `O9` A card can hold formulas and diagrams (approved).
+- `O10` The app is served at anki.smplworks.net, and the old address keeps working (approved).
 
 ## Environment
 
@@ -34,7 +35,7 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 - `pnpm check:static`: every static gate (`scripts/check.sh`), at zero warnings.
 - `pnpm test`: the tests (Vitest, under `tests/`, 2 s a test).
 - `pnpm check`: the static gates, the tests and the production build.
-- `pnpm build`: type-check, then bundle to `dist/`.
+- `pnpm build`: type-check, then bundle the app to `dist/` and the old address's hand-over page to `dist-handover/`.
 - `pnpm design:audit <page>`: the rendered audit (T4): axe, touch targets, small text, overflow and a census per screen, light and dark, with screenshots in a new temporary directory.
 - `pnpm preview`: serve the production build.
 
@@ -42,11 +43,11 @@ Before calling a change done: `pnpm check`, the tests, and the flows it touches 
 
 ## Branches
 
-Work happens on `dev`. A push to `main` deploys the site, so merging `dev` into `main` and pushing it is one action, taken only on the owner's word each time (owner, 2026-11-15). The session manages `dev` and pushes it whenever it commits, without asking (owner, 2026-11-15).
+Work happens on `dev`. A push to `main` deploys both sites (the app to `GalileoCap/anki`, the hand-over page here), so merging `dev` into `main` and pushing it is one action, taken only on the owner's word each time (owner, 2026-11-15). The session manages `dev` and pushes it whenever it commits, without asking (owner, 2026-11-15).
 
 ## Stored data
 
-The deployed site holds people's real decks. Whatever the app stores (the `localStorage` keys `anki-decks`, `anki-runs`, `anki-srs`, `anki-settings`, `lang`, `anki-theme`, `anki-look`), a backup file, a share link and an `.apkg` must keep reading as before. A change to what is stored reads the old shape, and its step is written in `OWED.md`.
+The deployed site holds people's real decks. Whatever the app stores (the `localStorage` keys `anki-decks`, `anki-runs`, `anki-srs`, `anki-settings`, `lang`, `anki-theme`, `anki-look`, and at the old address `anki-moved-at`), a backup file, a share link and an `.apkg` must keep reading as before. A change to what is stored reads the old shape, and its step is written in `OWED.md`.
 
 ## UI
 
@@ -55,6 +56,7 @@ The deployed site holds people's real decks. Whatever the app stores (the `local
 
 ## Documents
 
+- [OWED.md](OWED.md): what a change leaves to do outside the code, such as DNS and the Pages settings, under when it is due.
 - [docs/session-kit-adoption.md](docs/session-kit-adoption.md): the review against the session-kit rules and `CODE.md`, and the order of work.
 - [docs/rewrite-plan.md](docs/rewrite-plan.md): the design and order of the rewrite onto the pure-core shape.
 - [docs/design-research.md](docs/design-research.md): why the first restyle mocks read as machine-made, the research and working designers' patterns for avoiding it, and the design tools proposed for trial here and for session-kit after (`O6`).

@@ -1,3 +1,5 @@
+# Two sites (A17): the app goes to GalileoCap/anki, whose Pages site is anki.smplworks.net, and
+# this repo's Pages site, galileocap.github.io/sofi-anki/, serves the page that hands data over.
 name: Deploy to GitHub Pages
 
 on:
@@ -34,9 +36,18 @@ jobs:
       - name: Lint and build
         run: pnpm lint && pnpm build
 
+      - name: Push the app to anki.smplworks.net
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.ANKI_DEPLOY_KEY }}
+          external_repository: GalileoCap/anki
+          publish_branch: gh-pages
+          publish_dir: dist
+          cname: anki.smplworks.net
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: dist-handover
 
   deploy:
     needs: build
