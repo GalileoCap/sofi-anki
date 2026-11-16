@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { type AnkiCollection, decksFromCollection, noteTypesFromJson, renderTemplate } from "@/core/anki";
 import { type Deck, millis } from "@/core/model";
+import { deckFromJson, deckToJson } from "@/core/deck-json";
 import { decodeDeck, encodeDeck, shareUrl } from "@/core/share";
 
 const deck: Deck = {
@@ -9,7 +10,9 @@ const deck: Deck = {
   title: "Capitals ñ 東京",
   tags: ["geo"],
   createdAt: millis(1_700_000_000_000),
-  cards: [{ id: "c1", type: "standard", title: "France?", response: "**Paris**", complexity: "easy", tags: [] }],
+  cards: [
+    { id: "c1", type: "standard", title: "France?", response: "**Paris**", complexity: "easy", tags: [], sources: ["Atlas, p. 3", "https://x/paris"] },
+  ],
 };
 
 /** How the first version encoded a link: the browser's gzip, then base64url. */
@@ -30,6 +33,11 @@ describe("O2, a friend studies a deck someone shared", () => {
     expect(decodeDeck(encodeDeck(deck))._unsafeUnwrap()).toEqual(deck);
     expect(decodeDeck("not-a-deck")._unsafeUnwrapErr().kind).toBe("notALink");
     expect(shareUrl("https://x/", { ...deck, cards: [] })).toMatch(/^https:\/\/x\/#\/share\//);
+  });
+
+  test("a deck's JSON file keeps its cards' sources", () => {
+    const ids = ["d1", "c1"];
+    expect(deckFromJson(deckToJson(deck), deck.createdAt, () => ids.shift() ?? "")).toEqual(deck);
   });
 });
 

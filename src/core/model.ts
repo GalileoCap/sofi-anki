@@ -4,7 +4,7 @@ import { z } from "zod";
  * The app's data, as zod schemas that read every shape an earlier version stored.
  *
  * Fields were added over time (`git log -p src/types.ts` before the rewrite): `complexity`,
- * the card `type`, then `tags` on cards and decks, then `hint`, `color` and `emoji`. A field
+ * the card `type`, then `tags` on cards and decks, then `hint`, `color` and `emoji`, then `sources`. A field
  * an older shape lacks gets the default named beside it, so old data reads as current data.
  */
 
@@ -26,6 +26,8 @@ const cardBase = {
   complexity: z.enum(complexities).default(DEFAULT_COMPLEXITY),
   tags: z.array(z.string()).default([]),
   hint: z.string().optional(),
+  /** Where the answer comes from, one source a line: a reference or a link, in Markdown. */
+  sources: z.array(z.string()).optional(),
 };
 
 export const choiceOptionSchema = z.object({

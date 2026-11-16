@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { Markdown } from "@/components/markdown";
-import { CardFace, UnderRule } from "@/components/card-face";
+import { CardFace, CardSources, UnderRule } from "@/components/card-face";
 import { GradeMark, Key, Segmented } from "@/components/sticker";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
@@ -93,6 +93,7 @@ export function StudyCard({ card, deck, schedule, now, paused, onAnswer }: Study
             <Markdown>{card.response}</Markdown>
           </UnderRule>
         )}
+        {revealed && <CardSources label={t("common.sources")} sources={card.sources} />}
         {(card.hint || (!revealed && !difficultyShown)) && (
           <div className="mt-auto flex flex-col">
             {card.hint && hintShown && (

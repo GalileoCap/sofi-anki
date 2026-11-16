@@ -30,6 +30,7 @@ export const es: Translation = {
   "common.stats": "Estadísticas",
   "common.tags": "Etiquetas",
   "common.hint": "Pista",
+  "common.sources": "Fuentes",
   "common.due": "Pendiente",
   "common.weak": "Débil",
   "common.new": "Nuevo",
@@ -120,6 +121,7 @@ export const es: Translation = {
       "title": "Pregunta o anverso de la tarjeta",
       "response": "Respuesta o reverso de la tarjeta",
       "hint": "Pista opcional que se muestra antes de revelar la respuesta",
+      "sources": ["Opcional: de dónde sale la respuesta, una referencia o una URL"],
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtema"]
     },
@@ -127,6 +129,7 @@ export const es: Translation = {
       "type": "choice",
       "title": "Pregunta de opción múltiple",
       "hint": "Pista opcional que se muestra antes de la respuesta",
+      "sources": ["Opcional: de dónde sale la respuesta"],
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtema"],
       "options": [
@@ -137,8 +140,8 @@ export const es: Translation = {
   ]
 }
 
-Todas las cartas tienen "title", "response", "complexity", opcional "tags", y opcional "hint".
-Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", y "options" (array de { "text", "correct" }).
+Todas las cartas tienen "title", "response", "complexity", opcional "tags", opcional "hint" y opcional "sources".
+Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", opcional "sources" y "options" (array de { "text", "correct" }).
 Devolvé solo el JSON, sin texto extra.`,
   "import.cards.schemaPrompt": `Generá 50 tarjetas tipo anki sobre "" en el siguiente formato JSON:
 
@@ -149,6 +152,7 @@ Devolvé solo el JSON, sin texto extra.`,
       "title": "Pregunta o anverso de la tarjeta",
       "response": "Respuesta o reverso de la tarjeta",
       "hint": "Pista opcional que se muestra antes de revelar la respuesta",
+      "sources": ["Opcional: de dónde sale la respuesta, una referencia o una URL"],
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtema"]
     },
@@ -156,6 +160,7 @@ Devolvé solo el JSON, sin texto extra.`,
       "type": "choice",
       "title": "Pregunta de opción múltiple",
       "hint": "Pista opcional que se muestra antes de la respuesta",
+      "sources": ["Opcional: de dónde sale la respuesta"],
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtema"],
       "options": [
@@ -166,8 +171,8 @@ Devolvé solo el JSON, sin texto extra.`,
   ]
 }
 
-Todas las cartas tienen "title", "response", "complexity", opcional "tags", y opcional "hint".
-Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", y "options" (array de { "text", "correct" }).
+Todas las cartas tienen "title", "response", "complexity", opcional "tags", opcional "hint" y opcional "sources".
+Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", opcional "sources" y "options" (array de { "text", "correct" }).
 Devolvé solo el JSON, sin texto extra.`,
   // The sticker chart (A12): home, study, the run's end, and dates in words.
   "when.never": "sin estudiar todav\u00eda",
@@ -358,6 +363,7 @@ Devolvé solo el JSON, sin texto extra.`,
   "cardForm.option": "Opción {n}",
   "cardForm.optionRight": "La opción {n} es correcta",
   "cardForm.hint": "Pista, si hay",
+  "cardForm.sources": "Fuentes, una por línea",
   "cardForm.difficulty": "Dificultad",
   "cardForm.asItStudies": "Como se estudiará",
   "cardForm.single": "Una opción correcta: se estudia eligiendo una.",

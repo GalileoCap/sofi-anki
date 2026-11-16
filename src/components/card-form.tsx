@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { CardFace, UnderRule } from "@/components/card-face";
+import { CardFace, CardSources, UnderRule } from "@/components/card-face";
 import { Field } from "@/components/field";
 import { Markdown } from "@/components/markdown";
 import { Key, Segmented } from "@/components/sticker";
@@ -32,6 +32,12 @@ type OptionRow = { id: string; text: string; correct: boolean };
 
 const newOption = (): OptionRow => ({ id: newId(), text: "", correct: false });
 
+/** The card's sources as the editor shows them, one a line. */
+const sourceLines = (card: Card | undefined): string => card?.sources?.join("\n") ?? "";
+
+/** The sources typed, one a line, blank lines left out. */
+const sourcesOf = (text: string): string[] => text.split("\n").map((line) => line.trim()).filter(Boolean);
+
 const optionsOf = (card: Card | undefined): OptionRow[] =>
   card?.type === "choice" ? card.options.map(({ id, text, correct }) => ({ id, text, correct })) : [newOption(), newOption()];
 
@@ -45,6 +51,7 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
   const [cardType, setCardType] = useState<CardType>(initial?.type ?? "standard");
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [hint, setHint] = useState(initial?.hint ?? "");
+  const [sourceText, setSourceText] = useState(sourceLines(initial));
   const [response, setResponse] = useState(initial?.type === "standard" ? initial.response : "");
   const [options, setOptions] = useState<OptionRow[]>(() => optionsOf(initial));
 
@@ -57,6 +64,7 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
       setCardType(initial?.type ?? "standard");
       setTags(initial?.tags ?? []);
       setHint(initial?.hint ?? "");
+      setSourceText(sourceLines(initial));
       setResponse(initial?.type === "standard" ? initial.response : "");
       setOptions(optionsOf(initial));
     }
@@ -69,9 +77,17 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
     title.trim() !== "" &&
     (cardType === "standard" ? response.trim() !== "" : options.length >= 2 && options.every((o) => o.text.trim()) && options.some((o) => o.correct));
 
+  const sources = sourcesOf(sourceText);
+
   function save() {
     if (!isValid) return;
-    const common = { title: title.trim(), complexity, tags, ...(hint.trim() ? { hint: hint.trim() } : {}) };
+    const common = {
+      title: title.trim(),
+      complexity,
+      tags,
+      ...(hint.trim() ? { hint: hint.trim() } : {}),
+      ...(sources.length > 0 ? { sources } : {}),
+    };
     onSubmit(
       cardType === "standard"
         ? { ...common, type: "standard", response: response.trim() }
@@ -163,6 +179,9 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
                 />
               </Field>
             </div>
+            <Field label={t("cardForm.sources")}>
+              <Textarea value={sourceText} onChange={(e) => setSourceText(e.target.value)} rows={2} />
+            </Field>
             <Field label={t("common.tags")}>
               <TagInput tags={tags} onChange={setTags} placeholder={t("deckForm.tagsPlaceholder")} />
             </Field>
@@ -182,6 +201,7 @@ export function CardForm({ deck, trigger, open: controlledOpen, onOpenChange, on
                       <Markdown inline>{option.text || " "}</Markdown>
                     </p>
                   ))}
+              <CardSources label={t("common.sources")} sources={sources} />
             </CardFace>
           </div>
 

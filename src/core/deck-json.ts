@@ -13,6 +13,7 @@ const importCardBase = {
   complexity: z.enum(complexities).optional(),
   tags: z.array(z.string()).optional(),
   hint: z.string().optional(),
+  sources: z.array(z.string()).optional(),
 };
 
 const importChoiceSchema = z.object({
@@ -58,6 +59,7 @@ export function cardFromJson(card: ImportCard, newId: () => string): Card {
     complexity: card.complexity ?? DEFAULT_COMPLEXITY,
     tags: card.tags ?? [],
     ...(card.hint ? { hint: card.hint } : {}),
+    ...(card.sources?.length ? { sources: card.sources } : {}),
   };
   if (card.type === "choice") {
     return {
@@ -94,6 +96,7 @@ export function deckToJson(deck: Deck): DeckImport {
         complexity: card.complexity,
         ...(card.tags.length > 0 ? { tags: card.tags } : {}),
         ...(card.hint ? { hint: card.hint } : {}),
+        ...(card.sources?.length ? { sources: card.sources } : {}),
       };
       return card.type === "choice"
         ? {

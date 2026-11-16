@@ -29,6 +29,7 @@ export const en = {
   "common.stats": "Stats",
   "common.tags": "Tags",
   "common.hint": "Hint",
+  "common.sources": "Sources",
   "common.due": "Due",
   "common.weak": "Weak",
   "common.new": "New",
@@ -142,6 +143,7 @@ export const en = {
       "title": "Question or front of card",
       "response": "Answer or back of card",
       "hint": "Optional hint shown before revealing the answer",
+      "sources": ["Optional: where the answer comes from, a reference or a URL"],
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtopic"]
     },
@@ -149,6 +151,7 @@ export const en = {
       "type": "choice",
       "title": "Multiple choice question",
       "hint": "Optional hint shown before answer",
+      "sources": ["Optional: where the answer comes from"],
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtopic"],
       "options": [
@@ -159,8 +162,8 @@ export const en = {
   ]
 }
 
-Standard cards have "title", "response", "complexity", optional "tags", and optional "hint".
-Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", and "options" (array of { "text", "correct" }).
+Standard cards have "title", "response", "complexity", optional "tags", optional "hint", and optional "sources".
+Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", optional "sources", and "options" (array of { "text", "correct" }).
 If multiple options are correct, it becomes a multi-select question.
 The deck and each card can have "tags" (array of strings) for categorization.
 Return only the JSON, no extra text.`,
@@ -172,6 +175,7 @@ Return only the JSON, no extra text.`,
       "title": "Question or front of card",
       "response": "Answer or back of card",
       "hint": "Optional hint shown before revealing the answer",
+      "sources": ["Optional: where the answer comes from, a reference or a URL"],
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtopic"]
     },
@@ -179,6 +183,7 @@ Return only the JSON, no extra text.`,
       "type": "choice",
       "title": "Multiple choice question",
       "hint": "Optional hint shown before answer",
+      "sources": ["Optional: where the answer comes from"],
       "complexity": "easy" | "medium" | "hard",
       "tags": ["subtopic"],
       "options": [
@@ -189,8 +194,8 @@ Return only the JSON, no extra text.`,
   ]
 }
 
-Standard cards have "title", "response", "complexity", optional "tags", and optional "hint".
-Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", and "options" (array of { "text", "correct" }).
+Standard cards have "title", "response", "complexity", optional "tags", optional "hint", and optional "sources".
+Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", optional "sources", and "options" (array of { "text", "correct" }).
 Return only the JSON, no extra text.`,
   // The sticker chart (A12): home, study, the run's end, and dates in words.
   "when.never": "not studied yet",
@@ -381,6 +386,7 @@ Return only the JSON, no extra text.`,
   "cardForm.option": "Option {n}",
   "cardForm.optionRight": "Option {n} is right",
   "cardForm.hint": "Hint, if any",
+  "cardForm.sources": "Sources, one a line",
   "cardForm.difficulty": "Difficulty",
   "cardForm.asItStudies": "As it will study",
   "cardForm.single": "One right option: studied by picking one.",

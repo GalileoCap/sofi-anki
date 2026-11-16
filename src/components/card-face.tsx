@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Markdown } from "@/components/markdown";
 import { EmojiSticker } from "@/components/sticker";
 import type { Deck } from "@/core/model";
+import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
 type CardFaceProps = {
@@ -40,3 +41,20 @@ export function CardFace({ deck, title, corner, scrolls = false, className, chil
 export const UnderRule = ({ children }: { children: ReactNode }) => (
   <div className="flex flex-col gap-2.5 border-t-2 border-dashed border-border pt-2.5">{children}</div>
 );
+
+/** Where a card's answer comes from, in quiet words under it, each source in Markdown so a link is a link. */
+export function CardSources({ label, sources }: { label: string; sources: readonly string[] | undefined }) {
+  if (!sources?.length) return null;
+  return (
+    <div className={looks.muted}>
+      <p className="font-bold">{label}</p>
+      <ul className="list-disc pl-5 break-words">
+        {sources.map((source, i) => (
+          <li key={i}>
+            <Markdown inline>{source}</Markdown>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
