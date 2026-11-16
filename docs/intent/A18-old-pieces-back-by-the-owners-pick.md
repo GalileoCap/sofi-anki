@@ -17,10 +17,11 @@ The owner's girlfriend disliked the restyle (`A12`, the sticker-chart direction)
 - A button that shows something is named by what it shows: Hint, Answer, Difficulty, Time. The owner reads "Show the X" as machine-made wording.
 - On a phone, Undo, Skip and Save for later sit in view under the run's progress.
 - Stats opens on tiles: decks, cards, runs, time, right first try, the streak.
-- Home's tags sit in view under the search as chips, unfolded (P3, picked the same day).
 - A deck's page offers All, Due, Weak and New under its Study button, each with its count, in place of "Choose cards to study". Each opens the start dialog on its cards, for shuffle, difficulty and a goal, and one with no cards is disabled (P5).
 
 ## Options
+
+Home's tags in view under the search (P3) were brought back and then undone at the owner's word the same day: they stay folded under "Tags".
 
 The owner was offered the classic look alone, a classic look closer to the old app, old pieces back one by one, and a new default taken from both. They chose old pieces one by one, and will pick more from the table in old-new.md.
 

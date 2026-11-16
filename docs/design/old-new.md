@@ -89,7 +89,6 @@ The owner chose these on 2026-11-16 (`A18`, pieces of the app before the sticker
 - Study's buttons say what they show, without "Show the": Hint, Answer, Difficulty, Time.
 - On a phone, Undo, Skip and Save for later sit under the run's progress, out of the More menu, which keeps only the time.
 - Stats opens on six tiles: decks, cards, runs, time, right first try, and the streak.
-- P3: home's tags as chips under the search, unfolded.
 - P5: a deck's page offers All, Due, Weak and New with their counts under Study, each opening the start dialog on its cards. They replace "Choose cards to study".
 
 ## Old pieces still removed
@@ -100,7 +99,7 @@ What else e03ee17 had that the app now lacks, found from the screens above. Each
 |---|---|---|---|
 | P1 | Home | A 13-week heatmap of the cards studied each day, in greens from less to more | The last seven days as stickers, and the month calendar on stats |
 | P2 | Home | One line: the streak and today's count against the goal, the goal edited in place | The sheet of spots, the goal behind its figure |
-| P3 (back) | Home | The tags as chips beside the search, always in view | Folded under "Tags" |
+| P3 (tried, undone) | Home | The tags as chips beside the search, always in view | Folded under "Tags" |
 | P4 | Every screen | The theme and the language as words ("Light", "EN") | Icons, with the other language's name |
 | P5 (back) | Deck | Study pills with counts: All cards, Due, Weak, New, each one tap from a run | "Study N due", and the rest behind "Choose cards to study" |
 | P6 | Deck | Add Card, Import, Export JSON, Export Anki, Share Link and Delete as a row of buttons | Add and Share as icons, the rest in More |

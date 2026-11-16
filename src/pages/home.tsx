@@ -4,6 +4,7 @@ import { type ReactNode, useState } from "react";
 
 import { BackupDialog } from "@/components/backup-dialog";
 import { DeckForm } from "@/components/deck-form";
+import { FilterFold } from "@/components/filter-fold";
 import { Icon, IconButton } from "@/components/icon-button";
 import { ImportApkgDialog } from "@/components/import-apkg-dialog";
 import { ImportDeckDialog } from "@/components/import-dialog";
@@ -164,13 +165,15 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
             </div>
             <Input placeholder={t("deckList.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} />
             {allTags.length > 0 && (
-              <div role="group" aria-label={t("common.tags")} className={looks.chips}>
-                {allTags.map((tag) => (
-                  <Toggle key={tag} pressed={tagFilter.has(tag)} onClick={() => setTagFilter(toggled(tagFilter, tag))}>
-                    {tag}
-                  </Toggle>
-                ))}
-              </div>
+              <FilterFold label={t("common.tags")} on={tagFilter.size} onClear={() => setTagFilter(new Set())}>
+                <div role="group" aria-label={t("common.tags")} className={looks.chips}>
+                  {allTags.map((tag) => (
+                    <Toggle key={tag} pressed={tagFilter.has(tag)} onClick={() => setTagFilter(toggled(tagFilter, tag))}>
+                      {tag}
+                    </Toggle>
+                  ))}
+                </div>
+              </FilterFold>
             )}
             {rows.length === 0 && <p className={looks.muted}>{t("home.noMatch")}</p>}
             <div className={view === "cards" ? "grid gap-3 sm:grid-cols-2" : looks.column}>

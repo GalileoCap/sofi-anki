@@ -22,7 +22,8 @@ export const screens = [
   {
     name: "home, a tag picked",
     go: async (page) => {
-      await page.getByRole("group", { name: "Tags" }).getByRole("button").first().click();
+      await page.locator("main summary").first().click();
+      await page.locator("main details button[aria-pressed]").first().click();
     },
   },
   { name: "home, daily goal", go: (page) => homeMenu(page, "Daily goal") },
