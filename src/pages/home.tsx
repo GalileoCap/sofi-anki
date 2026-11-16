@@ -1,6 +1,6 @@
-import { ChartColumnIcon, MoreHorizontalIcon, PlusSignIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { ChartColumnIcon, GridViewIcon, ListViewIcon, MoreHorizontalIcon, PlusSignIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { DropdownMenu } from "radix-ui";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { BackupDialog } from "@/components/backup-dialog";
 import { DeckForm } from "@/components/deck-form";
@@ -17,13 +17,15 @@ import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/language-context";
 import { deckFromJson } from "@/core/deck-json";
 import { addDeck, matchingDecks, newDeck, receiveAnkiDecks, toggled } from "@/core/decks";
-import type { Deck, Millis, Store } from "@/core/model";
+import type { AppLook, Deck, DeckView, Millis, Store } from "@/core/model";
 import { type RunItem, dueItems } from "@/core/run";
 import { indexSchedules } from "@/core/scheduler";
 import { comingUp, deckRows, lastWeek, stickersOn, streak } from "@/core/stats";
 import { newId, now as clockNow } from "@/effects/clock";
+import { useDeckView } from "@/hooks/use-deck-view";
 import { useKeys } from "@/hooks/use-keys";
 import { useLook } from "@/hooks/use-look";
+import { deckColour } from "@/lib/sticker-looks";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +66,8 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
   const dueDecks = new Set(due.map((item) => item.deckId)).size;
   const later = comingUp(decks, schedules, now);
   const goal = store.settings.dailyCardGoal;
+  const { look, toggleLook } = useLook();
+  const { view, pickView } = useDeckView(look);
 
   useKeys((event) => {
     if (dialog === null && event.key === "s" && due.length > 0) onStudy(due);
@@ -97,7 +101,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
         )}
         <LanguageSwitch />
         <ThemeSwitch />
-        <HomeMenu onDialog={setDialog} />
+        <HomeMenu onDialog={setDialog} look={look} onToggleLook={toggleLook} />
       </div>
 
       {dialog === "newDeck" && (
@@ -153,6 +157,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
           <div className={looks.stack}>
             <div className={looks.row}>
               <h2 className="flex-1 text-lg font-bold">{t("home.decks")}</h2>
+              <DeckViewSwitch view={view} onPick={pickView} />
               <Button variant="outline" onClick={() => setDialog("newDeck")}>
                 <Icon icon={PlusSignIcon} />
                 {t("home.newDeck")}
@@ -171,22 +176,23 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
               </FilterFold>
             )}
             {rows.length === 0 && <p className={looks.muted}>{t("home.noMatch")}</p>}
-            <div className={looks.column}>
-              {rows.map(({ deck, due: count, lastRun }) => (
-                <DeckRow
-                  key={deck.id}
-                  deck={deck}
-                  onOpen={() => onOpenDeck(deck.id)}
-                  meta={
-                    <>
-                      {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")},{" "}
-                      {kept === deck.title ? t("home.keptToday") : <LastStudied at={lastRun} now={now} />}
-                      {deck.tags.length > 0 && `, ${deck.tags.join(", ")}`}
-                    </>
-                  }
-                  end={count > 0 && <Chip urgent>{count === 1 ? t("home.dueOne") : t("home.due").replace("{n}", String(count))}</Chip>}
-                />
-              ))}
+            <div className={view === "cards" ? "grid gap-3 sm:grid-cols-2" : looks.column}>
+              {rows.map(({ deck, due: count, lastRun }) => {
+                const meta = (
+                  <>
+                    {deck.cards.length} {tp(deck.cards.length, "common.card", "common.cards")},{" "}
+                    {kept === deck.title ? t("home.keptToday") : <LastStudied at={lastRun} now={now} />}
+                    {deck.tags.length > 0 && `, ${deck.tags.join(", ")}`}
+                  </>
+                );
+                const end = count > 0 && <Chip urgent>{count === 1 ? t("home.dueOne") : t("home.due").replace("{n}", String(count))}</Chip>;
+                const onOpen = () => onOpenDeck(deck.id);
+                return view === "cards" ? (
+                  <DeckCard key={deck.id} deck={deck} meta={meta} end={end} onOpen={onOpen} />
+                ) : (
+                  <DeckRow key={deck.id} deck={deck} meta={meta} end={end} onOpen={onOpen} />
+                );
+              })}
             </div>
           </div>
         )}
@@ -241,14 +247,57 @@ function TodaySheet({ store, now, goal, onGoal }: { store: Store; now: Millis; g
   );
 }
 
+/** A deck as a card: a cover in its colour with its emoji, then its title, what it holds and its due count. */
+function DeckCard({ deck, meta, end, onOpen }: { deck: Deck; meta: ReactNode; end: ReactNode; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      style={deckColour(deck)}
+      className="flex cursor-pointer flex-col overflow-hidden rounded-xl border bg-card text-left text-foreground transition-colors hover:bg-muted"
+    >
+      <span aria-hidden="true" className="grid h-24 place-items-center bg-(--deck) text-2xl">
+        {deck.emoji}
+      </span>
+      <span className="flex flex-col gap-1.5 px-3.5 py-3 leading-snug">
+        <span className="font-bold">{deck.title}</span>
+        <span className={looks.fine}>{meta}</span>
+        {end && <span>{end}</span>}
+      </span>
+    </button>
+  );
+}
+
+/** Home's choice between the decks as cards and as rows. */
+function DeckViewSwitch({ view, onPick }: { view: DeckView; onPick: (view: DeckView) => void }) {
+  const { t } = useLanguage();
+  const option = (value: DeckView, icon: typeof GridViewIcon, label: string) => (
+    <IconButton
+      variant="ghost"
+      icon={icon}
+      label={label}
+      aria-pressed={view === value}
+      className={cn(view === value ? looks.ink : "text-muted-foreground")}
+      onClick={() => onPick(value)}
+    />
+  );
+  return (
+    <div role="group" aria-label={t("home.deckView")} className="flex">
+      {option("cards", GridViewIcon, t("home.asCards"))}
+      {option("rows", ListViewIcon, t("home.asRows"))}
+    </div>
+  );
+}
+
 type HomeMenuProps = {
   onDialog: (dialog: "backup" | "goal") => void;
+  look: AppLook;
+  onToggleLook: () => void;
 };
 
 /** Home's menu: what is done now and then, the backup, the daily goal and the look. */
-function HomeMenu({ onDialog }: HomeMenuProps) {
+function HomeMenu({ onDialog, look, onToggleLook }: HomeMenuProps) {
   const { t } = useLanguage();
-  const { look, toggleLook } = useLook();
   const item = (label: string, onSelect: () => void) => (
     <DropdownMenu.Item className={looks.menuItem} onSelect={onSelect}>
       {label}
@@ -264,7 +313,7 @@ function HomeMenu({ onDialog }: HomeMenuProps) {
           {item(t("home.backup"), () => onDialog("backup"))}
           <DropdownMenu.Separator className={looks.menuRule} />
           {item(t("home.dailyGoal"), () => onDialog("goal"))}
-          <DropdownMenu.CheckboxItem className={looks.menuItem} checked={look === "classic"} onCheckedChange={toggleLook}>
+          <DropdownMenu.CheckboxItem className={looks.menuItem} checked={look === "classic"} onCheckedChange={onToggleLook}>
             {t("home.classicLook")}
             <DropdownMenu.ItemIndicator className="ml-auto">
               <Icon icon={Tick02Icon} />

@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { readBackup, restore, writeBackup } from "@/core/backup";
 import { type Deck, type Store, millis } from "@/core/model";
-import { readLang, readStore, readTheme } from "@/core/stored";
+import { readDeckView, readLang, readStore, readTheme } from "@/core/stored";
 
 import oldSeed from "./fixtures/old-seed-storage.json";
 
@@ -68,6 +68,10 @@ describe("stored data from every earlier version reads", () => {
     expect(readStore({ ...empty, settings: "{}" })._unsafeUnwrap().settings).toEqual({ dailyCardGoal: 20 });
     expect(readStore(empty)._unsafeUnwrap()).toEqual({ decks: [], runs: [], schedules: [], settings: { dailyCardGoal: 20 } });
     expect([readLang("es"), readLang(null), readTheme("dark"), readTheme("sepia")]).toEqual(["es", "en", "dark", "system"]);
+  });
+
+  test("a deck view picked holds in either look, and until one is picked each look opens on its own", () => {
+    expect([readDeckView("rows", "classic"), readDeckView(null, "classic"), readDeckView("tiles", "sticker")]).toEqual(["rows", "cards", "rows"]);
   });
 
   test("a value that does not decode is an error naming its key, never an empty list", () => {

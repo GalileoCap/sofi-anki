@@ -81,4 +81,38 @@ Each step below goes further than the one before, and costs more.
 
 Keeping the old screens whole beside the new ones was set aside under `A14`, since it would mean two versions of every screen against `C1`. That still holds.
 
-The next step is to show her these images and ask, screen by screen, which column she prefers and what about it. Step 3 depends on her answers, and the choice between steps 2 and 4 is the owner's.
+## Old pieces brought back
+
+The owner chose these on 2026-11-16 (`A18`, pieces of the app before the sticker chart come back as the owner picks them), taking step 3 for each:
+
+- Home shows the decks as a grid of cards with a cover in the deck's colour, or as the list, by a switch beside "Decks". The classic look opens on the grid and the sticker chart on the list, until a person picks one. The pick is kept under `anki-deck-view`.
+- Study's buttons say what they show, without "Show the": Hint, Answer, Difficulty, Time.
+- On a phone, Undo, Skip and Save for later sit under the run's progress, out of the More menu, which keeps only the time.
+- Stats opens on six tiles: decks, cards, runs, time, right first try, and the streak.
+
+## Old pieces still removed
+
+What else e03ee17 had that the app now lacks, found from the screens above. Each line is a candidate for the owner to take or leave. Behaviour came back under `restore.md`, so these are layout, wording and feel.
+
+| | Screen | At e03ee17 | Now |
+|---|---|---|---|
+| P1 | Home | A 13-week heatmap of the cards studied each day, in greens from less to more | The last seven days as stickers, and the month calendar on stats |
+| P2 | Home | One line: the streak and today's count against the goal, the goal edited in place | The sheet of spots, the goal behind its figure |
+| P3 | Home | The tags as chips beside the search, always in view | Folded under "Tags" |
+| P4 | Every screen | The theme and the language as words ("Light", "EN") | Icons, with the other language's name |
+| P5 | Deck | Study pills with counts: All cards, Due, Weak, New, each one tap from a run | "Study N due", and the rest behind "Choose cards to study" |
+| P6 | Deck | Add Card, Import, Export JSON, Export Anki, Share Link and Delete as a row of buttons | Add and Share as icons, the rest in More |
+| P7 | Deck | Each card a row with its difficulty, tags and Due as coloured pills, and Edit and Delete in view | A table with last grade, right and comes back, and Edit and Delete in each row's menu |
+| P8 | Study | The question and answer centred, the difficulty as a coloured pill | Left-aligned, the difficulty as a word on the card |
+| P9 | Study | Grading in two steps: pick Wrong, Approximate or Correct, then Next, so a grade could change before moving on | A stamp grades and moves on at once, and Undo takes it back |
+| P10 | Study | The grades named Wrong, Approximate, Correct | Wrong, Almost, Right |
+| P11 | Study | "Exit" | "Leave" |
+| P12 | Run's end | Confetti | Stickers falling in the decks' colours |
+| P13 | Stats | Accuracy over every try | Right on the first try |
+| P14 | Stats | The heatmap and an accuracy trend side by side, each in a bordered card | The month calendar and a chart of first tries per run, unboxed |
+| P15 | Stats | Each deck as a compact line: cards, due, accuracy, last studied | Rows like home's, the neediest first |
+| P16 | Stats | The streak in green from a week up | The streak in plain text |
+
+The deck stats screen, the dialogs and the forms were not compared screen by screen, so they may hold more.
+
+The next step is to show her these images and ask, screen by screen, which column she prefers and what about it. Taking a line of the table above is step 3 for that piece, and the choice between steps 2 and 4 is the owner's.

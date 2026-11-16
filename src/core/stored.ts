@@ -8,12 +8,15 @@ import {
   DEFAULT_SETTINGS,
   DEFAULT_THEME,
   type AppLook,
+  type DeckView,
   type Lang,
   type Store,
   type Theme,
   appLooks,
   deckSchema,
+  deckViews,
   langs,
+  lookDeckView,
   runSchema,
   scheduleSchema,
   settingsSchema,
@@ -29,6 +32,7 @@ export const storageKeys = {
   lang: "lang",
   theme: "anki-theme",
   look: "anki-look",
+  deckView: "anki-deck-view",
 } as const;
 
 export type StoreKey = "decks" | "runs" | "schedules" | "settings";
@@ -65,6 +69,10 @@ export const readTheme = (text: string | null): Theme =>
 /** The stored look, or `DEFAULT_LOOK` when none or an unknown one is stored. */
 export const readLook = (text: string | null): AppLook =>
   appLooks.find((look) => look === text) ?? DEFAULT_LOOK;
+
+/** The stored deck view, or the one `look` opens on when none or an unknown one is stored. */
+export const readDeckView = (text: string | null, look: AppLook): DeckView =>
+  deckViews.find((view) => view === text) ?? lookDeckView[look];
 
 const storeKeys: readonly StoreKey[] = ["decks", "runs", "schedules", "settings"];
 

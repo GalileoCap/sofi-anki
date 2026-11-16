@@ -21,7 +21,7 @@ type StatsPageProps = {
   onOpenDeck: (id: string) => void;
 };
 
-/** How studying is going: the totals and, in a line, the streak and first tries, the month as a sticker calendar, each run's first tries, and the decks that need it most. */
+/** How studying is going: tiles of the totals, the streak and first tries, the month as a sticker calendar, each run's first tries, and the decks that need it most. */
 export function StatsPage({ store, now, onBack, onOpenDeck }: StatsPageProps) {
   const { t, tp } = useLanguage();
   const { decks, runs } = store;
@@ -29,18 +29,14 @@ export function StatsPage({ store, now, onBack, onOpenDeck }: StatsPageProps) {
   const right = firstTryRight(runs);
   const rows = neediestFirst(deckRows(decks, runs, indexSchedules(store.schedules), now));
   const cards = decks.reduce((sum, deck) => sum + deck.cards.length, 0);
-  const sums = [
-    `${decks.length} ${tp(decks.length, "stats.deckOne", "stats.deckMany")}`,
-    `${cards} ${tp(cards, "common.card", "common.cards")}`,
-    `${runs.length} ${tp(runs.length, "stats.runOne", "stats.runMany")}`,
-    t("stats.inAll").replace("{time}", longDuration(totals(runs).timeMs)),
-  ].join(", ");
-  const line = [
-    days > 0 && `${days} ${tp(days, "home.dayInARow", "home.daysInARow")}`,
-    right !== null && t("stats.firstRight").replace("{p}", String(right)),
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const tiles: readonly (readonly [string, string])[] = [
+    [t("stats.tileDecks"), String(decks.length)],
+    [t("stats.tileCards"), String(cards)],
+    [t("stats.tileRuns"), String(runs.length)],
+    [t("stats.tileTime"), runs.length > 0 ? longDuration(totals(runs).timeMs) : "–"],
+    [t("stats.tileFirstRight"), right !== null ? `${right}%` : "–"],
+    [t("stats.tileStreak"), days > 0 ? `${days} ${tp(days, "stats.dayOne", "stats.dayMany")}` : "–"],
+  ];
 
   return (
     <div className={looks.form}>
@@ -50,13 +46,19 @@ export function StatsPage({ store, now, onBack, onOpenDeck }: StatsPageProps) {
           {t("deck.back")}
         </Button>
       </div>
+      <h1 className={looks.title}>{t("stats.title")}</h1>
+      {decks.length > 0 && (
+        <dl className="grid grid-cols-3 gap-2.5 lg:grid-cols-6">
+          {tiles.map(([label, value]) => (
+            <div key={label} className="flex flex-col-reverse justify-end gap-1 rounded-xl border bg-card px-3 py-3 text-center">
+              <dt className={looks.muted}>{label}</dt>
+              <dd className={cn(looks.value, "text-xl")}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
       <div className={looks.split}>
         <div className={cn(looks.form, "lg:self-start")}>
-          <div>
-            <h1 className={looks.title}>{t("stats.title")}</h1>
-            {decks.length > 0 && <p className={looks.lead}>{sums}</p>}
-            {line && <p className={looks.lead}>{line}</p>}
-          </div>
           <MonthSheet runs={runs} decks={decks} now={now} />
         </div>
         <div className={looks.form}>

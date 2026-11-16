@@ -197,7 +197,7 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
           </span>
           <span className={cn(looks.row, "lg:hidden")}>
             <IconButton variant="ghost" icon={paused ? PlayIcon : PauseIcon} label={paused ? t("common.resume") : t("common.pause")} words="sm" onClick={togglePause} />
-            <StudyMenu actions={[...actions.filter((action) => action.key !== "P"), toggleTime]} />
+            <StudyMenu actions={[toggleTime]} />
           </span>
         </div>
         <div className="flex flex-col gap-1.5 lg:hidden">
@@ -212,6 +212,15 @@ function Run({ items, store, goal, shuffle, update, onExit, onRestart }: StudyPa
           <Spots stickers={stickers} goal={dailyGoal} decks={before.decks} />
         </div>
         <RunProgress run={run} />
+        <div className="-ml-3 flex flex-wrap lg:hidden">
+          {actions
+            .filter((action) => action.key !== "P")
+            .map(({ label, key, onClick, disabled }) => (
+              <Button key={key} variant="ghost" className="text-muted-foreground" disabled={disabled} onClick={onClick}>
+                {label}
+              </Button>
+            ))}
+        </div>
         {goal && <GoalProgress goal={goal} completed={run.completed} spent={spent} reached={goalReached(goal, run, spent) && !showGoal} />}
         {showGoal && !paused && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-positive bg-card px-4 py-3">
@@ -333,7 +342,7 @@ function FirstTriesSoFar({ results }: { results: readonly CardRunResult[] }) {
   );
 }
 
-/** On a phone, what is done now and then in a run: take a grade back, skip the card, put it off. */
+/** On a phone, what is done rarely in a run: hiding or showing the time. */
 function StudyMenu({ actions }: { actions: readonly StudyAction[] }) {
   const { t } = useLanguage();
   return (

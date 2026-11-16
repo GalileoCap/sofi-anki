@@ -139,6 +139,12 @@ export const appLooks = ["sticker", "classic"] as const;
 export type AppLook = (typeof appLooks)[number];
 export const DEFAULT_LOOK: AppLook = "sticker";
 
+/** How home lays out the decks: as cards under a cover in the deck's colour, or as rows. */
+export const deckViews = ["cards", "rows"] as const;
+export type DeckView = (typeof deckViews)[number];
+/** The view each look opens on until one is picked: the classic look keeps the cards it had before the sticker chart. */
+export const lookDeckView: Readonly<Record<AppLook, DeckView>> = { classic: "cards", sticker: "rows" };
+
 export const runModes = ["all", "due", "weak", "new"] as const;
 export type RunMode = (typeof runModes)[number];
 
