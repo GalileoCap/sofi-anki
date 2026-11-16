@@ -41,6 +41,8 @@ jobs:
         run: pnpm lint && pnpm build
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          # The token server that renews sign-ins (A20), deployed apart from this workflow.
+          VITE_AUTH_SERVER: https://auth.anki.smplworks.net
 
       - name: Push the app to anki.smplworks.net
         uses: peaceiris/actions-gh-pages@v4

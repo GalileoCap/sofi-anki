@@ -66,11 +66,13 @@ export function readStore(text: StoredText): Result<Store, StoredError> {
 export const readStamps = (text: string | null): Stamps =>
   text === null ? NO_STAMPS : decodeJson(stampsSchema, text).unwrapOr(NO_STAMPS);
 
-/** Whether this browser has turned sync on, and the Google access token it holds until the token expires. */
+/** Whether this browser has turned sync on, the Google access token it holds until the token expires, and its sealed renewal token. */
 export const syncStateSchema = z.object({
   on: z.boolean(),
   token: z.string().optional(),
   expiresAt: millisSchema.optional(),
+  /** The renewal token the token server sealed (A20), which renews `token` with no click. */
+  sealed: z.string().optional(),
 });
 export type SyncState = z.infer<typeof syncStateSchema>;
 export const SYNC_OFF: SyncState = { on: false };

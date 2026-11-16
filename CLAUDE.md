@@ -13,7 +13,7 @@ This file adds the project's own. `.claude/settings.json` declares the plugin, a
 The owner's goals, the objectives and the constraints in force. Each entry is a file in [docs/intent/](docs/intent/INDEX.md), whose `INDEX.md` is written by `session-intent index`, and `session-intent check` holds this list to the record.
 
 - `G1` An Anki-like study app for the owner and their friends.
-- `C1` Keep it simple: no accounts, no server, and sync only through a person's own Google Drive, when they choose it.
+- `C1` Keep it simple: no accounts, sync only through a person's own Google Drive when they choose it, and one tiny server that only renews Google sign-ins.
 - `O1` Nobody loses their decks or their study history to the app (approved).
 - `O2` A friend can study a deck someone else made (approved).
 - `O3` Cards come back for study around when they would be forgotten (approved).
@@ -28,14 +28,15 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 
 ## Environment
 
-`nix develop` (or direnv, with an untracked `.envrc` holding `use flake`) gives Node 22, pnpm, ast-grep and python3, and puts the session-kit commands on PATH. `packageManager` in `package.json` pins pnpm.
+`nix develop` (or direnv, with an untracked `.envrc` holding `use flake`) gives Node 22, pnpm, ast-grep, python3 and Rust for the token server, and puts the session-kit commands on PATH. `packageManager` in `package.json` pins pnpm.
 
 ## Commands
 
 - `pnpm dev`: the dev server with HMR.
 - `pnpm check:static`: every static gate (`scripts/check.sh`), at zero warnings.
 - `pnpm test`: the tests (Vitest, under `tests/`, 2 s a test).
-- `pnpm check`: the static gates, the tests and the production build.
+- `pnpm test:server`: the token server's tests (`auth-server/`, Rust).
+- `pnpm check`: the static gates, the tests, the token server's tests and the production build.
 - `pnpm build`: type-check, then bundle the app to `dist/` and the old address's hand-over page to `dist-handover/`.
 - `pnpm design:audit <page>`: the rendered audit (T4): axe, touch targets, small text, overflow and a census per screen, light and dark, with screenshots in a new temporary directory.
 - `pnpm preview`: serve the production build.
@@ -44,7 +45,7 @@ Before calling a change done: `pnpm check`, the tests, and the flows it touches 
 
 ## Branches
 
-Work happens on `dev`. A push to `main` deploys both sites (the app to `GalileoCap/anki`, the hand-over page here), so merging `dev` into `main` and pushing it is one action, taken only on the owner's word each time (owner, 2026-11-15). The session manages `dev` and pushes it whenever it commits, without asking (owner, 2026-11-15).
+Work happens on `dev`. A push to `main` deploys both sites (the app to `GalileoCap/anki`, the hand-over page here), so merging `dev` into `main` and pushing it is one action, taken only on the owner's word each time (owner, 2026-11-15). The session manages `dev` and pushes it whenever it commits, without asking (owner, 2026-11-15). The token server deploys apart, by `auth-server/deploy/deploy.sh` to `opal`, also only on the owner's word.
 
 ## Stored data
 
@@ -58,6 +59,7 @@ The deployed site holds people's real decks. Whatever the app stores (the `local
 ## Documents
 
 - [OWED.md](OWED.md): what a change leaves to do outside the code, such as DNS and the Pages settings, under when it is due.
+- [auth-server/README.md](auth-server/README.md): the token server that renews sync's Google sign-ins (`A20`), its calls, settings and deploy to `opal`.
 - [docs/session-kit-adoption.md](docs/session-kit-adoption.md): the review against the session-kit rules and `CODE.md`, and the order of work.
 - [docs/rewrite-plan.md](docs/rewrite-plan.md): the design and order of the rewrite onto the pure-core shape.
 - [docs/design-research.md](docs/design-research.md): why the first restyle mocks read as machine-made, the research and working designers' patterns for avoiding it, and the design tools proposed for trial here and for session-kit after (`O6`).

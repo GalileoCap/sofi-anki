@@ -1,0 +1,20 @@
+# The token server as a user unit on opal (A20), written by deploy.sh with @APP@ and @PORT@ filled in.
+[Unit]
+Description=sofi-anki token server: renews Google sign-ins for sync
+
+[Service]
+ExecStart=%h/apps/@APP@/anki-auth
+Environment=ANKI_AUTH_ADDR=127.0.0.1:@PORT@
+# GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SEAL_KEY and ALLOWED_ORIGINS, readable by the owner alone.
+EnvironmentFile=%h/apps/@APP@/env
+# A20: the server stays under 16 MB. Past it the kernel stops it, and Restart starts it again; it holds nothing to lose.
+MemoryMax=16M
+MemorySwapMax=0
+Restart=always
+RestartSec=2
+# Opalstack lets a user write logs only under ~/logs/apps/<app>/, and rotates them there.
+StandardOutput=append:%h/logs/apps/@APP@/console.log
+StandardError=append:%h/logs/apps/@APP@/error.log
+
+[Install]
+WantedBy=default.target

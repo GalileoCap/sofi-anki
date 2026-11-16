@@ -1,11 +1,11 @@
-import { type ResultAsync, okAsync } from "neverthrow";
+import { type ResultAsync, errAsync, okAsync } from "neverthrow";
 import { useEffect, useRef, useState } from "react";
 
 import type { Millis, Store } from "@/core/model";
 import { SYNC_OFF, type SyncState, readSyncState } from "@/core/stored";
 import { type Synced, mergeSynced, readSyncFile, sameSynced, writeSyncFile } from "@/core/sync";
 import { now } from "@/effects/clock";
-import { type DriveError, onReturn, readDriveFile, signIn, signOut, syncAvailable, writeDriveFile } from "@/effects/google-drive";
+import { type DriveError, onReturn, readDriveFile, renew, signIn, signOut, syncAvailable, writeDriveFile } from "@/effects/google-drive";
 import { readStoredValue, writeStored } from "@/effects/storage";
 
 /** Where sync stands: off, at work, done at a moment, waiting for a click to sign in again, or stopped by an error. */
@@ -21,13 +21,14 @@ export type SyncError = DriveError | { readonly kind: "badFile" };
 
 /** How long after a change sync waits for the next, so a run of edits uploads once. */
 const SETTLE_MS = 3000;
-/** A token this close to expiring pauses sync, so no upload is cut off halfway. */
+/** A token this close to expiring is renewed first, so no upload is cut off halfway. */
 const MARGIN_MS = 60_000;
 
 /**
  * Sync with the person's Google Drive, when they turned it on: on opening, a few seconds after
- * each change to `store`, and when the page comes back into view or online. A token that expired
- * pauses it until `resume`, which needs a click for Google's popup.
+ * each change to `store`, and when the page comes back into view or online. An expired token is
+ * renewed through the token server (A20). A renewal that fails pauses sync until `turnOn`, which
+ * needs a click for Google's popup.
  */
 export function useSync(store: Store, synced: () => Synced, adopt: (merged: Synced) => void) {
   const [state, setState] = useState<SyncState>(() => (syncAvailable ? readSyncState(readStoredValue("sync")) : SYNC_OFF));
@@ -42,20 +43,20 @@ export function useSync(store: Store, synced: () => Synced, adopt: (merged: Sync
     writeStored("sync", JSON.stringify(next));
   }
 
-  async function run() {
-    const { on, token, expiresAt } = latest.current;
-    if (!on) return;
-    if (token === undefined || expiresAt === undefined || expiresAt - MARGIN_MS <= now()) {
-      setStatus({ kind: "paused" });
-      return;
-    }
-    if (running.current) {
-      again.current = true;
-      return;
-    }
-    running.current = true;
-    setStatus({ kind: "syncing" });
-    const result = await readDriveFile(token).andThen((file): ResultAsync<string, SyncError> => {
+  /** An access token good for a sync: the one held, or a new one from the sealed renewal token (A20). */
+  function freshToken(): ResultAsync<string, SyncError> {
+    const { token, expiresAt, sealed } = latest.current;
+    if (token !== undefined && expiresAt !== undefined && expiresAt - MARGIN_MS > now()) return okAsync(token);
+    if (sealed === undefined) return errAsync({ kind: "expired" });
+    return renew(sealed).map((renewed) => {
+      keep({ ...latest.current, ...renewed });
+      return renewed.token;
+    });
+  }
+
+  /** Downloads the file, merges, keeps the merge here and uploads it when it differs. */
+  const syncWith = (token: string): ResultAsync<string, SyncError> =>
+    readDriveFile(token).andThen((file): ResultAsync<string, SyncError> => {
       if (file === null) return writeDriveFile(token, null, writeSyncFile(synced()));
       return readSyncFile(file.text)
         .mapErr((): SyncError => ({ kind: "badFile" }))
@@ -65,7 +66,22 @@ export function useSync(store: Store, synced: () => Synced, adopt: (merged: Sync
           return sameSynced(merged, remote) ? okAsync(file.id) : writeDriveFile(token, file.id, writeSyncFile(merged));
         });
     });
+
+  /** A sync, which waits for one already running. Google refusing a token mid-sync renews it and tries once more. */
+  async function run(retried = false) {
+    if (!latest.current.on) return;
+    if (running.current) {
+      again.current = true;
+      return;
+    }
+    running.current = true;
+    setStatus({ kind: "syncing" });
+    const result = await freshToken().andThen(syncWith);
     running.current = false;
+    if (result.isErr() && result.error.kind === "expired" && latest.current.token !== undefined) {
+      keep({ ...latest.current, token: undefined, expiresAt: undefined });
+      if (!retried && latest.current.sealed !== undefined) return run(true);
+    }
     result.match(
       () => setStatus({ kind: "synced", at: now() }),
       (error) => setStatus(error.kind === "expired" ? { kind: "paused" } : { kind: "failed", error }),
@@ -89,8 +105,8 @@ export function useSync(store: Store, synced: () => Synced, adopt: (merged: Sync
     setStatus({ kind: "syncing" });
     const signedIn = await signIn();
     signedIn.match(
-      ({ token, expiresAt }) => {
-        keep({ on: true, token, expiresAt });
+      ({ token, expiresAt, sealed }) => {
+        keep({ on: true, token, expiresAt, sealed });
         void run();
       },
       (error) => setStatus(latest.current.on ? { kind: "paused" } : { kind: "failed", error }),
@@ -98,7 +114,7 @@ export function useSync(store: Store, synced: () => Synced, adopt: (merged: Sync
   }
 
   function turnOff() {
-    if (latest.current.token !== undefined) signOut(latest.current.token);
+    if (latest.current.sealed !== undefined) signOut(latest.current.sealed);
     keep(SYNC_OFF);
     setStatus({ kind: "off" });
   }

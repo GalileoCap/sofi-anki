@@ -8,10 +8,11 @@
     "build": "tsc -b && vite build && SITE=handover vite build",
     "lint": "eslint . --max-warnings 0",
     "check:static": "scripts/check.sh",
-    "check": "scripts/check.sh && vitest run && vite build && SITE=handover vite build && node scripts/chunk-sizes.mjs && node scripts/design-census.mjs",
+    "check": "scripts/check.sh && vitest run && (cd auth-server && cargo test --quiet --locked) && vite build && SITE=handover vite build && node scripts/chunk-sizes.mjs && node scripts/design-census.mjs",
     "design:audit": "node scripts/design-audit.mjs",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:server": "cd auth-server && cargo test --locked"
   },
   "dependencies": {
     "@fontsource-variable/figtree": "^5.3.0",

@@ -451,4 +451,5 @@ Return only the JSON, no extra text.`,
   "sync.offline": "No connection. Sync will try again when you are back online.",
   "sync.refused": "Google refused the sync ({detail}). Nothing here changed.",
   "sync.badFile": "The file in your Drive could not be read, so sync left it and this device as they are.",
+  "sync.signInAgain": "Google asks you to sign in once more to let sync keep going. Turn sync on again.",
 };

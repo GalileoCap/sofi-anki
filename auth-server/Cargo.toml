@@ -1,0 +1,20 @@
+[package]
+name = "anki-auth"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+base64 = "0.23.1"
+chacha20poly1305 = "0.11.0"
+getrandom = "0.4.3"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+ureq = { version = "3.5.2", default-features = false, features = ["rustls"] }
+
+[profile.release]
+# Small and lean on opal (A20): one codegen unit, link-time optimisation, no unwinding tables.
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

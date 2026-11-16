@@ -11,7 +11,7 @@ type SyncDialogProps = { open: boolean; onOpenChange: (open: boolean) => void; s
 export function SyncDialog({ open, onOpenChange, sync }: SyncDialogProps) {
   const { t } = useLanguage();
   const { status } = sync;
-  const on = status.kind !== "off" && !(status.kind === "failed" && status.error.kind === "signInClosed");
+  const on = status.kind !== "off" && !(status.kind === "failed" && (status.error.kind === "signInClosed" || status.error.kind === "signInAgain"));
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

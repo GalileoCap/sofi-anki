@@ -51,3 +51,29 @@ The owner's step, in a Google account of theirs.
 5. In `GalileoCap/sofi-anki`, Settings → Secrets and variables → Actions → Variables: `GOOGLE_CLIENT_ID` holding the client id. For `pnpm dev`, the same in an untracked `.env.local` as `VITE_GOOGLE_CLIENT_ID=…`.
 6. Push to `main` and turn sync on from two devices: the More menu shows Sync, and an edit on one shows on the other.
 
+## Before sync renews sign-ins without a click (A20)
+
+The app built with `VITE_AUTH_SERVER` signs in through the token server, so the server must answer at its address before `main` deploys a build with sync. Each is the owner's step, after the Google client above, in this order.
+
+### The Google client's secret, and the code flow's origins
+
+In the Google client of the section above: copy its client secret. The sign-in popup's code needs no redirect URI. The authorized JavaScript origins stay `https://anki.smplworks.net` and `http://localhost:5173`.
+
+### auth.anki.smplworks.net points at opal
+
+At Opalstack's DNS, `auth.anki.smplworks.net` to opal's address, the same as `stance.smplworks.net`. `dig +short auth.anki.smplworks.net` names opal's address once it holds.
+
+### An Opalstack app and site for the server
+
+1. Applications: a new "Nginx Proxy Port" app named `anki_auth`. Note its port.
+2. Sites: a new site for `auth.anki.smplworks.net`, routing `/` to `anki_auth`, with the panel's free HTTPS certificate turned on.
+
+### The first deploy, then its settings
+
+1. `PORT=<the app's port> auth-server/deploy/deploy.sh`. It makes `~/apps/anki_auth/env` on opal with a fresh `SEAL_KEY`, and the server stops at once for want of the Google client.
+2. On opal, fill `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in that file, then `systemctl --user restart anki-auth`.
+3. `curl -s https://auth.anki.smplworks.net/health` answers `{"ok":true}`.
+
+### The Google app published
+
+While the Google app is in Testing, its renewal tokens last 7 days, and each tester signs in again after them. Publishing it (Google Auth Platform → Audience → Publish app) makes them last.

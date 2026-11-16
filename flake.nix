@@ -23,6 +23,11 @@
             pkgs.ast-grep
             # The session-kit gates run with python3, and macOS ships none.
             pkgs.python3
+            # The token server (auth-server/, A20).
+            pkgs.cargo
+            pkgs.rustc
+            pkgs.clippy
+            pkgs.rustfmt
           ];
 
           # The session-kit gates in `pnpm check` run from the marketplace clone, which

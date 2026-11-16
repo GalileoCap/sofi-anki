@@ -21,7 +21,7 @@ Sync is off until a person turns it on from home's More menu, which signs them i
 
 ## Context
 
-The owner chose Google Drive, optional, on 2026-11-16 (`C1`). The app has no server, so it uses Google's browser sign-in, whose access token lasts an hour and cannot be renewed without a click: a browser alone cannot hold a refresh token. Sync therefore pauses when the token expires and shows a button to resume, which opens Google's sign-in popup again, usually without asking anything.
+The owner chose Google Drive, optional, on 2026-11-16 (`C1`). The app has no server, so it uses Google's browser sign-in, whose access token lasts an hour and cannot be renewed without a click: a browser alone cannot hold a refresh token. Sync therefore pauses when the token expires and shows a button to resume, which opens Google's sign-in popup again, usually without asking anything. `A20` adds a token server that renews it without the click. The pause stays for when renewal fails.
 
 ## Options
 
@@ -31,4 +31,4 @@ The owner chose Google Drive, optional, on 2026-11-16 (`C1`). The app has no ser
 
 ## Consequences
 
-Two new stored keys: `anki-sync-stamps`, and `anki-sync` for whether sync is on. Tombstones are never pruned, which costs a few bytes a deletion. A restore by replace on one device deletes on every synced device what the backup lacks, as a restore asks. The deploy needs a Google OAuth client id, the owner's step in `OWED.md`. Until it is set the More menu offers no sync. If people find the hourly resume tiresome, the remedy is a small token server, against `C1`, which the owner would decide.
+Two new stored keys: `anki-sync-stamps`, and `anki-sync` for whether sync is on. Tombstones are never pruned, which costs a few bytes a deletion. A restore by replace on one device deletes on every synced device what the backup lacks, as a restore asks. The deploy needs a Google OAuth client id, the owner's step in `OWED.md`. Until it is set the More menu offers no sync. The owner chose the token server the same day (`A20`).

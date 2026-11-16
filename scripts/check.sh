@@ -7,7 +7,9 @@ tsc -b
 eslint . --max-warnings 0
 session-codeintel looks .
 # The prose and comments written here; shadcn's generated components are not.
-git ls-files -z '*.md' 'src/*.ts' 'src/*.tsx' ':!src/components/ui/' | xargs -0 session-tells check
+git ls-files -z '*.md' 'src/*.ts' 'src/*.tsx' 'auth-server/*.rs' ':!src/components/ui/' | xargs -0 session-tells check
+# The token server (A20): its lints at zero warnings and its formatting.
+(cd auth-server && cargo clippy --quiet --all-targets --locked -- -D warnings && cargo fmt --check)
 session-suppressions check
 session-docs check
 session-intent check

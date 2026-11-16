@@ -54,6 +54,7 @@
         ".",
         "env",
         "VITE_GOOGLE_CLIENT_ID=fake-client.apps.googleusercontent.com",
+        "VITE_AUTH_SERVER=http://127.0.0.1:8787",
         "pnpm",
         "dev",
         "--port",
