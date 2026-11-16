@@ -66,4 +66,5 @@ The deployed site holds people's real decks. Whatever the app stores (the `local
 - [docs/design/checklist.md](docs/design/checklist.md): the critique's yes-or-no questions (T5), drawn from the rules held by `check`, answered by a fresh reader from the rendered audit's screenshots.
 - [docs/design/restyle.md](docs/design/restyle.md): the plan for restyling the app to the sticker chart (`A12`), screen by screen, and what changes beyond the look.
 - [docs/design/restore.md](docs/design/restore.md): the plan for restoring every capability the restyle dropped, screen by screen, each ticked as it comes back.
+- [docs/design/old-new.md](docs/design/old-new.md): the app before the sticker chart beside the app now and its classic look, screen by screen, and the ways to merge them.
 - [docs/suppressions.md](docs/suppressions.md): every suppression and type escape with its reason, written by `session-suppressions index`.
