@@ -35,3 +35,21 @@ export function onSystemThemeChange(listener: () => void): () => void {
   query.addEventListener("change", listener);
   return () => query.removeEventListener("change", listener);
 }
+
+/**
+ * Whether the page shows dark now.
+ *
+ * @effects DOM
+ */
+export const pageShowsDark = (): boolean => document.documentElement.classList.contains("dark");
+
+/**
+ * `listener` called each time the page's classes change (dark, classic), until the returned function is called.
+ *
+ * @effects DOM
+ */
+export function onPageClassChange(listener: () => void): () => void {
+  const observer = new MutationObserver(listener);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => observer.disconnect();
+}

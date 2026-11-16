@@ -22,6 +22,7 @@ The owner's goals, the objectives and the constraints in force. Each entry is a 
 - `O6` The app looks made for its people, the same on every screen, and is easy to use (approved).
 - `O7` A person can go back and forth between screens and keep a deck's address (approved).
 - `O8` A person studying can see where a card's answer comes from (approved).
+- `O9` A card can hold formulas and diagrams (approved).
 
 ## Environment
 

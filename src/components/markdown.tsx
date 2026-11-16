@@ -1,5 +1,11 @@
+import type { Element } from "hast";
 import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+
+import { MermaidDiagram } from "@/components/mermaid-diagram";
+import { guardDollars } from "@/core/dollars";
 import { looks } from "@/lib/ui-looks";
 import { cn } from "@/lib/utils";
 
@@ -10,13 +16,27 @@ interface MarkdownProps {
   inline?: boolean;
 }
 
-/** Text the person wrote, rendered as the Markdown they meant (data-5). */
+/** The source of a ```mermaid block, from the `pre` that holds it, or null for any other block. */
+function mermaidSource(pre: Element | undefined): string | null {
+  const code = pre?.children[0];
+  if (code?.type !== "element" || code.tagName !== "code") return null;
+  const classes = code.properties.className;
+  if (!Array.isArray(classes) || !classes.includes("language-mermaid")) return null;
+  return code.children.map((child) => (child.type === "text" ? child.value : "")).join("");
+}
+
+/**
+ * Text the person wrote, rendered as the Markdown they meant (data-5): GitHub's Markdown, LaTeX
+ * between `$` (as `guardDollars` reads them) or `$$`, and Mermaid diagrams in ```mermaid blocks. KaTeX writes MathML, which the
+ * browser lays out itself, so formulas need neither KaTeX's stylesheet nor its fonts.
+ */
 export function Markdown({ children, className, inline }: MarkdownProps) {
   const Wrapper = inline ? "span" : "div";
   return (
     <Wrapper className={cn(className)}>
     <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[[rehypeKatex, { output: "mathml" }]]}
       disallowedElements={inline ? ["p", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "blockquote", "ul", "ol", "pre", "table"] : undefined}
       unwrapDisallowed={inline}
       components={{
@@ -28,11 +48,16 @@ export function Markdown({ children, className, inline }: MarkdownProps) {
         ),
         em: ({ children }) => <em className="italic">{children}</em>,
         del: ({ children }) => <del className="line-through opacity-70">{children}</del>,
-        pre: ({ children }) => (
-          <pre tabIndex={0} className="my-2 overflow-x-auto rounded-lg bg-muted/80 border p-3 text-xs font-mono leading-relaxed">
-            {children}
-          </pre>
-        ),
+        pre: ({ node, children }) => {
+          const diagram = mermaidSource(node);
+          return diagram !== null ? (
+            <MermaidDiagram source={diagram} />
+          ) : (
+            <pre tabIndex={0} className="my-2 overflow-x-auto rounded-lg bg-muted/80 border p-3 text-xs font-mono leading-relaxed">
+              {children}
+            </pre>
+          );
+        },
         code: ({ className: cls, children }) => {
           const isBlock = cls?.startsWith("language-");
           return isBlock ? (
@@ -90,7 +115,7 @@ export function Markdown({ children, className, inline }: MarkdownProps) {
         ),
       }}
     >
-      {children}
+      {guardDollars(children)}
     </ReactMarkdown>
     </Wrapper>
   );

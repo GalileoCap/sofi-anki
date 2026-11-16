@@ -30,6 +30,7 @@ export const es: Translation = {
   "common.stats": "Estadísticas",
   "common.tags": "Etiquetas",
   "common.hint": "Pista",
+  "diagram.failed": "No se pudo dibujar este diagrama: {reason}",
   "common.sources": "Fuentes",
   "common.due": "Pendiente",
   "common.weak": "Débil",
@@ -142,6 +143,7 @@ export const es: Translation = {
 
 Todas las cartas tienen "title", "response", "complexity", opcional "tags", opcional "hint" y opcional "sources".
 Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", opcional "sources" y "options" (array de { "text", "correct" }).
+Los textos son Markdown: escribí las fórmulas en LaTeX entre $ y $ (en línea) o $$ y $$ (en su propia línea), y los diagramas en bloques de código \`\`\`mermaid.
 Devolvé solo el JSON, sin texto extra.`,
   "import.cards.schemaPrompt": `Generá 50 tarjetas tipo anki sobre "" en el siguiente formato JSON:
 
@@ -173,6 +175,7 @@ Devolvé solo el JSON, sin texto extra.`,
 
 Todas las cartas tienen "title", "response", "complexity", opcional "tags", opcional "hint" y opcional "sources".
 Las cartas de tipo Choice tienen "type": "choice", "title", "complexity", opcional "tags", opcional "hint", opcional "sources" y "options" (array de { "text", "correct" }).
+Los textos son Markdown: escribí las fórmulas en LaTeX entre $ y $ (en línea) o $$ y $$ (en su propia línea), y los diagramas en bloques de código \`\`\`mermaid.
 Devolvé solo el JSON, sin texto extra.`,
   // The sticker chart (A12): home, study, the run's end, and dates in words.
   "when.never": "sin estudiar todav\u00eda",

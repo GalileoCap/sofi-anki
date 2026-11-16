@@ -29,6 +29,7 @@ export const en = {
   "common.stats": "Stats",
   "common.tags": "Tags",
   "common.hint": "Hint",
+  "diagram.failed": "This diagram could not be drawn: {reason}",
   "common.sources": "Sources",
   "common.due": "Due",
   "common.weak": "Weak",
@@ -166,6 +167,7 @@ Standard cards have "title", "response", "complexity", optional "tags", optional
 Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", optional "sources", and "options" (array of { "text", "correct" }).
 If multiple options are correct, it becomes a multi-select question.
 The deck and each card can have "tags" (array of strings) for categorization.
+Text fields are Markdown: write math in LaTeX between $ and $ (inline) or $$ and $$ (on its own line), and diagrams in \`\`\`mermaid code blocks.
 Return only the JSON, no extra text.`,
   "import.cards.schemaPrompt": `Generate flashcards in the following JSON format:
 
@@ -196,6 +198,7 @@ Return only the JSON, no extra text.`,
 
 Standard cards have "title", "response", "complexity", optional "tags", optional "hint", and optional "sources".
 Choice cards have "type": "choice", "title", "complexity", optional "tags", optional "hint", optional "sources", and "options" (array of { "text", "correct" }).
+Text fields are Markdown: write math in LaTeX between $ and $ (inline) or $$ and $$ (on its own line), and diagrams in \`\`\`mermaid code blocks.
 Return only the JSON, no extra text.`,
   // The sticker chart (A12): home, study, the run's end, and dates in words.
   "when.never": "not studied yet",

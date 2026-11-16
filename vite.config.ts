@@ -43,7 +43,14 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,wasm}'],
+        // A megabyte and more of diagram code nobody needs until a card holds a diagram.
+        globIgnores: ['**/diagram-*.js'],
         runtimeCaching: [
+          {
+            urlPattern: /\/assets\/diagram-[\w-]+\.js$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'diagram', expiration: { maxEntries: 60 } },
+          },
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
             handler: 'CacheFirst',
@@ -62,6 +69,9 @@ export default defineConfig({
     },
   },
   build: {
+    // Above Mermaid's largest chunk, which loads only for a diagram. scripts/chunk-sizes.mjs
+    // holds every other chunk to Vite's 500 kB.
+    chunkSizeWarningLimit: 1700,
     rolldownOptions: {
       output: {
         // Libraries apart from the app, so each chunk stays under the 500 kB warning and a
@@ -69,8 +79,16 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
-            { name: 'markdown', test: /node_modules[\\/](react-markdown|remark-|micromark|mdast-|unified|hast-|vfile|property-information)/ },
+            { name: 'markdown', test: /node_modules[\\/](react-markdown|remark-|rehype-|micromark|mdast-|unified|hast-|vfile|property-information)/ },
+            { name: 'math', test: /node_modules[\\/]katex[\\/]/ },
             { name: 'anki-file', test: /node_modules[\\/](sql\.js|turndown|fzstd|marked)[\\/]/ },
+            // Mermaid and its libraries, imported only when a card holds a diagram: kept apart from
+            // the eager vendor chunk, split under the warning, and cached on first use (below).
+            {
+              name: 'diagram',
+              test: /node_modules[\\/](mermaid|@mermaid-js|@braintree|@iconify|@upsetjs|chevrotain|langium|vscode-|cytoscape|cose-base|layout-base|d3|internmap|delaunator|robust-predicates|dagre-d3-es|dayjs|dompurify|elkjs|es-toolkit|lodash-es|khroma|roughjs|stylis|ts-dedent)/,
+              maxSize: 450_000,
+            },
             { name: 'vendor', test: /node_modules[\\/]/ },
           ],
         },
