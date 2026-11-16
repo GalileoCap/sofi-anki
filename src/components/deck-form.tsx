@@ -24,6 +24,8 @@ const swatch = (picked: boolean): string =>
 interface DeckFormProps {
   /** What opens the form. Without one, `open` opens it. */
   trigger?: React.ReactNode;
+  /** Ways to bring a deck in instead, shown under the title of a new deck's form. */
+  imports?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onSubmit: (title: string, tags: string[], color?: string, emoji?: string) => void;
@@ -37,6 +39,7 @@ interface DeckFormProps {
 
 export function DeckForm({
   trigger,
+  imports,
   open: controlledOpen,
   onOpenChange,
   onSubmit,
@@ -87,6 +90,12 @@ export function DeckForm({
         <DialogHeader>
           <DialogTitle>{resolvedTitle}</DialogTitle>
         </DialogHeader>
+        {imports && (
+          <div className={cn(looks.chips, "border-b-[1.5px] border-border pb-4")}>
+            <span className={cn(looks.muted, "mr-1")}>{t("deckForm.orBringIn")}</span>
+            {imports}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className={looks.form}>
           <Field label={t("deckForm.title")}>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("deckForm.titleExample")} autoFocus />

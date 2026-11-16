@@ -74,14 +74,6 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
     onOpenChange: (open: boolean) => setDialog(open ? name : null),
   });
 
-  const newDeckForm = (trigger?: React.ReactNode) => (
-    <DeckForm
-      trigger={trigger}
-      {...(trigger === undefined && dialogProps("newDeck"))}
-      onSubmit={(title, tags, color, emoji) => update(withDecks((d) => addDeck(d, newDeck(newId(), { title, tags, color, emoji }, clockNow()))))}
-    />
-  );
-
   const line =
     decks.length === 0
       ? t("home.noDecks")
@@ -108,7 +100,23 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
         <HomeMenu onDialog={setDialog} />
       </div>
 
-      {dialog === "newDeck" && newDeckForm()}
+      {dialog === "newDeck" && (
+        <DeckForm
+          open
+          onOpenChange={(open) => setDialog(open ? "newDeck" : null)}
+          onSubmit={(title, tags, color, emoji) => update(withDecks((d) => addDeck(d, newDeck(newId(), { title, tags, color, emoji }, clockNow()))))}
+          imports={
+            <>
+              <Button type="button" variant="outline" size="sm" onClick={() => setDialog("apkg")}>
+                {t("deckForm.fromAnki")}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setDialog("json")}>
+                {t("deckForm.fromJson")}
+              </Button>
+            </>
+          }
+        />
+      )}
       <ImportDeckDialog {...dialogProps("json")} onImport={(data) => update(withDecks((d) => addDeck(d, deckFromJson(data, clockNow(), newId))))} />
       <ImportApkgDialog {...dialogProps("apkg")} onImport={(parsed) => update((s) => receiveAnkiDecks(s, parsed.decks, parsed.schedules))} />
       <BackupDialog {...dialogProps("backup")} store={store} onRestore={(restored) => update(() => restored)} />
@@ -136,7 +144,7 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
         {decks.length === 0 ? (
           <div className="flex min-h-52 flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border p-6 text-center">
             <p className={cn(looks.muted, "max-w-64")}>{t("home.emptyHint")}</p>
-            {newDeckForm(<Button>{t("home.makeDeck")}</Button>)}
+            <Button onClick={() => setDialog("newDeck")}>{t("home.makeDeck")}</Button>
             <Button variant="ghost" onClick={() => setDialog("apkg")}>
               {t("home.fromAnki")}
             </Button>
@@ -145,12 +153,10 @@ export function Home({ store, update, now, kept, onOpenDeck, onOpenStats, onStud
           <div className={looks.stack}>
             <div className={looks.row}>
               <h2 className="flex-1 text-lg font-bold">{t("home.decks")}</h2>
-              {newDeckForm(
-                <Button variant="outline">
-                  <Icon icon={PlusSignIcon} />
-                  {t("home.newDeck")}
-                </Button>,
-              )}
+              <Button variant="outline" onClick={() => setDialog("newDeck")}>
+                <Icon icon={PlusSignIcon} />
+                {t("home.newDeck")}
+              </Button>
             </div>
             <Input placeholder={t("deckList.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} />
             {allTags.length > 0 && (
@@ -236,10 +242,10 @@ function TodaySheet({ store, now, goal, onGoal }: { store: Store; now: Millis; g
 }
 
 type HomeMenuProps = {
-  onDialog: (dialog: "newDeck" | "json" | "apkg" | "backup" | "goal") => void;
+  onDialog: (dialog: "backup" | "goal") => void;
 };
 
-/** Home's menu: what is done now and then, bringing decks in, the backup and the daily goal. */
+/** Home's menu: what is done now and then, the backup, the daily goal and the look. */
 function HomeMenu({ onDialog }: HomeMenuProps) {
   const { t } = useLanguage();
   const { look, toggleLook } = useLook();
@@ -255,8 +261,6 @@ function HomeMenu({ onDialog }: HomeMenuProps) {
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content className={looks.menu} align="end" sideOffset={4}>
-          {item(t("home.fromAnki"), () => onDialog("apkg"))}
-          {item(t("home.fromJson"), () => onDialog("json"))}
           {item(t("home.backup"), () => onDialog("backup"))}
           <DropdownMenu.Separator className={looks.menuRule} />
           {item(t("home.dailyGoal"), () => onDialog("goal"))}
